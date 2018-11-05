@@ -1,1 +1,3 @@
-This repository contains all the code related to solving the ATSP problem
+This repository contains material related to solving the
+Asymetrical Traveling Salesman Problem (ATSP)
+
