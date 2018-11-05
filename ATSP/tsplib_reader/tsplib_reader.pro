@@ -4,4 +4,8 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 SOURCES += \
-        main.cpp
+        main.cpp \
+    tsplib_reader.cpp
+
+HEADERS += \
+    tsplib_reader.h
