@@ -4,11 +4,11 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 INCLUDEPATH += "/Users/ladeira/Documents/src/boost_1_65_1/"
-INCLUDEPATH += "../../../"
-INCLUDEPATH += "../../"
+LIBS += -L"/Users/ladeira/Documents/src/boost_1_65_1/stage/lib/"  -lboost_timer
+
 SOURCES += \
         main.cpp \
-    random_solver.cpp
+    random.cpp
 
 HEADERS += \
-    random_solver.h
+    random.h
