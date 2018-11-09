@@ -2,27 +2,18 @@
 #define TSPLIB_READER_H
 
 #include <string>
+#include "../atsp_base/atsp_data.h"
 
-class tsplib_reader
+namespace atsp
 {
+namespace data
+{
+class tsplib_reader : public data_loader
+{
+    void operator()( data_t & ) const;
 public:
-    explicit tsplib_reader(const char * fname);
-    ~tsplib_reader();
-
-    unsigned int            size() const;
-    const unsigned int *    operator[](const unsigned int index) const;
-    void                    print(void) const;
-
-    unsigned int min() const;
-    unsigned int max() const;
-
-private:
-
-    std::string     m_name;
-    unsigned int    m_sz;
-    unsigned int ** m_data;
-    unsigned int    m_max;
-    unsigned int    m_min;
+    tsplib_reader(const char * const & fname);
 };
-
+}
+}
 #endif // TSPLIB_READER_H

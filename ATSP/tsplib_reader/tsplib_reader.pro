@@ -5,7 +5,9 @@ CONFIG -= qt
 
 SOURCES += \
         main.cpp \
-    tsplib_reader.cpp
+    tsplib_reader.cpp \
+    ../atsp_base/atsp_data.cpp
+
 
 HEADERS += \
     tsplib_reader.h

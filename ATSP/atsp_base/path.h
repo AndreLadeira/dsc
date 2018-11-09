@@ -14,7 +14,7 @@ bool operator > (const path &, const path &);
 
 uint get_length(const path &);
 void assign_random( path &, uint size);
-void shorten(path & path, uint start, uint length, const atsp_data & data);
+//void shorten(path & path, uint start, uint length, const atsp_data & data);
 
 }
 #endif // PATH_H
