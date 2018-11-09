@@ -4,7 +4,7 @@
 using namespace atsp::data;
 using namespace std;
 
-void alloc(data_t & atsp_data)
+void atsp::data::alloc(data_t & atsp_data)
 {
     data_matrix_t & data = atsp_data.data;
     uint sz = atsp_data.size;
@@ -15,7 +15,7 @@ void alloc(data_t & atsp_data)
         data[i] = row_t( new value_t[sz]);
 }
 
-void dump(const data_t & db, std::ostream & os)
+void atsp::data::dump(const data_t & db, std::ostream & os)
 {
     const data_matrix_t & data = db.data;
     const uint & sz = db.size;

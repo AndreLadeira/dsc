@@ -22,7 +22,7 @@ typedef struct
 }data_t;
 
 void alloc(data_t &);
-void dump(const data_t &, std::ostream &);
+void dump(const data_t & db, std::ostream & os);
 
 // loads atsp data from a file
 // this class manipulates the actual data that
