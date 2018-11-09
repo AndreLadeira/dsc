@@ -49,6 +49,8 @@ void dump(const data_t & db, std::ostream & os)
 data_loader::data_loader(const char * const & fname): m_fname(fname){}
 data_loader::~data_loader(){}
 
+data_t data_proxy::m_data;
+
 data_proxy &data_proxy::instance()
 {
   static data_proxy obj;
