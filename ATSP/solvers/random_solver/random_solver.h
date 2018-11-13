@@ -5,11 +5,11 @@
 
 namespace atsp
 {
-    typedef unsigned int uint;
-
-
-
-   path random_solver(char * const argv[]);
+   typedef unsigned int uint;
+   path random_solver(const char * const fname,
+                      uint numexecs,
+                      uint numiters,
+                      uint msize);
 }
 
 #endif // RANDOM_SOLVER_H
