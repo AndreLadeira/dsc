@@ -1,21 +1,28 @@
 #include <iostream>
-#include <vector>
-#include <forward_list>
+#include "tsplib_reader/tsplib_reader.h"
 #include "path.h"
 
 using namespace std;
+using atsp::data::data_proxy;
+using atsp::data::tsplib_reader;
 
-int main()
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
+int main(int argc, char * argv[])
+try
 {
-    base::fast_srand();
-    atsp::path p;
-    atsp::get_random(p, 10);
+    data_proxy::instance().load( new tsplib_reader(argv[1]) );
+    const auto & data = data_proxy::instance().data_ptr();
 
-    for( const auto & x:p   )
-    {
-       cout << x << " ";
-    }
-    cout << endl;
-
+    atsp::data::dump( data, cout );
+    atsp::path p(data.size);
     return 0;
+}
+catch( std::exception & e)
+{
+    std::cout<< e.what() << endl;
+}
+catch(...)
+{
+    std::cout<<"Unknown exception caught in main()\n";
 }

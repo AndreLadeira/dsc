@@ -25,8 +25,6 @@ int main(int argc, char *argv[] )
     }
     else
     {
-
-
         cpu_timer timer;
         path path = random_solver(argv);
         cout<< "Elapsed time: " << fixed << setprecision(2) << timer.elapsed().wall / 1.0e09 << endl;
