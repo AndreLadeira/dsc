@@ -9,10 +9,6 @@ namespace base
     {
         g_seed = seed;
     }
-    inline void fast_srand(int seed)
-    {
-        g_seed = static_cast<unsigned int>(seed);
-    }
     inline void fast_srand(void)
     {
         g_seed = static_cast<unsigned int>(time(nullptr));
