@@ -19,7 +19,5 @@ int main()
         int rnd = base::fast_rand() % 100;
         hist[rnd]++;
     }
-
-
     cout<< "Elapsed time: " << std::fixed << std::setprecision(2) << timer.elapsed().wall / 1.0e09 << endl;
 }
