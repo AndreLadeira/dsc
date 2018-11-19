@@ -23,26 +23,14 @@ void atsp::data::dump(const data_t & db, std::ostream & os)
     os << "--- atsp data dump ---\n";
     os << "Problem name: " << db.id << endl;
     os << "Dimension:    " << db.size << endl;
-    os << "Data (edge weights)\n";
-    os << "\nFirst 10x10 elements\n\n";
+    os << "Data (edge weights)\n\n";
 
-    for(unsigned int i = 0; i < 10;++i)
+    for(unsigned int i = 0; i < sz;++i)
     {
-        for(unsigned int j = 0; j < 10;++j)
-            os<< data[i][j] << " ";
+        for(unsigned int j = 0; j < sz;++j)
+            os<< data[i][j] << "  ";
         os << endl;
     }
-
-    os << "\nLast 10x10 elements\n\n";
-
-    for(unsigned long i = sz - 10; i < sz; ++i )
-    {
-        for(unsigned long j = sz - 10; j < sz; ++j )
-            os << data[i][j] << " ";
-
-        os << endl;
-    }
-
     os<< "\n--- end of atsp data dump ---\n";
 }
 

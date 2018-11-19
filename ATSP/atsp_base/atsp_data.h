@@ -45,10 +45,16 @@ protected:
     const char * const & m_fname;
 };
 
-// encapsulates the actual data
-// provides a sigle access point to it
-// provides read-only direct access throug data_ptr()
-// exposes a data load interface, receiving a data_loader
+// data_proxy encapsulates and restrict the
+// access the the actual data
+// The class has a sigle access point to it
+// through instance() (its a simplified meyer's singleton)
+
+// It provides read-only direct access throug data_ptr()
+// and exposes an interface to load data, through a proper
+// data_loader class. This is the only way to change the
+// actual data.
+
 
 class data_proxy
 {

@@ -19,8 +19,10 @@ public:
     const uint & at(uint) const; // returns the value of the ith node on the path
     path_ subpath(const uint, const uint) const; // returns a subpath of the current path
 
-    uint length(const data::data_t &, bool = false);
-    uint length_upto(const data::data_t &, uint, bool = true);
+    uint length(const data::data_matrix_t &, bool = false);
+    uint length_upto(const data::data_matrix_t &, uint, bool = false);
+    uint length_forward_on(const data::data_matrix_t &, uint, bool = false);
+    uint shorten(const uint mask_start, const uint mask_length, const data::data_matrix_t & );
 
 public:
 
@@ -34,8 +36,11 @@ private:
     path_t              m_path;
     bool                m_length_set;
     bool                m_length_upto_set;
+    bool                m_length_forward_on_set;
 
-
+    uint m_length;
+    std::vector<uint> m_length_upto;
+    std::vector<uint> m_length_fwd;
 };
 
 typedef std::forward_list<uint> path;

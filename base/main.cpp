@@ -10,7 +10,7 @@ using boost::timer::cpu_timer;
 
 int main()
 {
-    base::fast_srand( time(nullptr) );
+    base::fast_srand();
     cpu_timer timer;
     int hist[100]={0};
 

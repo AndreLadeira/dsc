@@ -18,3 +18,5 @@ HEADERS += \
     path.h \
     atsp_data.h \
     repository.h
+
+LIBS += -L"/Users/ladeira/Documents/src/boost_1_65_1/stage/lib/"  -lboost_timer

@@ -2,10 +2,16 @@
 #include <iomanip>
 #include <boost/timer/timer.hpp>
 #include "random_solver.h"
+#include "atsp_base/atsp_data.h"
+#include "tsplib_reader/tsplib_reader.h"
+#include "atsp_base/path.h"
 
 using namespace std;
-using boost::timer::cpu_timer;
 using namespace atsp;
+using atsp::data::data_proxy;
+using atsp::data::tsplib_reader;
+using boost::timer::cpu_timer;
+
 
 /*
  * argv[0]: exe name
@@ -25,10 +31,16 @@ int main(int argc, char *argv[] )
     }
     else
     {
-        cpu_timer timer;
-        path path = random_solver(argv);
-        cout<< "Elapsed time: " << fixed << setprecision(2) << timer.elapsed().wall / 1.0e09 << endl;
-        cout<< "Final result: " << get_length(path) << endl;
+        //cpu_timer timer;
+        //path path = random_solver(argv);
+        //cout<< "Elapsed time: " << fixed << setprecision(2) << timer.elapsed().wall / 1.0e09 << endl;
+        //cout<< "Final result: " << get_length(path) << endl;
+        data_proxy::instance().load( new tsplib_reader(argv[1]) );
+        const auto & db = data_proxy::instance().data_ptr();
+        const auto & data = db.data;
+
+        atsp::data::dump( db, cout );
+        atsp::path_ p(db.size);
     }
     return 0;
 }

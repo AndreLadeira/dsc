@@ -4,120 +4,16 @@ using namespace atsp;
 using std::runtime_error;
 using std::vector;
 
-uint atsp::get_length(const path & p, const data::data_t & tspdata)
-{
-    auto i = p.cbegin();
-    auto j = ++p.cbegin();
-    uint len = 0;
 
-    const atsp::data::data_matrix_t & db = tspdata.data;
-
-    while ( j != p.end()  )
-    {
-       len += db[*i][*j];
-       i++;
-       j++;
-    }
-    return len;
-}
-
-void atsp::get_random(path & p, const uint sz, base::rand_fcn_t rnd)
-{
-    p.clear();
-
-    path::iterator * it = new path::iterator[sz];
-
-    for(uint i = 0; i <sz; ++i)
-    {
-        p.insert_after(p.before_begin(),i);
-        it[i] = p.begin();
-    }
-    //linear shuffle
-    for(uint i = 0; i <sz; ++i)
-    {
-        uint a = static_cast<uint>(rnd()) % sz;
-        uint b = static_cast<uint>(rnd()) % sz;
-
-        uint tmp = *it[a];
-        *it[a] = *it[b];
-        *it[b] = tmp;
-    }
-    // closes the loop
-    p.insert_after(it[0],*it[sz-1]);
-    delete [] it;
-}
-
-void get_shortest(path &p, const uint mstart, const uint mlength, const data::data_t & db)
-{
-//    // sanity check
-//    if ( (mstart + mlength) > db.size )
-//        throw runtime_error("path::get_shortest: inconsistent mask data (size, length).");
-
-//    // find the nodes at the mask endpoints  (begin, end)
-//    uint ms             = get_value(mstart);
-//    uint me             = get_value(mstart+mlength-1);
-//    uint mask_cost      = get_length( get_subpath(p,mstart,mlength), db );
-//    auto mask_begin_it  = get_iterator(p,mstart-1);
-//    auto mask_end_it    = get_iterator(p,mstart + mlength);
-
-//    path X(p.cbegin(),mask_begin_it);
-//    X.insert_after(X.end(),mask_end_it,p.cend());
-
-//    uint Xcost              = get_length(X,db);
-//    vector<uint> cost_upto;
-
-//    // pointers to list items
-//    uint counter = 0;
-//    for( const auto & n:X  )
-//    {
-//        if ( counter == 0)
-//        {
-//            cost_upto.push_back(0);
-//        }
-//        else
-//        {
-//            uint cost = db.data[counter-1][counter];
-//            cost_upto.push_back( cost_upto.at(counter) + cost );
-//        }
-//        counter++;
-//    }
-//    // get the index of the best transformation
-//    uint best_length = std::numeric_limits<uint>::max();
-//    uint index = 0;
-
-//    for(uint i = 0; i < counter; i++)
-//    {
-//        uint cost_link1 = db.data[i][ms];
-//        uint cost_link2 = db.data[me][i+1];
-
-//        uint cost_forward_on = Xcost - cost_upto.at(i);
-
-//        uint length = cost_upto.at(i) + cost_link1 + mask_cost + cost_link2 + cost_forward_on;
-
-//        if ( length < best_length )
-//        {
-//            best_length = length;
-//            index = i;
-//        }
-//    }
-//    // save the best (shortest) path
-//    if ( best_length < get_length(p,db) )
-//    {
-//        path res(p.cbegin(),get_iterator(p,index));
-//        res.insert_after(res.end(), mask_begin_it++,mask_end_it);
-//        res.insert_after(res.end(), get_iterator(p,index+1),p.cend());
-
-//        path & q = const_cast<path &>(p);
-//        q.assign(res.begin(),res.end());
-//    }
-//    // returns
-
-}
 //==========================================================
 path_::path_(uint sz, bool random, base::rand_fcn_t rnd):
-    m_length_set(false),m_length_upto_set(false)
+    m_length_set(false),
+    m_length_upto_set(false),
+    m_length_forward_on_set(false)
 {
     m_path.reserve(sz);
+    for (uint i = 0; i<sz;++i)
+        m_path.push_back(i);
     if (random) randomize(rnd);
 }
 
@@ -126,7 +22,7 @@ path_::path_(const path_ &rhs)
    *this=rhs;
 }
 
-const uint &path_::at(uint pos) const
+const uint & path_::at(uint pos) const
 {
     if (pos >m_path.size())
         throw std::runtime_error("path::at: invalid position.");
@@ -154,12 +50,15 @@ path_ &path_::operator =(const path_ & rhs)
 
     m_length_set = false;
     m_length_upto_set = false;
-
+    m_length_forward_on_set = false;
     return *this;
 }
 path_ &path_::operator +=(const path_ & rhs)
 {
     m_path.insert(m_path.end(), rhs.m_path.begin(),rhs.m_path.end());
+    m_length_set = false;
+    m_length_upto_set = false;
+    m_length_forward_on_set = false;
     return *this;
 }
 void path_::randomize(base::rand_fcn_t rnd)
@@ -167,7 +66,7 @@ void path_::randomize(base::rand_fcn_t rnd)
     //linear shuffle
     auto sz = m_path.size();
 
-    for(auto i = 0u; i < sz; ++i)
+    for(uint i = 0; i < sz; ++i)
     {
         uint a = static_cast<uint>(rnd()) % sz;
         uint b = static_cast<uint>(rnd()) % sz;
@@ -176,50 +75,137 @@ void path_::randomize(base::rand_fcn_t rnd)
         m_path.at(a) = m_path.at(b) ;
         m_path.at(b) = tmp;
     }
+    m_length_set = false;
+    m_length_upto_set = false;
+    m_length_forward_on_set = false;
+
 }
-uint path_::length(const data::data_t & tspdata, bool force)
+
+uint path_::length(const data::data_matrix_t & db, bool force)
 {
-   static uint length = 0;
    if ( !m_length_set || force )
    {
        auto i = m_path.cbegin();
        auto j = ++m_path.cbegin();
-       length = 0;
-
-       const atsp::data::data_matrix_t & db = tspdata.data;
+       m_length = 0;
 
        while ( j != m_path.end()  )
        {
-          length += db[*i][*j];
+          m_length += db[*i][*j];
           i++;
           j++;
        }
        // closes the loop
-       length += db[*(j-1)][*m_path.cbegin()];
+       m_length += db[*i][*m_path.cbegin()];
+       m_length_set = true;
    }
-   return length;
+   return m_length;
 
 }
-uint path_::length_upto(const data::data_t & tspdata, uint pos, bool force)
+uint path_::length_upto(const data::data_matrix_t & db, uint pos, bool force)
 {
-    static std::vector<uint> length_upto;
-     if ( !m_length_set || force )
+     if ( !m_length_upto_set || force )
      {
-         length_upto.clear();
-         length_upto.reserve( m_path.size() + 1 );
+         m_length_upto.clear();
+         m_length_upto.reserve( m_path.size() );
 
          auto i = m_path.cbegin();
          auto j = ++m_path.cbegin();
 
-         const auto & db = tspdata.data;
-         length_upto.push_back(0);
+         m_length_upto.push_back(0);
          uint counter = 0;
          while ( j != m_path.end()  )
          {
-             uint cost = db[*i][*j];
-             length_upto.push_back( length_upto.at(counter++) + cost );
+             uint cost = db[*i++][*j++];
+             m_length_upto.push_back( m_length_upto.at(counter++) + cost );
          }
+         m_length_upto_set = true;
      }
-     return length_upto.at(pos);
+     return m_length_upto.at(pos);
+}
+uint path_::length_forward_on(const data::data_matrix_t & db, uint pos, bool force)
+{
+    if ( !m_length_forward_on_set || force )
+    {
+        m_length_fwd.clear();
+        m_length_fwd.reserve(m_path.size());
+        m_length_fwd.push_back(0);
+
+        uint length = this->length(db);
+        uint pos = 1;
+        while ( pos < m_path.size()  )
+        {
+            m_length_fwd.push_back( length - m_length_upto.at(pos++) );
+        }
+        m_length_forward_on_set = true;
+    }
+    return m_length_fwd.at(pos);
+}
+
+uint path_::shorten(const uint mstart, const uint mlength, const data::data_matrix_t & db)
+{
+    const uint this_pathsz = static_cast<uint>(this->m_path.size());
+
+    path_ msk = this->subpath(mstart,mlength);
+    const uint & msk_cost = msk.length_upto(db,mlength-1); // test mask size 1..ok!
+
+    path_ x = this->subpath(0,mstart);
+    x += this->subpath(mstart + mlength, this_pathsz - mstart - mlength);
+    uint xlen = this_pathsz - mlength;
+
+    const uint & ms = msk.at(0); // mask's 1st city
+    const uint & me = msk.at(mlength-1); // mask's last city
+
+    auto i = x.m_path.cbegin();
+    auto j = ++x.m_path.cbegin();
+
+    uint pos = 0;
+    uint min_cost = this->length(db);
+    uint mc_pos = 0;
+
+    //uint trcost = x.length(db);
+
+    //if ( trcost > min_cost ) return min_cost;
+
+    while (j!= x.m_path.cend())
+    {
+       uint l1_cost = db[*i][ms];
+       uint l2_cost = db[me][*j];
+
+       uint cost = x.length_upto(db, pos) + l1_cost +
+               msk_cost + l2_cost + x.length_forward_on(db, pos + 1);
+
+       if ( cost < min_cost )
+       {
+           min_cost = cost;
+           mc_pos = pos;
+       }
+       i++;
+       j++;
+       pos++;
+    }
+
+    // do the loop
+    uint l1_cost = db[x.at(xlen-1)][ms];
+    uint l2_cost = db[me][x.at(0)];
+
+    uint cost = x.length_upto(db, xlen-1) + l1_cost +
+            msk_cost + l2_cost;
+    if ( cost < min_cost )
+    {
+        min_cost = cost;
+        mc_pos = xlen-1;
+    }
+
+    if ( min_cost < this->length(db) )
+    {
+        path_ p = x.subpath(0,mc_pos+1);
+        p += msk;
+        if (mc_pos < xlen-1)
+            p += x.subpath(mc_pos + mlength, this_pathsz - mc_pos - mlength -1);
+
+        (*this) = p;
+    }
+    return  this->length(db);
 }
 
