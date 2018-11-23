@@ -1,8 +1,6 @@
-#include <vector>
+
 #include "path.h"
 using namespace atsp;
-using std::runtime_error;
-using std::vector;
 
 #ifdef __DEBUG__
 #include <cassert>

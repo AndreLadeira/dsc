@@ -1,7 +1,6 @@
 #ifndef PATH_H
 #define PATH_H
 
-#include <forward_list>
 #include "atsp_data.h"
 #include "base/random.h"
 #include <cstdlib>
