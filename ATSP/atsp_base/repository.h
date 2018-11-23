@@ -159,5 +159,87 @@ void get_shortest(path &p, const uint mstart, const uint mlength, const data::da
 //    // returns
 
 }
- */
+
+
+//path::path(const path &rhs)
+//{
+//   //*this=rhs;
+//}
+
+//const uint & path_::at(uint pos) const
+//{
+//    if (pos > m_sz )
+//        throw std::runtime_error("path::at: invalid position.");
+//    return m_path[pos];
+//}
+
+//path_ path_::subpath(const uint start, const uint size) const
+//{
+//    if (!size)
+//        throw std::runtime_error("path::subpath: size must be greater than zero.");
+//    if ( start + size - 1 > m_sz )
+//        throw std::runtime_error("path::subpath: invalid start/length.");
+
+//    path_ newp(size);
+
+//    uint j = 0;
+
+//    for(uint i = start; i < start + size; ++i)
+//        newp.m_path[j++] = m_path[i];
+
+//    return  newp;
+//}
+
+path_ &path_::operator =(const path_ & rhs)
+{
+    m_path.resize(rhs.m_path.size());
+    m_path = rhs.m_path;
+
+    m_length_set = false;
+    m_length_upto_set = false;
+    m_length_forward_on_set = false;
+    return *this;
+}
+path_ &path_::operator +=(const path_ & rhs)
+{
+    m_path.insert(m_path.end(), rhs.m_path.begin(),rhs.m_path.end());
+    m_length_set = false;
+    m_length_upto_set = false;
+    m_length_forward_on_set = false;
+    return *this;
+}
+
+uint path::length_upto(const data::data_matrix_t & db, uint pos)
+{
+     if ( !m_length_upto_set )
+     {
+         if (m_length_upto) delete[] m_length_upto;
+         m_length_upto = uintptr_t( new uint[m_sz]());
+
+         for(uint i = 1; i < m_sz; i++)
+             m_length_upto[i] = m_length_upto[i-1] + db[ m_path[i-1] ][ m_path[i] ];
+         m_length_upto_set = true;
+     }
+     return m_length_upto[pos];
+}
+uint path::length_forward_on(const data::data_matrix_t & db, uint pos)
+{
+    if ( !m_length_forward_on_set )
+    {
+        if (m_length_fwd) delete []  m_length_fwd;
+        m_length_fwd = uintptr_t( new uint[m_sz]());
+
+        uint pathlen = length(db);
+
+        for(uint i = 0; i < m_sz-1; i++)
+            m_length_fwd[i] = pathlen - length_upto(db,i); // $OPTIMIZE
+
+        m_length_forward_on_set = true;
+    }
+    return m_length_fwd[pos];
+}
+
+*/
+
+
 #endif // REPOSITORY_H

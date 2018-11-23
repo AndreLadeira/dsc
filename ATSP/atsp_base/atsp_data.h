@@ -14,12 +14,12 @@ typedef uint value_t;
 typedef std::unique_ptr<value_t[]> row_t;
 typedef std::unique_ptr<row_t[]> data_matrix_t;
 
-typedef struct
+struct data_t
 {
     data_matrix_t data;
     uint size;
     std::string id;
-}data_t;
+};
 
 void alloc(data_t &);
 void dump(const data_t & db, std::ostream & os);

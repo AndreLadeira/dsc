@@ -4,71 +4,39 @@
 #include <forward_list>
 #include "atsp_data.h"
 #include "base/random.h"
-#include <vector>
+#include <cstdlib>
 
 namespace atsp
 {
-typedef unsigned int uint;
-
-class path_
+class path
 {
-public:
-    // initializes the path with a random value
-    path_(uint sz, bool random = true, base::rand_fcn_t rnd = base::fast_rand);
-    path_(const path_ &);
-    const uint & at(uint) const; // returns the value of the ith node on the path
-    path_ subpath(const uint, const uint) const; // returns a subpath of the current path
 
-    uint length(const data::data_matrix_t &, bool = false);
-    uint length_upto(const data::data_matrix_t &, uint, bool = false);
-    uint length_forward_on(const data::data_matrix_t &, uint, bool = false);
-    uint shorten(const uint mask_start, const uint mask_length, const data::data_matrix_t & );
+    typedef uint * path_t;
 
 public:
 
-    path_ & operator = (const path_ &); // replaces the current conten of the path
-    path_ &operator += (const path_ &); // add new data at path's end
-    void randomize(base::rand_fcn_t = base::fast_rand);
+    path(uint sz, base::rand_fcn_t rnd_fcn = base::fast_rand);
+    path(path_t ptr, uint sz, base::rand_fcn_t rnd_fcn = base::fast_rand);
+    path(const path &, base::rand_fcn_t rnd_fcn = base::fast_rand);
+    path& operator=(const path &);
+    ~path();
+
+    // path length functions
+    uint length(const data::data_matrix_t &);
+    uint shorten(const uint mask_start, const uint mask_length, const data::data_matrix_t &);
+    void randomize();
 
 private:
-    typedef std::vector<uint> path_t;
 
-    path_t              m_path;
-    bool                m_length_set;
-    bool                m_length_upto_set;
-    bool                m_length_forward_on_set;
+    friend std::ostream & operator << (std::ostream &, const path & p);
 
-    uint m_length;
-    std::vector<uint> m_length_upto;
-    std::vector<uint> m_length_fwd;
+    path_t  m_path;
+    bool    m_length_set;
+    uint    m_length;
+    uint    m_sz; // size (#of vertices) on the path
+
+    const base::rand_fcn_t m_rnd_fcn;
 };
-
-typedef std::forward_list<uint> path;
-
-bool operator < (const path &, const path &);
-bool operator > (const path &, const path &);
-
-/*
- * Returns a value corresponding to the length (or weight)
- * of the given path, considering the given ATSP data
- *
- */
-
-uint get_length(const path &, const data::data_t &);
-
-/*
- * Returns a random path, given the path size.
- * The size correspond to the number of cities in the TS path.
- * The actual path length is size + 1, to account for the
- * to the fisrt city.
- */
-void get_random( path &, const uint size, base::rand_fcn_t = base::fast_rand );
-
-path get_subpath( const path &, const uint, const uint );
-uint get_value( uint at );
-path::const_iterator get_iterator(const path &,uint at);
-
-void get_shortest(const path & path, const uint mstart, const uint mlength, const atsp::data::data_t & );
 
 }
 #endif // PATH_H

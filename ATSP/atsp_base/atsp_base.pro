@@ -19,4 +19,14 @@ HEADERS += \
     atsp_data.h \
     repository.h
 
-LIBS += -L"/Users/ladeira/Documents/src/boost_1_65_1/stage/lib/"  -lboost_timer
+#LIBS += -L"/Users/ladeira/Documents/src/boost_1_65_1/stage/lib/"  -lboost_timer
+#QMAKE_CXXFLAGS += -O3
+
+#debug levels
+CONFIG(debug, debug|release) {
+    DEFINES += "__DEBUG__"
+}
+CONFIG(release, debug|release) {
+   DEFINES += "__RELEASE__"
+    QMAKE_CXXFLAGS += -O3
+}

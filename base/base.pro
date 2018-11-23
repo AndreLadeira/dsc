@@ -8,7 +8,9 @@ LIBS += -L"/Users/ladeira/Documents/src/boost_1_65_1/stage/lib/"  -lboost_timer
 
 SOURCES += \
         main.cpp \
-    random.cpp
+    random.cpp \
+    teste.cpp
 
 HEADERS += \
-    random.h
+    random.h \
+    teste.h

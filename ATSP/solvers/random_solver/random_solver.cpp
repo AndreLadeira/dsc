@@ -21,30 +21,19 @@ path atsp::random_solver(
     data_proxy::instance().load( new tsplib_reader(fname) );
     const atsp::data::data_t & tspdata = data_proxy::instance().data_ptr();
 
-    path best;
-    path attempt;
-    uint exec = 0;
 
     // set the random number generator
     base::fast_srand( static_cast<uint>(time(nullptr)));
 
-    while ( exec < numexecs )
+    for(uint iter = 0; iter < numiters; ++iter)
     {
-        atsp::get_random_path(attempt,tspdata.size);
 
         for(uint iter = 0; iter < numiters; ++iter)
         {
             // get a randon position
             uint mstart = static_cast<uint>(base::fast_rand());
 
-            // evaluate the weights of transformations
-            // with the current position and mask size
-            atsp::get_best_tr(attempt, mstart, msize, tspdata );
 
-            if ( best > attempt)
-                best = attempt;
         }
-        exec++;
     }
-    return best;
 }

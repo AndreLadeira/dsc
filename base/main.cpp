@@ -1,23 +1,24 @@
 #include <iostream>
 #include <ctime>
 #include <iomanip>
-#include <boost/timer/timer.hpp>
-
-#include "random.h"
+#include "teste.h"
 
 using namespace std;
-using boost::timer::cpu_timer;
 
 int main()
 {
-    base::fast_srand();
-    cpu_timer timer;
-    int hist[100]={0};
+    cout<<"Starting...\n";
 
-    for( uint i = 0; i < 1e09; i++)
-    {
-        int rnd = base::fast_rand() % 100;
-        hist[rnd]++;
-    }
-    cout<< "Elapsed time: " << std::fixed << std::setprecision(2) << timer.elapsed().wall / 1.0e09 << endl;
+    A a(17);
+    B b(17);
+    clock_t begin = clock();
+
+    randomize(a);
+    cout<< "Elapsed time: " << setprecision(3) <<
+           (clock() - begin) / (double) CLOCKS_PER_SEC << endl;
+
+    begin = clock();
+    randomize(b);
+    cout<< "Elapsed time: " << setprecision(3) <<
+           (clock() - begin) / (double) CLOCKS_PER_SEC << endl;
 }
