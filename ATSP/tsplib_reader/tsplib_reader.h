@@ -2,7 +2,7 @@
 #define TSPLIB_READER_H
 
 #include <string>
-#include "../atsp_base/atsp_data.h"
+#include "../atsp_base/data.h"
 
 namespace atsp
 {
