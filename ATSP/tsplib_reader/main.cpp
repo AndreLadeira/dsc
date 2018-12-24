@@ -1,8 +1,8 @@
 #include <iostream>
 #include "tsplib_reader.h"
 #include <fstream>
+
 using namespace std;
-using atsp::data::data_proxy;
 using atsp::data::tsplib_reader;
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -10,8 +10,8 @@ using atsp::data::tsplib_reader;
 int main(int argc, char * argv[])
 try
 {
-    data_proxy::instance().load( new tsplib_reader(argv[1]) );
-    atsp::data::dump( data_proxy::instance().data_ptr(), cout );
+    atsp::data::load( new tsplib_reader(argv[1]) );
+    atsp::data::dump( cout );
     return 0;
 }
 catch( std::exception & e)

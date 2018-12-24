@@ -6,10 +6,10 @@ CONFIG -= qt
 SOURCES += \
         main.cpp \
     path.cpp \
-    atsp_data.cpp \
     ../../base/random.cpp \
     ../tsplib_reader/tsplib_reader.cpp \
-    algorithm.cpp
+    algorithm.cpp \
+    data.cpp
 
 INCLUDEPATH += "/Users/ladeira/Documents/src/boost_1_65_1/"
 INCLUDEPATH += "../../"
@@ -20,7 +20,8 @@ HEADERS += \
     repository.h \
     data.h \
     base.h \
-    algorithm.h
+    algorithm.h \
+    mask.h
 
 #LIBS += -L"/Users/ladeira/Documents/src/boost_1_65_1/stage/lib/"  -lboost_timer
 #QMAKE_CXXFLAGS += -O3

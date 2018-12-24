@@ -10,7 +10,7 @@ namespace data
 {
 class tsplib_reader : public data_loader
 {
-    void operator()( data_t & ) const;
+    void operator()() const;
 public:
     tsplib_reader(const char * const & fname);
 };

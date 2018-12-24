@@ -46,14 +46,14 @@ const string &          atsp::data::id      = idObj;
 
 // the data read-write access points, available only to loaders
 
-const_matrix_ptr_t &    data_loader::m_data   = dataObj;
-const uint &            data_loader::m_size   = sizeObj;
-string &                data_loader::m_id     = idObj;
+matrix_t &      data_loader::m_data   = dataObj;
+const uint &    data_loader::m_size   = sizeObj;
+string &        data_loader::m_id     = idObj;
 
 data_loader::data_loader(const char * const & fname): m_fname(fname){}
 data_loader::~data_loader(){}
 
-void data_loader::set_size(uint sz)
+void data_loader::set_size(uint sz) const
 {
     if (dataObj) release();
 
@@ -78,7 +78,7 @@ void atsp::data::dump(std::ostream & os)
     for(unsigned int i = 0; i < size; ++i)
     {
         for(unsigned int j = 0; j < size;++j)
-            os<< data[i][j] << "  ";
+            os<< dataObj[i][j] << "  ";
         os << endl;
     }
     os<< "\n--- end of atsp data dump ---\n";

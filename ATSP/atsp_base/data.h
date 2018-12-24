@@ -10,17 +10,12 @@ namespace atsp { namespace data {
 typedef uint *  row_t;
 typedef row_t * matrix_t;
 
-// the intermediate access type (values can be changed, pointers cant)
-typedef uint * const            const_row_ptr_t;
-typedef const_row_ptr_t * const const_matrix_ptr_t;
-
 // locked read-only access type
-typedef const uint * const  const_row_t;
-typedef const const_row_t * const const_matrix_t;
+typedef const matrix_t const_matrix_t;
 
 // locked read-only globally visible access points
 
-extern const const_matrix_t &   data;
+extern const const_matrix_t  &   data;
 extern const uint &             size;
 extern const std::string &      id;
 
@@ -56,15 +51,14 @@ private:
 
 protected:
 
-    const char * const          m_fname;
+    const char * const &            m_fname;
 
-    static const_matrix_ptr_t &     m_data;
+    static matrix_t &               m_data;
     static const uint &             m_size; // read only. Set through set_size
     static std::string &            m_id;
 
-    void set_size(uint sz);
+    void set_size(uint sz) const;
 };
-
 
 
 }

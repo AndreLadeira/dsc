@@ -1,6 +1,7 @@
 
 #include "path.h"
 #include "data.h"
+#include "algorithm.h"
 
 using namespace atsp;
 
@@ -9,102 +10,173 @@ using namespace atsp;
 #include <iostream>
 #endif
 
-base::rand_fcn_t path::m_rnd_fcn = base::fast_rand;
+base::rand_fcn_t Path::_rnd_fcn = base::fast_rand;
 
 // size constructor: constructs a new path given a size
 // the path has initially the vertexes (cities) in order:
 // 1,2,3...,N
-path::path():m_sz(data::size)
+
+Path::Path():_size(data::size)
 {
-    m_path = new uint[m_sz];
-    for (uint i = 0; i <m_sz; ++i)
-        m_path[i] = i;
+    set();
 }
-path::path(uint sz):m_sz(sz)
+Path::Path(uint sz):_size(sz)
 {
-    m_path = new uint[m_sz];
-    for (uint i = 0; i <m_sz; ++i)
-        m_path[i] = i;
+    set();
+
 }
 
 // constructs a path from raw data: a pointer to a memory area
 // and a size. This is used to speed some things up.
 // Note to self: evaluate cons of changing to more robust c++
 
-path::path(path_t ptr, uint sz)
+Path::Path(const Path & rhs):_size(rhs._size)
 {
-    m_path = ptr;
-    m_sz = sz;
-    m_length_set = false;
+    _path = new uint[_size];
+    for (uint i = 0; i <_size; ++i)
+        _path[i] = rhs._path[i];
+
+    _length_set = false;
 }
 
-// copy constructor: allocs memory and copies
-// the path and its size
-
-path::path(const path & rhs):m_sz(rhs.m_sz)
+Path::Path(const Path & p, uint pos, uint length):_size(p._size-length)
 {
-    m_path = new uint[m_sz];
-    for (uint i = 0; i <m_sz; ++i)
-        m_path[i] = rhs.m_path[i];
+    _path = new uint[_size];
+
+    // copies the original path up to the mask start
+
+    std::memcpy(_path, p._path, (pos)*sizeof(uint) );
+
+    // copies the original path from after the mask end to the end
+
+    std::memcpy(_path + pos,
+                p._path + pos + length,
+                ( p._size - pos - length )*sizeof(uint) );
+
+    _length_set = false;
 }
 
-
-
-path &path::operator=(const path & rhs)
+Path & Path::operator=(const Path & rhs)
 {
-    for (uint i = 0; i <m_sz; ++i)
-        m_path[i] = rhs.m_path[i];
+    for (uint i = 0; i <_size; ++i)
+        _path[i] = rhs._path[i];
     return *this;
 }
 
-path::~path()
+const uint &Path::operator[](uint at) const
 {
-    if (m_path) delete[] m_path;
+    return _path[at];
 }
 
-void path::randomize()
+void Path::set()
+{
+    _path = new uint[_size];
+    for (uint i = 0; i <_size; ++i)
+        _path[i] = i;
+
+    _length_set = false;
+}
+
+Path::~Path()
+{
+    if (_path) delete[] _path;
+}
+
+void Path::randomize()
 {
     // linear shuffle
-    for(uint i = 0; i < m_sz; ++i)
+    for(uint i = 0; i < _size; ++i)
     {
-        uint a = static_cast<uint>(m_rnd_fcn()) % m_sz;
-        uint b = static_cast<uint>(m_rnd_fcn()) % m_sz;
+        uint a = static_cast<uint>(_rnd_fcn()) % _size;
+        uint b = static_cast<uint>(_rnd_fcn()) % _size;
 
-        uint tmp = m_path[a];
-        m_path[a] = m_path[b] ;
-        m_path[b] = tmp;
+        uint tmp = _path[a];
+        _path[a] = _path[b] ;
+        _path[b] = tmp;
     }
-    m_length_set = false;
+    _length_set = false;
 }
 
-std::ostream & atsp::operator <<(std::ostream & os, const path & p)
+void Path::move(uint ins, uint msk_init, uint msk_count)
 {
-    for (uint i = 0; i < p.m_sz -1; i++)
-        os << p.m_path[i] << ", ";
-    os << p.m_path[p.m_sz-1] << "\n";
+    // attempt #1: no memory allocation. O( n * count )
+
+    if ( msk_init > ins )
+    {
+        for ( uint i = 0; i < msk_count; ++i)
+        {
+            uint temp = _path[ msk_init + i];
+            for ( uint j = 0; j < msk_init - ins - 1; ++j)
+                _path[ msk_init + i - j ] = _path[ msk_init + i - j -1 ];
+            _path[ ins + i + 1 ] = temp;
+        }
+    }
+    else
+    {
+          for ( uint i = 0; i < msk_count; ++i)
+          {
+              uint temp = _path[ msk_init + msk_count - i - 1];
+
+              for ( uint j = 0; j < ins - msk_init + 1; ++j)
+                  _path[ msk_init + msk_count - i + j  - 1 ] = _path[ msk_init + msk_count - i + j ];
+
+              _path[ ins + msk_count - i ] = temp;
+          }
+
+    }
+
+    _length_set = false;
+}
+
+void Path::setRandonFcn(base::rand_fcn_t fcn)
+{
+   _rnd_fcn = fcn;
+}
+
+std::ostream & atsp::operator <<(std::ostream & os, const Path & p)
+{
+    for (uint i = 0; i < p._size -1; i++)
+        os << p._path[i] << ", ";
+    os << p._path[p._size-1] << "\n";
 
     return os;
 }
 
-uint path::length()
+uint Path::length() const
 {
    const auto & db = atsp::data::data;
 
-   if ( !m_length_set )
+   if ( !_length_set )
    {
-       m_length = 0;
+       _length = 0;
 
-       for (uint i = 0; i < m_sz - 1; ++i)
-          m_length += db[ m_path[i] ][ m_path[i+1] ];
+       for (uint i = 0; i < _size - 1; ++i)
+          _length += db[ _path[i] ][ _path[i+1] ];
        // closes the loop
-       m_length += db[m_path[m_sz-1]][m_path[0]];
-       m_length_set = true;
+       _length += db[_path[_size-1]][_path[0]];
+       _length_set = true;
    }
-   return m_length;
+   return _length;
 }
 
-uint path::shorten()
+uint Path::length(uint start, uint size)
 {
+    const auto & db = atsp::data::data;
 
+    uint  _len = 0;
+
+    for (uint i = start; i < start+size-1; ++i)
+       _len += db[ _path[i] ][ _path[i+1] ];
+
+    return _len;
 }
 
+uint Path::size() const
+{
+    return _size;
+}
+
+uint Path::shorten(atsp::algorithm * shorten_algorithm)
+{
+    return (*shorten_algorithm)(*this);
+}

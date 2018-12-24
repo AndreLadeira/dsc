@@ -1,6 +1,8 @@
 #ifndef ALGORITHM_H
 #define ALGORITHM_H
 
+//#include "path.h"
+
 namespace atsp{
 /*
  This class is the interface for the concept
@@ -9,19 +11,19 @@ namespace atsp{
  Many different algorithms exist, each with its
  particularities, but all have something in common:
  they do manipulate a path in the process of
- finding the minimum path in a Eulerian Cycle
+ finding the minimum Eulerian Cycle
 
  Also, any algorithm works through two steps:
 
  1 - setup: values must be passed to the algorithm
  to set it up prior to its execution.
 
- The problem is that each algorithm has its own parameters
- and the number of parameters can be big, 5 maybe 10.
+ The problem is that each algorithm has its own parameters.
 
  There are dozens of ways of doing this setup:
 
- class constructor: makes the implementation of polymorphism
+ class constructor: each dfferent algorithm requires different set
+ of parameters what makes the implementation of polymorphism
  impossible.
 
  setters and getters: they are a pain in the neck and also change
@@ -49,21 +51,30 @@ namespace atsp{
 
 */
 
+class Path;
+
 class algorithm
 {
 public:
+    typedef unsigned uint;
     virtual ~algorithm();
-    virtual inline void operator()() = 0;
+    virtual uint operator()(Path &) const = 0;
 };
 
 // greedy is used by many other algorithms
 
 class greedy_algorithm : public algorithm
 {
-public:
-    virtual inline void operator()();
 
-    const
+public:
+
+    greedy_algorithm();
+
+    virtual uint operator()(Path &) const;
+
+    uint _pos;
+    uint _length;
+
 };
 
 }

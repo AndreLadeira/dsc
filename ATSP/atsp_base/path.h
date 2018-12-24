@@ -2,46 +2,52 @@
 #define PATH_H
 
 #include "base/random.h"
+#include "algorithm.h"
 #include <ostream>
+
 
 namespace atsp
 {
 
-class path
+class Path
 {
-    typedef unsigned int uint;
-    typedef uint * path_t;
 
 public:
 
-    path();
-    explicit path(uint sz);
+    Path();
+    explicit Path(uint sz);
+    Path(const Path &);
+    Path(const Path &, uint pos, uint len); // cut construction
+    ~Path();
 
-    path(path_t ptr, uint sz);
-    path(const path &);
-    path& operator=(const path &);
-
-    ~path();
-
-    // path length functions
-
-    uint length();
-    uint shorten();
+    uint length() const;
+    uint length(uint start, uint length);
+    uint size() const;
     void randomize();
+    void move(uint insertion, uint pos, uint length);
+    uint shorten(atsp::algorithm *);
 
-    static void set_random_fcn(base::rand_fcn_t);
+    static void setRandonFcn(base::rand_fcn_t);
+
+    Path & operator=(const Path &);
+    const uint & operator[](uint)const;
 
 private:
 
-    friend std::ostream & operator << (std::ostream &, const path & p);
+    friend std::ostream & operator << (std::ostream &, const Path & p);
 
-    path_t  m_path;
-    bool    m_length_set;
-    uint    m_length;
-    uint    m_sz; // size (#of vertices) on the path
+    uint *  _path;
 
-    static base::rand_fcn_t m_rnd_fcn;
+    mutable bool    _length_set; // lazy evaluation
+    mutable uint    _length;
+
+    uint    _size; // size (#of vertices) on the path
+
+    static base::rand_fcn_t _rnd_fcn;
+
+    void set();
 };
+
 
 }
 #endif // PATH_H

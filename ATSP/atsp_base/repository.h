@@ -239,6 +239,24 @@ uint path::length_forward_on(const data::data_matrix_t & db, uint pos)
     return m_length_fwd[pos];
 }
 
+
+    // copies the original path up to the insertion point
+    std::memcpy(new_pwm_ptr, pwm_ptr, ( pos + 1 )*sizeof(uint) );
+
+    // copies the mask
+    std::memcpy(new_pwm_ptr + pos + 1,
+                path_ptr + msk_start,
+                ( msk_size )*sizeof(uint) );
+
+    // copies the rest of the path
+    std::memcpy(new_pwm_ptr + pos + msk_size + 1,
+                pwm_ptr + pos + 1,
+                ( path_wm_sz - pos - 1 )*sizeof(uint) );
+
+    delete [] m_path;
+    m_path = new_pwm_ptr;
+    m_length_set = false;
+
 */
 
 

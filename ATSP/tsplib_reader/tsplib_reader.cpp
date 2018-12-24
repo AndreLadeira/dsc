@@ -6,9 +6,11 @@
 using namespace std;
 using namespace atsp::data;
 
-void tsplib_reader::operator()( data_t & data ) const
+void tsplib_reader::operator()() const
 {
-    ifstream file(m_fname);
+   if (!m_fname) throw runtime_error( string("tsplib_reader(): file name not set.") );
+
+   ifstream file(m_fname);
 
    if ( !file.is_open() )
        throw runtime_error( string("tsplib_reader(): file not found: ") + string(m_fname) );
@@ -21,7 +23,7 @@ void tsplib_reader::operator()( data_t & data ) const
    if ( !regex_search (line,m,e) )
        throw runtime_error( string("tsplib_reader(): problem name not found in atsp file: ") + m_fname );
 
-   data.id = m[1];
+   data_loader::m_id = m[1];
 
    getline(file,line); // type
    getline(file,line); // comment
@@ -31,8 +33,7 @@ void tsplib_reader::operator()( data_t & data ) const
    if ( !regex_search (line,m,e) )
        throw std::runtime_error( string("tsplib_reader(): problem sz not found atsp file: ") + m_fname);
 
-   data.size = static_cast<unsigned int>(stoul(m[1]));
-   alloc(data);
+   this->set_size( static_cast<uint>(stoul(m[1])) );
 
    getline(file,line); // weight type
    getline(file,line); // weight format
@@ -40,11 +41,9 @@ void tsplib_reader::operator()( data_t & data ) const
 
    try
    {
-       for( uint i = 0; i< data.size; ++i )
-           for( uint j = 0; j< data.size; ++j )
-           {
-               file >> data.data[i][j];
-           }
+       for( uint i = 0; i< this->m_size; ++i )
+           for( uint j = 0; j< this->m_size; ++j )
+               file >> m_data[i][j];
 
    }
    catch(...)
@@ -53,4 +52,4 @@ void tsplib_reader::operator()( data_t & data ) const
    }
 }
 
-tsplib_reader::tsplib_reader(const char * const &fname):data_loader(fname){}
+tsplib_reader::tsplib_reader(const char * const & fname):data_loader(fname){}
