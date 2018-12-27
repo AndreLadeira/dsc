@@ -23,6 +23,8 @@ atsp::Path &atsp::Path::operator=(const atsp::Path & rhs)
     _size = rhs._size;
     for (uint i = 0; i < _size; i++)
         _path[i] = rhs._path[i];
+
+    return *this;
 }
 
 const uint *atsp::Path::getDataPtr() const
