@@ -1,90 +1,88 @@
 #include "data.h"
 
-using namespace atsp::data;
+using namespace atsp;
 using namespace std;
 
-namespace
+Data::Data():_data(nullptr),_size(0){}
+Data::~Data()
 {
-
-// the actual data
-
-matrix_t    dataObj = nullptr;
-uint        sizeObj = 0;
-string      idObj;
-
-void release()
-{
-    for( uint i = 0; i < sizeObj; ++i )
-        delete[] dataObj[i];
-
-    delete[] dataObj;
-    dataObj = nullptr;
+    release();
 }
 
-// The idea here is to have a global variable and
-// rely on its destructor to release any memory
-// alocated on dataObj.
+//uint const * Data::operator[](uint i) const
+//{
+//#ifdef __DEBUG__
+//    if ( i >= _size )
+//        throw runtime_error("Data::operator[]: index out of range.");
+//    if ( !_data )
+//        throw runtime_error("Data::operator[]: data not set.");
+//#endif
 
-struct Releaser
+//    return this->_data[i];
+//}
+
+uint Data::getSize() const
 {
-   ~Releaser()
-   {
-      if (dataObj)
-      {
-          release();
-      }
-   }
-
-} releaser;
-
-}
-// the constant read-only references
-
-const const_matrix_t &  atsp::data::data    = dataObj;
-const uint &            atsp::data::size    = sizeObj;
-const string &          atsp::data::id      = idObj;
-
-// the data read-write access points, available only to loaders
-
-matrix_t &      data_loader::m_data   = dataObj;
-const uint &    data_loader::m_size   = sizeObj;
-string &        data_loader::m_id     = idObj;
-
-data_loader::data_loader(const char * const & fname): m_fname(fname){}
-data_loader::~data_loader(){}
-
-void data_loader::set_size(uint sz) const
-{
-    if (dataObj) release();
-
-    sizeObj = sz;
-
-    dataObj = matrix_t( new row_t[sizeObj] );
-
-    for( uint i = 0; i < sizeObj; ++i )
-        dataObj[i] = row_t( new uint[sizeObj]);
-
-    // m_data[0][0] = 100; // OK
-    // m_data[0] = nullptr; // compile error as expected
+    return _size;
 }
 
-void atsp::data::dump(std::ostream & os)
+void Data::load(const DataLoader & loader)
+{
+    loader.load(*this);
+}
+
+void Data::malloc(uint size)
+{
+    if (_data) release();
+
+    _size = size;
+
+    _data = new uint * [_size];
+    for(uint i = 0; i < _size; i++)
+        _data[i] = new uint[_size]();
+}
+
+void Data::release()
+{
+    if (_data)
+    {
+        for(uint i = 0; i < 10; i++)
+            delete[] _data[i];
+        delete[] _data;
+        _size = 0;
+        _data = nullptr;
+    }
+
+}
+
+DataLoader::~DataLoader()
+{
+}
+
+void DataLoader::set(Data &d, string id, uint sz) const
+{
+    d.malloc(sz);
+    d._id = id;
+}
+
+uint **DataLoader::getDataPtr(Data &d) const
+{
+    return d._data;
+}
+
+ostream & atsp::operator <<(ostream & os, const Data & d)
 {
     os << "--- atsp data dump ---\n";
-    os << "Problem name: " << id << endl;
-    os << "Dimension:    " << size << endl;
+    os << "Problem name: " << d._id << endl;
+    os << "Dimension:    " << d._size << endl;
     os << "Data (edge weights)\n\n";
 
-    for(unsigned int i = 0; i < size; ++i)
+    for(unsigned int i = 0; i < d._size; ++i)
     {
-        for(unsigned int j = 0; j < size;++j)
-            os<< dataObj[i][j] << "  ";
+        for(unsigned int j = 0; j <d._size;++j)
+            os<< d._data[i][j] << "  ";
         os << endl;
     }
     os<< "\n--- end of atsp data dump ---\n";
-}
-
-void atsp::data::load(const data_loader * loader)
-{
-    (*loader)();
+    return os;
 }

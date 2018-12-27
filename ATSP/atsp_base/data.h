@@ -4,63 +4,65 @@
 #include <ostream>
 #include <string>
 
-namespace atsp { namespace data {
+namespace atsp {
 
-// the basic all access types (read-write)
-typedef uint *  row_t;
-typedef row_t * matrix_t;
+class DataLoader;
 
-// locked read-only access type
-typedef const matrix_t const_matrix_t;
-
-// locked read-only globally visible access points
-
-extern const const_matrix_t  &   data;
-extern const uint &             size;
-extern const std::string &      id;
-
-// specialized classes to do the actual data loading
-// derived classes have the intermidiate limited
-// write access
-
-class data_loader;
-
-// dumps the currently loaded data to a stream
-
-void dump(std::ostream & os);
-
-// loads the data using a data loader
-
-void load(const data_loader * loader);
-
-// loads atsp data from a file
-// this class manipulates the actual data that
-// is kept read-only for its users
-
-class data_loader
+class Data
 {
 public:
+    Data();
+    ~Data();
 
-    data_loader( const char * const &);
-    virtual ~data_loader();
+    // read only access points (slow)
+    //uint const * operator[](uint i) const;
+
+    uint getSize() const;
+
+    // in most compilers this results in the fastest access
+    uint const * const * getDataPtr() const
+    {
+        return _data;
+    }
+
+    // uses a polimorfic DataLoader to load data into it
+    void load(const DataLoader & loader);
 
 private:
 
-    friend void load(const data_loader * loader);
-    virtual void operator()() const = 0;
+    // alows data access to DataLoaders
+    friend class DataLoader;
+
+    // outputs content to a stream
+    friend std::ostream & operator <<(std::ostream &, const Data &);
+
+    // allocs necessary memory
+    void malloc(uint size);
+
+    // releases alocated memory
+    void release();
+
+    uint **      _data;
+    uint         _size;
+    std::string  _id;
+
+};
+
+class DataLoader
+{
+public:
+
+    virtual ~DataLoader();
+    virtual void load(Data &) const = 0;
 
 protected:
 
-    const char * const &            m_fname;
+    void set(Data & d, std::string id,  uint sz) const;
 
-    static matrix_t &               m_data;
-    static const uint &             m_size; // read only. Set through set_size
-    static std::string &            m_id;
-
-    void set_size(uint sz) const;
+    uint ** getDataPtr(Data & d) const;
 };
 
+std::ostream & operator <<(std::ostream &, const Data &);
 
-}
-}
+}// ns atsp
 #endif // DATA_H

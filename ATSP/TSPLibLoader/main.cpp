@@ -1,17 +1,18 @@
 #include <iostream>
-#include "tsplib_reader.h"
+#include "TSPLibLoader.h"
 #include <fstream>
 
 using namespace std;
-using atsp::data::tsplib_reader;
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
 int main(int argc, char * argv[])
 try
 {
-    atsp::data::load( new tsplib_reader(argv[1]) );
-    atsp::data::dump( cout );
+    atsp::Data data;
+
+    data.load( atsp::TSPLibLoader(argv[1]) );
+    cout << data;
     return 0;
 }
 catch( std::exception & e)

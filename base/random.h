@@ -23,7 +23,7 @@ namespace base
     inline int fast_rand(void)
     {
         g_seed = (214013*g_seed+2531011);
-        return (g_seed>>16)&rand_max;
+        return ((g_seed>>16)&rand_max);
     }
 }
 
