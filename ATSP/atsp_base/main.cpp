@@ -73,7 +73,6 @@ try
     cout<< "Final result: " << min << endl;
     cout<< "Best path: " << best;
 
-        return 0;
     return 0;
 }
 catch( std::exception & e)
