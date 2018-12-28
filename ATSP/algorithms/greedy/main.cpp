@@ -2,19 +2,16 @@
 #include <iomanip>
 #include <ctime>
 #include "base/random.h"
-#include "data.h"
+#include "atsp/data.h"
 #include "TSPLibLoader/TSPLibLoader.h"
-#include "path.h"
-#include "algorithm.h"
+#include "atsp/path.h"
+#include "greedy_algorithm.h"
 #include <limits>
+#include <cmath>
+
 using namespace std;
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-
-uint f(uint x)
-{
-    return x * x;
-}
 
 int main(int argc, char * argv[])
 try
@@ -22,7 +19,7 @@ try
     atsp::Data data;
     data.load( atsp::TSPLibLoader(argv[1]) );
 
-    std::cout<< data;
+    //std::cout<< data;
 
     uint runs    = static_cast<uint>(atoi( argv[2]) );
     uint iters   = static_cast<uint>(atoi( argv[3]) );
@@ -32,7 +29,7 @@ try
     cout<<"\n\nData file: " << argv[1] << " (" << data.getSize() << " nodes)\n";
     cout<< runs << " executions, " << iters << " iterations per run.\n";
     cout<<"Mask size: " << msksz << "\n\n";
-    cout<< "|0      50|      100|\n" << flush;
+    cout<< "|0      50|      100|\n|" << flush;
 
     base::fast_srand();
 
@@ -48,7 +45,10 @@ try
 
     clock_t begin = clock();
 
-    for (unsigned long long run = 0; run < runs; run++)
+    float progress = 0.0f;
+    uint  mult = 1;
+
+    for (uint run = 0; run < runs; run++)
     {
         atsp::randomize(current);
 
@@ -64,7 +64,12 @@ try
                 best = current;
             }
         }
-        if ( run % (runs / 20) == 0) cout<<"|" << flush;
+        progress = 100.0f * run / runs;
+        if ( progress > mult * 5)
+        {
+            mult++;
+            cout<<"|" << flush;
+        }
     }
 
     cout<<"|" << endl;

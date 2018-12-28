@@ -81,7 +81,7 @@ inline void randomize(Path & p, base::rand_fcn_t rand = base::fast_rand)
 
 inline void move(Path & p, uint insert, uint start, uint sz)
 {
-    uint tmp[128];
+    uint tmp[512];
     uint * _path = p._path;
 
     uint insert_corrected = insert < start ? insert : insert + sz;

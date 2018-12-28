@@ -1,7 +1,9 @@
-TEMPLATE = app
-CONFIG += console c++11
+TEMPLATE = lib
+#CONFIG += console c++11
+CONFIG += c++11
 CONFIG -= app_bundle
 CONFIG -= qt
+CONFIG += staticlib
 
 INCLUDEPATH += "/Users/ladeira/Documents/src/boost_1_65_1/"
 LIBS += -L"/Users/ladeira/Documents/src/boost_1_65_1/stage/lib/"  -lboost_timer

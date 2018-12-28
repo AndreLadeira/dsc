@@ -1,26 +1,10 @@
-#ifndef ALGORITHM_H
-#define ALGORITHM_H
+#ifndef GREEDYALGORITHM_H
+#define GREEDYALGORITHM_H
 
-#include "path.h"
-#include "data.h"
-#include "base/random.h"
+#include "atsp/algorithm.h"
+#include "atsp/data.h"
 
 namespace atsp{
-
-class Algorithm
-{
-public:
-    virtual ~Algorithm();
-    virtual inline uint run(Path&, const Data &) const = 0;
-
-protected:
-
-    inline uint * getPathPtr(Path& p) const
-    {
-        return p._path;
-    }
-
-};
 
 class GreedyAlgorithm : public Algorithm
 {
@@ -107,4 +91,4 @@ inline uint GreedyAlgorithm::run(Path & path, const Data & data) const
 
 }
 
-#endif // ALGORITHM_H
+#endif // GREEDYALGORITHM_H

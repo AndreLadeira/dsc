@@ -1,19 +1,19 @@
-TEMPLATE = app
-CONFIG += console c++11
+TEMPLATE = lib
+#CONFIG += console c++11
+CONFIG += c++11
 CONFIG -= app_bundle
 CONFIG -= qt
+CONFIG += staticlib
 
 SOURCES += \
         main.cpp \
     path.cpp \
-    ../../base/random.cpp \
     algorithm.cpp \
-    data.cpp \
-    ../TSPLibLoader/TSPLibLoader.cpp
+    data.cpp
 
-INCLUDEPATH += "/Users/ladeira/Documents/src/boost_1_65_1/"
 INCLUDEPATH += "../../"
 INCLUDEPATH += "../"
+INCLUDEPATH += ../_libs
 
 HEADERS += \
     path.h \
@@ -23,6 +23,8 @@ HEADERS += \
     algorithm.h \
     mask.h
 
+#LIBS += -L../_libs/ -llibbase
+
 #QMAKE_CXXFLAGS += -O3
 
 #debug levels
@@ -31,5 +33,5 @@ CONFIG(debug, debug|release) {
 }
 CONFIG(release, debug|release) {
    DEFINES += "__RELEASE__"
-    QMAKE_CXXFLAGS += -O3
+   QMAKE_CXXFLAGS += -O3
 }

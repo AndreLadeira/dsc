@@ -1,12 +1,6 @@
-#include "algorithm.h"
+#include "greedy_algorithm.h"
 
 using namespace atsp;
-
-
-Algorithm::~Algorithm()
-{
-
-}
 
 GreedyAlgorithm::GreedyAlgorithm(uint msksz):_msksz(msksz)
 {
