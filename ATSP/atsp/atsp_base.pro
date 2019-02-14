@@ -20,8 +20,7 @@ HEADERS += \
     repository.h \
     data.h \
     base.h \
-    algorithm.h \
-    mask.h
+    algorithm.h
 
 #LIBS += -L../_libs/ -llibbase
 
@@ -30,8 +29,10 @@ HEADERS += \
 #debug levels
 CONFIG(debug, debug|release) {
     DEFINES += "__DEBUG__"
+    TARGET = "atsp_based"
 }
 CONFIG(release, debug|release) {
    DEFINES += "__RELEASE__"
+   TARGET = "atsp_base"
    QMAKE_CXXFLAGS += -O3
 }

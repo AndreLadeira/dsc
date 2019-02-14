@@ -4,6 +4,10 @@
 #include "atsp/algorithm.h"
 #include "atsp/data.h"
 
+#ifdef __DEBUG__
+#include <cassert>
+#endif
+
 namespace atsp{
 
 class GreedyAlgorithm : public Algorithm
@@ -36,10 +40,11 @@ inline uint GreedyAlgorithm::run(Path & path, const Data & data) const
     // starts with the current length as the minimum
     uint minlen = length;
 
-    // mask's 1st and last node
+    // direct, read only, acess pointers (remove function call)
     const uint * _path  = path.getDataPtr();
     const uint * _pwm   = pwm.getDataPtr();
 
+    // mask's 1st and last node
     const uint  m1st    = _path[ _mask ];
     const uint  mlast   = _path[ _mask + _msksz -1 ];
     const uint  pwm_sz  = pwm.getSize();
@@ -47,14 +52,17 @@ inline uint GreedyAlgorithm::run(Path & path, const Data & data) const
 
     const auto & db = data.getDataPtr();
 
+    // try re-inserting at every possible position
+
     for (uint i = 0; i < pwm_sz - 1; ++i )
     {
+        // length calculation in constant time
         const uint len =
-                pwm_length -                    // sub path original length
-                db[ _pwm[i] ][ _pwm[i+1] ] +    // minus the way being disconnected
-                db[ _pwm[i] ][ m1st ] +         // plus going into the mask
-                msklen +                        // plus going through the mask
-                db[ mlast ][ _pwm[i+1] ];       // plus going from the mask back to the path
+                pwm_length -                    // sub path original length minus
+                db[ _pwm[i] ][ _pwm[i+1] ] +    // the way being disconnected plus
+                db[ _pwm[i] ][ m1st ] +         // going into the mask plus
+                msklen +                        // going through the mask plus
+                db[ mlast ][ _pwm[i+1] ];       // going from the mask back to the path
 
         if (len < minlen)
         {
@@ -63,14 +71,14 @@ inline uint GreedyAlgorithm::run(Path & path, const Data & data) const
         }
     }
 
-    // try the last _postion
+    // try the last postion (from the last to the first city)
 
     const uint len =
-            pwm_length -                            // sub path original length
-            db[ _pwm[ pwm_sz - 1 ] ][ _pwm[ 0 ] ] + // minus the way being disconnected
-            db[ _pwm[ pwm_sz - 1 ] ][ m1st ] +      // plus going into the mask
-            msklen +                                // plus going through the mask
-            db[ mlast ][ _pwm[ 0 ] ];               // plus going from the mask back to the path
+            pwm_length -                            // sub path original length minus
+            db[ _pwm[ pwm_sz - 1 ] ][ _pwm[ 0 ] ] + // the way being disconnected plus
+            db[ _pwm[ pwm_sz - 1 ] ][ m1st ] +      // going into the mask plus
+            msklen +                                // going through the mask plus
+            db[ mlast ][ _pwm[ 0 ] ];               // going from the mask back to the path
 
     if (len < minlen)
     {
@@ -78,12 +86,15 @@ inline uint GreedyAlgorithm::run(Path & path, const Data & data) const
         minlen = len;
     }
 
+    // if a better path is found
     if ( minlen < length )
     {
+      // then updates the current best
+
       move(path,insert,_mask,_msksz);
 
 #ifdef __DEBUG__
-       assert( p.length() == minlen );
+       assert( atsp::getLength(data, path) == minlen );
 #endif
     }
     return minlen;

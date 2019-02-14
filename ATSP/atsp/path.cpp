@@ -1,15 +1,9 @@
 #include "path.h"
+#include <sstream>
 
-
-atsp::Path::Path(uint sz):_size(0)//:_path(nullptr),_size(0)
+atsp::Path::Path(uint sz):_size(sz)//:_path(nullptr),_size(0)
 {
-    if (sz)
-    {
-        //_path = new uint[sz];
-        _size = sz;
-        for (uint i = 0; i < _size; ++i)
-            _path[i] = i;
-    }
+    reset(*this);
 }
 
 atsp::Path::~Path()
@@ -58,14 +52,4 @@ atsp::Path::Path(const atsp::Path & rhs):_size(rhs._size)
 {
     for (uint i = 0; i < _size; i++)
         _path[i] = rhs._path[i];
-}
-
-std::ostream & atsp::operator <<(std::ostream & os, const Path & p)
-{
-    for (uint i = 0; i < p._size - 1; i++)
-        os << p._path[ i ] << ", ";
-
-    os << p._path[ p._size - 1 ] << "\n";
-
-    return os;
 }

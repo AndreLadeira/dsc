@@ -15,6 +15,12 @@ SOURCES += \
 HEADERS += \
     TSPLibLoader.h
 
+CONFIG(debug, debug|release) {
+    DEFINES += "__DEBUG__"
+    TARGET = "TSPLibLoaderd"
+}
 CONFIG(release, debug|release) {
-    QMAKE_CXXFLAGS += -O3
+   DEFINES += "__RELEASE__"
+   TARGET = "TSPLibLoader"
+   QMAKE_CXXFLAGS += -O3
 }

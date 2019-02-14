@@ -25,6 +25,12 @@ namespace base
         g_seed = (214013*g_seed+2531011);
         return ((g_seed>>16)&rand_max);
     }
+    inline double fast_rand01(void)
+    {
+        g_seed = (214013*g_seed+2531011);
+        return static_cast<double>((g_seed>>16)&rand_max) / rand_max;
+        //return 1.00 * ((g_seed>>16)&rand_max) / rand_max;
+    }
 }
 
 #endif // RANDOM_H

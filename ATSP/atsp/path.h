@@ -29,8 +29,9 @@ private:
 private:
 
     friend inline void randomize(Path &, base::rand_fcn_t);
+    friend inline void reset(Path &);
     friend inline void move(Path & p, uint insert, uint start, uint sz);
-    friend std::ostream & operator << (std::ostream &, const Path & p);
+    friend inline void operator << (std::ostream &, const Path & p);
 
     friend class Algorithm;
 };
@@ -78,11 +79,37 @@ inline void randomize(Path & p, base::rand_fcn_t rand = base::fast_rand)
         path[b] = tmp;
     }
 }
+inline void reset(Path & p)
+{
+    for (uint i = 0; i < p._size; ++i)
+            p._path[i] = i;
+}
+
+// create a new path by moving part of the path to another position
+//
+// The block that is moved: path[start] to path[start + sz]
+// The insertion point: insert.
+//
+
 
 inline void move(Path & p, uint insert, uint start, uint sz)
 {
-    uint tmp[512];
+    uint tmp[512]; // fixed size "big" buffer, to avoid memory allocation
     uint * _path = p._path;
+
+    // The insertion point was obtained in a sub-path that did not contain
+    // the block being moved
+    // Example:
+    //
+    // Original path: ABCDEF
+    // Part of the path being reinserted: 'C'
+    // sub-path: ABDEF
+    // insert possible values: 1,2,3,4,5
+    // 1 = after A, 2 = after B ... 5 = after F
+    //
+    // so, if insert is bigger than start (e.g., the block is to be inserted
+    // after its original position, 'C' inserted after D,E of F) a correction is
+    // necessary
 
     uint insert_corrected = insert < start ? insert : insert + sz;
 
@@ -109,6 +136,19 @@ inline void move(Path & p, uint insert, uint start, uint sz)
     // copy the mask back to the path
     for (uint i = 0; i < sz; i++)
         _path[ insert + 1 + i ] = tmp[i];
+}
+
+inline void operator <<(std::ostream & os, const Path & p)
+{
+    for (uint i = 0; i < p._size - 1; i++)
+        os << p._path[ i ] << "\n";
+
+    os << p._path[ p._size - 1 ] << "\n";
+
+//        for (uint i = 0; i < p._size - 1; i++)
+//            os << p._path[ i ] << " \t";
+
+//        os << p._path[ p._size - 1 ] << "\n";
 }
 
 }// ns atsp

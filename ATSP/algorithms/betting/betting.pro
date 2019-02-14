@@ -6,13 +6,26 @@ CONFIG -= qt
 INCLUDEPATH += "../../"
 INCLUDEPATH += "../../../"
 
-LIBS += ../../_libs/libatsp_base.a
-#LIBS += ../../_libs/libbase.a
-LIBS += ../../_libs/libTSPLibLoader.a
-
 SOURCES += \
         main.cpp \
-    betting_algorithm.cpp
+    betting_phase1.cpp \
+    player.cpp
 
 HEADERS += \
-    betting_algorithm.h
+    betting_phase1.h \
+    player.h
+
+CONFIG(debug, debug|release) {
+    DEFINES += "__DEBUG__"
+    LIBS += ../../_libs/libatsp_based.a
+    LIBS += ../../_libs/libbased.a
+    LIBS += ../../_libs/libTSPLibLoaderd.a
+
+}
+CONFIG(release, debug|release) {
+    DEFINES += "__RELEASE__"
+    LIBS += ../../_libs/libatsp_base.a
+    LIBS += ../../_libs/libbase.a
+    LIBS += ../../_libs/libTSPLibLoader.a
+    QMAKE_CXXFLAGS += -O3
+}
