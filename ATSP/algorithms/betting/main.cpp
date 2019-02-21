@@ -10,6 +10,7 @@
 #include "atsp/path.h"
 #include "betting_phase1.h"
 
+
 using namespace std;
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -25,17 +26,42 @@ int main(int argc, char * argv[])
 
     clock_t begin = clock();
 
-    uint msksz = 2;
-    uint mskRange = data.getSize() - msksz;
+    uint trsz = 3;
+    uint trcount = 3;
 
     atsp::Path current(data.getSize());
+    atsp::Path best = current;
 
-    atsp::BettingPhase1 betting1(20, data.getSize(), msksz );
+    atsp::bet::Player players[30];
 
-    for(uint i = 0; i < 1000 * 1000 * 10; i++)
+    for (uint i = 0; i < 30; ++i)
+        players[i].reset(data.getSize(),1000.0);
+
+    atsp::bet::BetAgorithm1 bet1(trsz, trcount, players, 30);
+
+    uint runs  = 1e05; //100k
+    uint iters = 500;
+
+    uint all_min = std::numeric_limits<uint>::max();
+
+    // phase 1
+
+    for (uint run = 0; run < runs; run++)
     {
-        betting1.setMask( static_cast<uint>(base::fast_rand()) % mskRange );
-        res += betting1.run(current,data);
+        atsp::randomize(current);
+
+        for (uint iter = 0; iter < iters; iter++)
+        {
+            uint r = bet1.run(current, data);
+
+            if ( r < all_min )
+            {
+                all_min = r;
+                best = current;
+            }
+
+        }
+
     }
 
     cout<< "Elapsed time: " << fixed << setprecision(2) <<

@@ -2,48 +2,116 @@
 #define BETTING_ALGORITHM_H
 
 #include "atsp/algorithm.h"
+#include "greedy/greedy_algorithm.h"
 #include "player.h"
-#include <vector>
-#include <cmath>
+
 
 namespace atsp {
+namespace bet{
 
-class BettingPhase1 : public Algorithm
+class BetAgorithm1 : public Algorithm
 {
 public:
-    BettingPhase1(uint numPlayers, uint _size, uint msksz);
-    ~BettingPhase1();
 
+    explicit BetAgorithm1(uint trSize, uint trCount,
+                          Player * const players, uint playerCount);
     virtual inline uint run(Path&, const Data &) const;
-    void setMask(uint mask);
+    void setMaskCount(uint maskCount);
 
 private:
 
-    uint _numPlayers;
-    uint _mask;
-    uint _msksz;
-
-    std::vector<Player> _player;
+    const uint        _trsz;
+    const uint        _pickCount;
+    Player * const    _players;
+    const uint        _playerCount;
 
 };
 
-inline uint BettingPhase1::run(Path&, const Data &) const
+inline uint BetAgorithm1::run(Path &        path,
+                              const Data &  data) const
 {
-    double pweights[512];
+    // Gets new random points of path transformation
+    // huge buffer, avoid allocation....
+    uint picks[512] = {0};
+    const uint pathSz = path.getSize();
 
-    double res = 0.0;
+    picks[0] = static_cast<uint>(base::fast_rand()) % pathSz;
 
-    for (uint i = 0; i < _numPlayers; ++i)
     {
-        pweights[i] = _player.at(i).getWeight(_mask);
-        res += pweights[i];
+        uint count  = 1;
+        for(uint i = 1; i < _pickCount; ++i)
+        {
+            back:
+            uint attempt = static_cast<uint>(base::fast_rand()) % pathSz;
+            for(uint j = 0; j < count; ++j)
+            {
+                if ( attempt == picks[j]) goto back;
+            }
+            picks[i] = attempt;
+            count++;
+        }
     }
-    double omega = 1.0 / res;
 
-    return static_cast<uint>( omega );
+    // get the set of players to find out how they rank
+    // each available pick (trPoint)
 
+    // holds the sum of rates of all players on all picks
+    // used later to calculate the odds
+    double R = 0.0;
+
+    for (uint i = 0; i < _playerCount; ++i)
+        _players[i].ratePicks(picks,_pickCount);
+
+    // calculate the odds, based on player's collective knowledge
+    double odds[512] = {0.0};
+
+    for(uint i = 0; i < _pickCount; i++)
+    {
+        for(uint j = 0; j < _playerCount; ++j)
+            odds[i] += _players[j].rates[i];
+        odds[i] /= R;
+    }
+
+    // Players then bet or not, according to the given odds
+    for(uint j = 0; j < _playerCount; ++j)
+        _players[j].gamble(odds,_pickCount);
+
+    // gets the winner transformation
+    atsp::GreedyAlgorithm greedyAlgorithm(_trsz);
+
+    uint min = std::numeric_limits<uint>::max();
+    uint r = 0;
+    atsp::Path current = path;
+    atsp::Path best = path;
+    uint winner = 0;
+
+    for(uint p = 0; p < _pickCount; ++p)
+    {
+        greedyAlgorithm.setMask( picks[p] );
+
+        r = greedyAlgorithm.run(current, data);
+
+        if ( r < min )
+        {
+            min = r;
+            winner = p;
+            best = current;
+        }
+    }
+
+    // pays the prizes, replaces the broken
+    for(uint j = 0; j < _playerCount; ++j)
+        service(_players[j], winner, odds);
+
+    // update the best path
+    if ( min < atsp::getLength(data, path) )
+    {
+        path = best;
+    }
+
+    return min;
 }
 
 }
-
+}
 #endif // BETTING_ALGORITHM_H

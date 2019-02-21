@@ -946,5 +946,38 @@ public:
 //    const uint pwmLength =  getLength(data,pwm,size-_msksz);
 //    delete[] pwm;
 
+
+    // wPjMi = weight given
+    double wPjMi[512] = {0.0}; // huge buffer...you know
+    double W = 0.0;
+
+    for (uint playerj = 0; playerj < _numPlayers; ++playerj)
+    {
+        // ugly as hell.....
+        wi[maski] +=
+                _playerPool[playerj].weights[masks[maski]] *
+                (1.0-);
+    }
+
+    for (uint maski = 0; maski < _maskCount; ++maski)
+    {
+        for (uint playerj = 0; playerj < _numPlayers; ++playerj)
+        {
+            // ugly as hell.....
+            wi[maski] +=
+                    _playerPool[playerj].weights[masks[maski]] *
+                    (1.0-);
+        }
+        W += wi[maski];
+    }
+
+    // Gets the odds based on the players collective evaluation
+
+    // odds[ choice i ] =
+    //      SUM( players weights for choice i ) / SUM( all weights )
+    double odds[512] = {0.0};
+    for (uint maski = 0; maski < _maskCount; ++maski)
+        odds[maski] = wi[maski] / W;
+
 */
 #endif // REPOSITORY_H

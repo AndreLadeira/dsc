@@ -69,23 +69,24 @@ try
 
         //std::cout<< "\n";
 
-        uint local_min = std::numeric_limits<uint>::max();;
+        //uint local_min = std::numeric_limits<uint>::max();;
+        uint r = 0;
 
         for (uint iter = 0; iter < iters; iter++)
         {
             greedyAlgorithm.setMask(static_cast<uint>(base::fast_rand()) % mskRange);
 
-            uint r = greedyAlgorithm.run(current, data);
+            r = greedyAlgorithm.run(current, data);
 
             if ( r < min )
             {
                 min = r;
                 best = current;
             }
-            if (r < local_min)
-            {
-                local_min = r;
-            }
+//            if (r < local_min)
+//            {
+//                local_min = r;
+//            }
 
 
         }
@@ -99,8 +100,7 @@ try
 //            mult++;
 //            cout<<"|" << flush;
 //        }
-
-        total += local_min;
+          total += r;
         //outfile << min << "\n";
     }
 

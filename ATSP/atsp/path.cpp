@@ -1,5 +1,6 @@
 #include "path.h"
-#include <sstream>
+#include <cstring>
+
 
 atsp::Path::Path(uint sz):_size(sz)//:_path(nullptr),_size(0)
 {

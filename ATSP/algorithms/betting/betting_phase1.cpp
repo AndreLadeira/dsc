@@ -1,20 +1,13 @@
 #include "betting_phase1.h"
 
 using namespace atsp;
+using namespace bet;
 
-BettingPhase1::BettingPhase1(uint numPlayers, uint gsize, uint msksz):
-    _numPlayers(numPlayers),_msksz(msksz)//, _player(nullptr)
-{
-    _player.reserve(_numPlayers);
-    for (uint i = 0; i < _numPlayers; i++)
-        _player.push_back( Player(gsize) );
-}
 
-BettingPhase1::~BettingPhase1()
+BetAgorithm1::BetAgorithm1(bet::uint trSize,
+                           bet::uint trCount,
+                           bet::Player * const players,
+                           bet::uint playerCount)
 {
-}
 
-void BettingPhase1::setMask(uint mask)
-{
-   _mask = mask;
 }

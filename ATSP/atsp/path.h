@@ -31,6 +31,7 @@ private:
     friend inline void randomize(Path &, base::rand_fcn_t);
     friend inline void reset(Path &);
     friend inline void move(Path & p, uint insert, uint start, uint sz);
+    // outputs path to a stream
     friend inline void operator << (std::ostream &, const Path & p);
 
     friend class Algorithm;
@@ -102,14 +103,14 @@ inline void move(Path & p, uint insert, uint start, uint sz)
     // Example:
     //
     // Original path: ABCDEF
-    // Part of the path being reinserted: 'C'
+    // Part of the path being moved: 'C'
     // sub-path: ABDEF
     // insert possible values: 1,2,3,4,5
     // 1 = after A, 2 = after B ... 5 = after F
     //
     // so, if insert is bigger than start (e.g., the block is to be inserted
-    // after its original position, 'C' inserted after D,E of F) a correction is
-    // necessary
+    // after its original position, ('C' inserted after D,E of F) a correction is
+    // necessary in the insertion point number
 
     uint insert_corrected = insert < start ? insert : insert + sz;
 

@@ -3,38 +3,47 @@
 
 #include "base/random.h"
 
-namespace atsp
-{
+namespace atsp{
+namespace bet{
 
 typedef unsigned int uint;
 
 class Player
 {
+public:
+
+    static const uint buffsz = 512;
+
+public:
+
+    Player();
+
+    // returns the sum of player rate (used to calculate the odds)
+    double ratePicks(const uint picks[buffsz], uint count);
+    void   gamble(const double odds[buffsz], uint count);
+    void   reset(uint numCities = 0, double startCash = 0.0);
+
+    const double * rates; // access point;
+
 private:
 
-    explicit Player(uint gameSize);
 
-    inline double getWeight(uint mask) const;
-    static void setRandFcn(base::rand_fcn_t, uint rand_max);
+    double _bankroll;
 
-private:
+    double _knowledge[buffsz]   = {0.0};    // player's knowlege
+    double _myOdds[buffsz]      = {0.0};    // how it rates each given pick
+    bool   _picked[buffsz]      = {false};  //
+    double _bets[buffsz]        = {0.0};    // its bets
 
-    // how much a player like a number beside other number
+    friend void service(Player p, uint winner, double odds[Player::buffsz] );
 
-    double _ps[512][512];
+    static double minbet;
 
-private:
 
-    uint _size;
-
-    friend class BettingPhase1;
-    friend class BettingPhase2;
 };
 
-inline double Player::getWeight(uint mask) const
-{
-    return _p1[mask] * _totalNoBetProd / (1.0 - _p1[mask]);
-}
+void service(Player p, uint winner, double odds[Player::buffsz] );
 
+}
 }
 #endif // PLAYER_H

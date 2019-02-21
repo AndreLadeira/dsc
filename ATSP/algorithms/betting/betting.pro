@@ -5,6 +5,7 @@ CONFIG -= qt
 
 INCLUDEPATH += "../../"
 INCLUDEPATH += "../../../"
+INCLUDEPATH += "../"
 
 SOURCES += \
         main.cpp \
@@ -20,12 +21,13 @@ CONFIG(debug, debug|release) {
     LIBS += ../../_libs/libatsp_based.a
     LIBS += ../../_libs/libbased.a
     LIBS += ../../_libs/libTSPLibLoaderd.a
-
+    LIBS += ../../_libs/libGreedyAlgod.a
 }
 CONFIG(release, debug|release) {
     DEFINES += "__RELEASE__"
     LIBS += ../../_libs/libatsp_base.a
     LIBS += ../../_libs/libbase.a
     LIBS += ../../_libs/libTSPLibLoader.a
+    LIBS += ../../_libs/libGreedyAlgo.a
     QMAKE_CXXFLAGS += -O3
 }
