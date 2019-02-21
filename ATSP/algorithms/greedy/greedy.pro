@@ -20,6 +20,8 @@ SOURCES += \
 HEADERS += \
     greedy_algorithm.h
 
+DESTDIR = "../../_libs"
+
 CONFIG(debug, debug|release) {
     DEFINES += "__DEBUG__"
     LIBS += ../../_libs/libatsp_based.a

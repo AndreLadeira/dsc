@@ -22,9 +22,7 @@ HEADERS += \
     base.h \
     algorithm.h
 
-#LIBS += -L../_libs/ -llibbase
-
-#QMAKE_CXXFLAGS += -O3
+DESTDIR = "../../_libs"
 
 #debug levels
 CONFIG(debug, debug|release) {

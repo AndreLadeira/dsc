@@ -15,6 +15,8 @@ SOURCES += \
 HEADERS += \
     TSPLibLoader.h
 
+DESTDIR = "../../_libs"
+
 CONFIG(debug, debug|release) {
     DEFINES += "__DEBUG__"
     TARGET = "TSPLibLoaderd"

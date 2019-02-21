@@ -17,9 +17,12 @@ HEADERS += \
     random.h \
     histogram.h
 
+DESTDIR = "../../_libs"
+
 CONFIG(debug, debug|release) {
     DEFINES += "__DEBUG__"
     TARGET = "based"
+
 }
 CONFIG(release, debug|release) {
    DEFINES += "__RELEASE__"
