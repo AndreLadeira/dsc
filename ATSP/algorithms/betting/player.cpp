@@ -2,80 +2,104 @@
 
 using namespace atsp::bet;
 
-Player::Player()
+namespace
+{
+    static uint     numCities       = 0;
+    static double   minBet          = 0.0;
+    static double   initialBankroll = 0.0;
+}
+
+Player::Player():rating(_myRating)
 {
 }
 
-double Player::ratePicks(const uint picks[], uint count)
+double Player::ratePicks(const uint picks[], const uint pickCount)
 {
     double total = 0.0;
-    for(uint p = 0; p < count; ++p)
+    for(uint p = 0; p < pickCount; ++p)
     {
-        _myOdds[p] = _knowledge[ picks[p] ];
-        for(uint q = 0; q < count; ++q)
+        _myRating[p] = _myProb[ picks[p] ];
+        for(uint q = 0; q < pickCount; ++q)
         {
             if (p==q) continue;
-            _myOdds[p] *= ( 1.0 - _knowledge[ picks[q] ] );
+            _myRating[p] *= ( 1.0 - _myProb[ picks[q] ] );
         }
-        total += _myOdds[p];
+        total += _myRating[p];
     }
     return total;
 }
 
-void Player::gamble(const double odds[], uint count)
+void Player::bet(const double houseProbs[buffsz], uint pickCount)
 {
-    for(uint pick = 0; pick < count; ++pick)
+    for(uint pick = 0; pick < pickCount; ++pick)
     {
-        if ( odds[pick] > _myOdds[pick] )
+        // already spent all cash on previous picks
+        if ( _bankroll == 0.0 )
         {
-            const double kelly =
-                    ( 1.0 / _myOdds[pick] * odds[pick] - 1.0) /
-                    (odds[pick] - 1.0) * _bankroll;
-
-            _bets[pick] = kelly > minbet ? kelly : minbet;
-
-            if ( _bets[pick] >= _bankroll ) // cacife zero
+            _picked[pick] = false;
+        }
+        else
+        {
+            // Is my rating bigger than the house's
+            if ( _myRating[pick] > houseProbs[pick] )
             {
-                _bets[pick] = _bankroll;
-                _bankroll = 0.0;
+                // kelly = (p*o - 1) / (o - 1)
+                // where
+                // p = the probability of success, according to player
+                // o = howse odd = 1/houseProbs[pick]
+
+                const double p = _myRating[pick];
+                const double o = 1/houseProbs[pick];
+                const double po = p*o;
+
+                const double kelly = ( po - 1.0) /
+                    (o - 1.0);
+
+                const double bet = kelly * _bankroll;
+
+                _bets[pick] = bet > minBet ? bet : minBet;
+
+                if ( _bets[pick] >= _bankroll )
+                {
+                    _bets[pick] = _bankroll;
+                    _bankroll = 0.0;
+                }
+                else
+                {
+                    _bankroll -= _bets[pick];
+                }
+                _picked[pick] = true;
             }
             else
             {
-                _bankroll -= _bets[pick];
+                _picked[pick] = false;
             }
-            _picked[pick] = true;
         }
-        else {
-            _picked[pick] = false;
-        }
-
     }
 }
 
-void Player::reset(uint numCitiesParam, double startCash)
+void Player::reset()
 {
-    static uint numCities;
-
-    if ( numCitiesParam )
-    {
-        numCities = numCitiesParam;
-    }
-    if ( startCash > 0.0 )
-    {
-        _bankroll = startCash;
-    }
+    _bankroll = initialBankroll;
 
     for (uint i = 0; i < numCities; ++i)
     {
-       _knowledge[i] = base::fast_rand01();
+       _myProb[i] = base::fast_rand01();
     }
 }
 
-void atsp::bet::service(Player p, uint winner, double odds[])
+void Player::setGameParameters(uint numCitiesP, double minBetP, double initialBankrollP)
+{
+    numCities = numCitiesP;
+    minBet = minBetP;
+    initialBankroll = initialBankrollP;
+}
+
+void atsp::bet::service(Player p, uint winner, double houseProbs[])
 {
     if ( p._picked[winner] )
     {
-        p._bankroll += p._bets[winner] /= odds[winner];
+        p._bankroll += p._bets[winner] /= houseProbs[winner]; // checar!!
     }
     else if ( p._bankroll == 0.0 )
     {

@@ -4,7 +4,7 @@
 #include "atsp/algorithm.h"
 #include "greedy/greedy_algorithm.h"
 #include "player.h"
-
+#include <algorithm> // std::sort
 
 namespace atsp {
 namespace bet{
@@ -13,8 +13,8 @@ class BetAgorithm1 : public Algorithm
 {
 public:
 
-    explicit BetAgorithm1(uint trSize, uint trCount,
-                          Player * const players, uint playerCount);
+    BetAgorithm1(uint trSize, uint pickCount,
+                 Player * const players, uint playerCount);
     virtual inline uint run(Path&, const Data &) const;
     void setMaskCount(uint maskCount);
 
@@ -38,17 +38,15 @@ inline uint BetAgorithm1::run(Path &        path,
     picks[0] = static_cast<uint>(base::fast_rand()) % pathSz;
 
     {
-        uint count  = 1;
         for(uint i = 1; i < _pickCount; ++i)
         {
             back:
             uint attempt = static_cast<uint>(base::fast_rand()) % pathSz;
-            for(uint j = 0; j < count; ++j)
+            for(uint j = 0; j < i; ++j)
             {
                 if ( attempt == picks[j]) goto back;
             }
             picks[i] = attempt;
-            count++;
         }
     }
 
@@ -60,21 +58,25 @@ inline uint BetAgorithm1::run(Path &        path,
     double R = 0.0;
 
     for (uint i = 0; i < _playerCount; ++i)
-        _players[i].ratePicks(picks,_pickCount);
+        R += _players[i].ratePicks(picks,_pickCount);
 
-    // calculate the odds, based on player's collective knowledge
-    double odds[512] = {0.0};
+    // calculate the house probabilities, based on player's collective knowledge
+    double houseProbs[512] = {0.0};
 
     for(uint i = 0; i < _pickCount; i++)
     {
         for(uint j = 0; j < _playerCount; ++j)
-            odds[i] += _players[j].rates[i];
-        odds[i] /= R;
+            houseProbs[i] += _players[j].rating[i];
+        houseProbs[i] /= R;
     }
+
+    // sorts the odds in ascending order, so the players
+    // evaluate the best options first
+    std::sort(houseProbs, houseProbs + _pickCount, std::greater<double>());
 
     // Players then bet or not, according to the given odds
     for(uint j = 0; j < _playerCount; ++j)
-        _players[j].gamble(odds,_pickCount);
+        _players[j].bet(houseProbs,_pickCount);
 
     // gets the winner transformation
     atsp::GreedyAlgorithm greedyAlgorithm(_trsz);
@@ -101,7 +103,7 @@ inline uint BetAgorithm1::run(Path &        path,
 
     // pays the prizes, replaces the broken
     for(uint j = 0; j < _playerCount; ++j)
-        service(_players[j], winner, odds);
+        service(_players[j], winner, houseProbs);
 
     // update the best path
     if ( min < atsp::getLength(data, path) )

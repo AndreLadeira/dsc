@@ -20,29 +20,30 @@ public:
 
     // returns the sum of player rate (used to calculate the odds)
     double ratePicks(const uint picks[buffsz], uint count);
-    void   gamble(const double odds[buffsz], uint count);
-    void   reset(uint numCities = 0, double startCash = 0.0);
+    void   bet(const double houseProbs[buffsz], uint count);
+    void   reset();
 
-    const double * rates; // access point;
+    const double * rating; // access point to player's rating
+
+public:
+
+    static void setGameParameters(uint numCities, double minBet, double initialBankroll );
 
 private:
 
 
     double _bankroll;
 
-    double _knowledge[buffsz]   = {0.0};    // player's knowlege
-    double _myOdds[buffsz]      = {0.0};    // how it rates each given pick
+    double _myProb[buffsz]     = {0.0};    // player's knowlege
+    double _myRating[buffsz]    = {0.0};    // player's rating for each given pick
     bool   _picked[buffsz]      = {false};  //
-    double _bets[buffsz]        = {0.0};    // its bets
+    double _bets[buffsz]        = {0.0};    // player bets
 
-    friend void service(Player p, uint winner, double odds[Player::buffsz] );
-
-    static double minbet;
-
+    friend void service(Player p, uint winner, double houseProbs[Player::buffsz] );
 
 };
 
-void service(Player p, uint winner, double odds[Player::buffsz] );
+void service(Player p, uint winner, double houseProbs[Player::buffsz] );
 
 }
 }

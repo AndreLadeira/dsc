@@ -26,20 +26,22 @@ int main(int argc, char * argv[])
 
     clock_t begin = clock();
 
-    uint trsz = 3;
-    uint trcount = 3;
+    const uint trsz = 3;
+    const uint numPicks = 3;
+    const uint numPlayers = 30;
 
     atsp::Path current(data.getSize());
     atsp::Path best = current;
 
-    atsp::bet::Player players[30];
+    atsp::bet::Player players[numPlayers];
+    atsp::bet::Player::setGameParameters(data.getSize(),1.0,1000.0);
 
-    for (uint i = 0; i < 30; ++i)
-        players[i].reset(data.getSize(),1000.0);
+    for (uint i = 0; i < numPlayers; ++i)
+        players[i].reset();
 
-    atsp::bet::BetAgorithm1 bet1(trsz, trcount, players, 30);
+    atsp::bet::BetAgorithm1 bet1(trsz, numPicks, players, numPlayers);
 
-    uint runs  = 1e05; //100k
+    uint runs  = 500; //100k
     uint iters = 500;
 
     uint all_min = std::numeric_limits<uint>::max();

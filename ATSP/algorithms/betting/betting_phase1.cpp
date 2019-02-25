@@ -11,3 +11,8 @@ using namespace bet;
 //{
 
 //}
+
+BetAgorithm1::BetAgorithm1(uint trSize, uint pickCount, Player * const players, uint playerCount):
+    _trsz(trSize),_pickCount(pickCount),_players(players),_playerCount(playerCount)
+{
+}
