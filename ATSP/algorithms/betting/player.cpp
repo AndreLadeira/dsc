@@ -94,12 +94,17 @@ void Player::setGameParameters(uint numCitiesP, double minBetP, double initialBa
     minBet = minBetP;
     initialBankroll = initialBankrollP;
 }
-
-void atsp::bet::service(Player p, uint winner, double houseProbs[])
+#ifdef __DEBUG__
+#include <iostream>
+#endif
+void atsp::bet::service(Player &p, uint winner, const double houseProbs[])
 {
     if ( p._picked[winner] )
     {
-        p._bankroll += p._bets[winner] /= houseProbs[winner]; // checar!!
+#ifdef __DEBUG__
+        std::cout<< " winner!";
+#endif
+        p._bankroll += p._bets[winner] / houseProbs[winner];
     }
     else if ( p._bankroll == 0.0 )
     {

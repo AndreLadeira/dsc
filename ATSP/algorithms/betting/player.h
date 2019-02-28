@@ -39,11 +39,11 @@ private:
     bool   _picked[buffsz]      = {false};  //
     double _bets[buffsz]        = {0.0};    // player bets
 
-    friend void service(Player p, uint winner, double houseProbs[Player::buffsz] );
+    friend void service(Player & p, uint winner, const double houseProbs[Player::buffsz] );
 
 };
 
-void service(Player p, uint winner, double houseProbs[Player::buffsz] );
+void service(Player & p, uint winner, const double houseProbs[Player::buffsz] );
 
 }
 }

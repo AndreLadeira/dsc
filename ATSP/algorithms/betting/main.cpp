@@ -20,8 +20,6 @@ int main(int argc, char * argv[])
     atsp::Data data;
     data.load( atsp::TSPLibLoader(argv[1]) );
 
-    double res = 0;
-
     base::fast_srand();
 
     clock_t begin = clock();
@@ -44,7 +42,7 @@ int main(int argc, char * argv[])
     uint runs  = 500; //100k
     uint iters = 500;
 
-    uint all_min = std::numeric_limits<uint>::max();
+    uint all_min = atsp::getLength(data,best);
 
     // phase 1
 
@@ -68,7 +66,7 @@ int main(int argc, char * argv[])
 
     cout<< "Elapsed time: " << fixed << setprecision(2) <<
            (clock() - begin) / static_cast<double>(CLOCKS_PER_SEC) << endl;
-    cout<< "Final result: " << res << endl;
+    cout<< "Final result: " << all_min << endl;
 
 
     return 0;

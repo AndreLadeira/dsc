@@ -4,6 +4,9 @@
 #include "atsp/algorithm.h"
 #include "greedy/greedy_algorithm.h"
 #include "player.h"
+#ifdef __DEBUG__
+#include <iostream>
+#endif
 #include <algorithm> // std::sort
 
 namespace atsp {
@@ -34,14 +37,15 @@ inline uint BetAgorithm1::run(Path &        path,
     // huge buffer, avoid allocation....
     uint picks[512] = {0};
     const uint pathSz = path.getSize();
+    const uint maxPick = pathSz - _trsz;
 
-    picks[0] = static_cast<uint>(base::fast_rand()) % pathSz;
+    picks[0] = static_cast<uint>(base::fast_rand()) % maxPick;
 
     {
         for(uint i = 1; i < _pickCount; ++i)
         {
             back:
-            uint attempt = static_cast<uint>(base::fast_rand()) % pathSz;
+            uint attempt = static_cast<uint>(base::fast_rand()) % maxPick;
             for(uint j = 0; j < i; ++j)
             {
                 if ( attempt == picks[j]) goto back;
@@ -82,7 +86,6 @@ inline uint BetAgorithm1::run(Path &        path,
     atsp::GreedyAlgorithm greedyAlgorithm(_trsz);
 
     uint min = std::numeric_limits<uint>::max();
-    uint r = 0;
     atsp::Path current = path;
     atsp::Path best = path;
     uint winner = 0;
@@ -91,11 +94,11 @@ inline uint BetAgorithm1::run(Path &        path,
     {
         greedyAlgorithm.setMask( picks[p] );
 
-        r = greedyAlgorithm.run(current, data);
+        uint newPathLen = greedyAlgorithm.run(current, data);
 
-        if ( r < min )
+        if ( newPathLen < min )
         {
-            min = r;
+            min = newPathLen;
             winner = p;
             best = current;
         }
@@ -103,7 +106,16 @@ inline uint BetAgorithm1::run(Path &        path,
 
     // pays the prizes, replaces the broken
     for(uint j = 0; j < _playerCount; ++j)
+    {
+#ifdef __DEBUG__
+        std::cout<< "[" << j << "] - ";
+#endif
         service(_players[j], winner, houseProbs);
+
+#ifdef __DEBUG__
+        std::cout<< "\n";
+#endif
+    }
 
     // update the best path
     if ( min < atsp::getLength(data, path) )
