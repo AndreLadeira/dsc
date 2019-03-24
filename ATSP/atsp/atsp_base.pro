@@ -13,7 +13,6 @@ SOURCES += \
 
 INCLUDEPATH += "../../"
 INCLUDEPATH += "../"
-INCLUDEPATH += ../_libs
 
 HEADERS += \
     path.h \
@@ -22,7 +21,7 @@ HEADERS += \
     base.h \
     algorithm.h
 
-DESTDIR = "../../_libs"
+DESTDIR = "../_libs"
 
 #debug levels
 CONFIG(debug, debug|release) {
