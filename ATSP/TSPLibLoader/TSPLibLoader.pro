@@ -9,7 +9,7 @@ INCLUDEPATH += "../"
 #LIBS += ../../_libs/libatsp_base.a
 
 SOURCES += \
-        main.cpp \
+    #    main.cpp \
     TSPLibLoader.cpp
 
 HEADERS += \

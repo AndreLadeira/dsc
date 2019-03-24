@@ -14,7 +14,7 @@ INCLUDEPATH += "../../"
 INCLUDEPATH += "../../../"
 
 SOURCES += \
-        main.cpp \
+       # main.cpp \
     greedy_algorithm.cpp
 
 HEADERS += \

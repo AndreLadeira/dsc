@@ -1,0 +1,86 @@
+These are the instructions to download and build the applications of this project.
+These instructions cover the process to build them as they were created, using the
+Qt Creator suite of tools.
+
+The code in this project was all written in plain standard c++. No additional libraries
+are needed nor any OS specific feature was used.
+
+To build this project using Qt proceed as follows:
+
+1 - Create a folder for the project
+
+2 - Open a Terminal window, change the current directory to the project’s directory
+
+3 - At the project folder run: git clone https://github.com/AndreLadeira/dsc
+
+4 - Open Qt Creator, then File -> Open Project and choose one of the master
+    ".pro" files, located at the project's root directory. The master files are:
+
+    /dsc/greedy.pro:
+
+        Opens the standalone random-restart greedy algorithm to solve the atsp problem.
+        The command line parameters are:
+        <tsplib file name> <#of restarts> <attempts per restart> <mask size>
+
+    /dsc/bet.pro
+
+        The bet algorithm to solve the atsp problem.
+
+5-  Follow the instructions of the Qt project loader to choose a kit to build your project.
+    You must have a kit capable of building terminal applications installed as part of your
+    Qt installation in order to build the apps of this project.
+
+6 - At the Qt Creator IDE, Righ-click the project folder then choose "Build".
+    The project's executable will be put at
+
+    ~dsc/ATSP/algorithms/build-<project>-<kit>-Debug or -Release
+
+    where <project> is the project name and <kit> is the name of
+    the particular kit chosen to built it.
+
+Notes:
+
+The .pro files referenced here are of a special kind known as "template: subdirs" files
+within the Qt documentation. These files are used to build more complex projects, where,
+for example, an application is built using libraries that are also part of the project.
+
+The template:subdirs .pro file automate and organize the process of loading all the
+necessary components (other .pro files) and compiling/building the project the in the
+correct order, considering the dependencies.
+
+The current components of this projects are described below:
+
+base:
+
+    basic stuff, nom atsp related. For example, a faster and simpler random number
+    generator.
+
+atsp_base:
+
+    basic stuff of the atsp problem, not related to a particular way of solving it.
+
+TSPLibLoader:
+
+    a class to load atsp data from tsplib instances. tsplib instances were obtained at
+
+    https://www.iwr.uni-heidelberg.de/groups/comopt/software/TSPLIB95/atsp/
+
+greedy:
+
+    An implementation of a greedy algorithm to solve the atsp problem.
+    The greedy algorithm is used both to create a standalone application
+    and as part of the betting algorithm.
+
+betting:
+
+    The betting algorithm itself.
+
+Additional Note:
+
+    All projects have a main.cpp file. This purpose of those “mains” were test/debug
+    the components. They're not part of any application anymore.
+
+
+
+
+	 

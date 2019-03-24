@@ -9,7 +9,7 @@ CONFIG += staticlib
 #LIBS += -L"/Users/ladeira/Documents/src/boost_1_65_1/stage/lib/"  -lboost_timer
 
 SOURCES += \
-        main.cpp \
+    #    main.cpp \
     random.cpp \
     histogram.cpp
 

@@ -6,7 +6,7 @@ CONFIG -= qt
 CONFIG += staticlib
 
 SOURCES += \
-        main.cpp \
+    #    main.cpp \
     path.cpp \
     algorithm.cpp \
     data.cpp
