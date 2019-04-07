@@ -41,6 +41,8 @@ private:
 
     friend void service(Player & p, uint winner, const double houseProbs[Player::buffsz] );
 
+    uint _gamesAlive; // number of games this player has been alive
+
 };
 
 void service(Player & p, uint winner, const double houseProbs[Player::buffsz] );

@@ -9,24 +9,32 @@ namespace
     static double   initialBankroll = 0.0;
 }
 
-Player::Player():rating(_myRating)
+Player::Player():rating(_myRating),_gamesAlive(1)
 {
 }
 
 double Player::ratePicks(const uint picks[], const uint pickCount)
 {
     double total = 0.0;
+
+    // _myRating[pickCount] will hold the probability
+    // of no choice result in inprovement
+
+    _myRating[pickCount] = 1.0;
+
     for(uint p = 0; p < pickCount; ++p)
-    {
+    {     
+        _myRating[pickCount] *= ( 1.0 - _myProb[ picks[p] ] );
         _myRating[p] = _myProb[ picks[p] ];
-        for(uint q = 0; q < pickCount; ++q)
-        {
-            if (p==q) continue;
-            _myRating[p] *= ( 1.0 - _myProb[ picks[q] ] );
-        }
-        total += _myRating[p];
+        total += _myProb[ picks[p] ];
     }
-    return total;
+    total += _myRating[pickCount];
+
+    for(uint p = 0; p < pickCount + 1; ++p)
+    {
+      _myRating[p] /= total;
+    }
+    return 1.0;
 }
 
 void Player::bet(const double houseProbs[buffsz], uint pickCount)
@@ -81,6 +89,7 @@ void Player::bet(const double houseProbs[buffsz], uint pickCount)
 void Player::reset()
 {
     _bankroll = initialBankroll;
+    _gamesAlive = 1;
 
     for (uint i = 0; i < numCities; ++i)
     {
@@ -99,11 +108,10 @@ void Player::setGameParameters(uint numCitiesP, double minBetP, double initialBa
 #endif
 void atsp::bet::service(Player &p, uint winner, const double houseProbs[])
 {
+    p._gamesAlive++;
+
     if ( p._picked[winner] )
     {
-#ifdef __DEBUG__
-        std::cout<< " winner!";
-#endif
         p._bankroll += p._bets[winner] / houseProbs[winner];
     }
     else if ( p._bankroll == 0.0 )

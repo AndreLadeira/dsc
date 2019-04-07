@@ -1,3 +1,5 @@
+QMAKE_MACOSX_DEPLOYMENT_TARGET = "10.9"
+
 TEMPLATE = lib
 CONFIG += c++11
 CONFIG -= app_bundle
