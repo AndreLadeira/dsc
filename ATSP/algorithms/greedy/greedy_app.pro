@@ -29,4 +29,6 @@ CONFIG(release, debug|release) {
    LIBS += ../../_libs/libTSPLibLoader.a
 }
 
+TARGET =  "greedyATSP.app"
+
 

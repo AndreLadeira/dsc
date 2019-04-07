@@ -21,3 +21,5 @@ CONFIG(release, debug|release) {
    LIBS += ../../_libs/libatsp_base.a
    QMAKE_CXXFLAGS += -O3
 }
+
+TARGET =  "TSPLibLoader.app"

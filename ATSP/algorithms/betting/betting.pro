@@ -34,4 +34,4 @@ CONFIG(release, debug|release) {
     QMAKE_CXXFLAGS += -O3
 }
 
-TARGET =  "betATSP"
+TARGET =  "betATSP.app"
