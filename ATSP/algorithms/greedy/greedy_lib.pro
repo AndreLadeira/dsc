@@ -1,10 +1,4 @@
-#TEMPLATE = app
-#CONFIG += console c++11
-#CONFIG -= app_bundle
-#CONFIG -= qt
-
 TEMPLATE = lib
-#CONFIG += console c++11
 CONFIG += c++11
 CONFIG -= app_bundle
 CONFIG -= qt
@@ -14,7 +8,6 @@ INCLUDEPATH += "../../"
 INCLUDEPATH += "../../../"
 
 SOURCES += \
-       # main.cpp \
     greedy_algorithm.cpp
 
 HEADERS += \

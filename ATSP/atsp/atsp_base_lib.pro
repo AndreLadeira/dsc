@@ -1,28 +1,33 @@
-#TEMPLATE = app
 TEMPLATE = lib
-#CONFIG += console c++11
+CONFIG += c++11
 CONFIG -= app_bundle
 CONFIG -= qt
 CONFIG += staticlib
 
-INCLUDEPATH += "../"
-#LIBS += ../../_libs/libatsp_base.a
-
 SOURCES += \
-    #    main.cpp \
-    TSPLibLoader.cpp
+    path.cpp \
+    algorithm.cpp \
+    data.cpp
+
+INCLUDEPATH += "../../"
+INCLUDEPATH += "../"
 
 HEADERS += \
-    TSPLibLoader.h
+    path.h \
+    repository.h \
+    data.h \
+    base.h \
+    algorithm.h
 
 DESTDIR = "../_libs"
 
+#debug levels
 CONFIG(debug, debug|release) {
     DEFINES += "__DEBUG__"
-    TARGET = "TSPLibLoaderd"
+    TARGET = "atsp_based"
 }
 CONFIG(release, debug|release) {
    DEFINES += "__RELEASE__"
-   TARGET = "TSPLibLoader"
+   TARGET = "atsp_base"
    QMAKE_CXXFLAGS += -O3
 }

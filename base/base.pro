@@ -17,7 +17,7 @@ HEADERS += \
     random.h \
     histogram.h
 
-DESTDIR = "../_libs"
+DESTDIR = "../ATSP/_libs"
 
 CONFIG(debug, debug|release) {
     DEFINES += "__DEBUG__"
