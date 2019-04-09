@@ -9,7 +9,7 @@ namespace
     static double   initialBankroll = 0.0;
 }
 
-Player::Player():rating(_myRating),_gamesAlive(1)
+Player::Player():rating(_myRating),_played(false)
 {
 }
 
@@ -39,18 +39,22 @@ double Player::ratePicks(const uint picks[], const uint pickCount)
 
 void Player::bet(const double houseProbs[buffsz], uint pickCount)
 {
+    _played = false;
+
     for(uint pick = 0; pick < pickCount; ++pick)
     {
         // already spent all cash on previous picks
         if ( _bankroll == 0.0 )
         {
             _picked[pick] = false;
+            _bets[pick] = 0.0;
         }
         else
         {
             // Is my rating bigger than the house's
             if ( _myRating[pick] > houseProbs[pick] )
             {
+                _played = true;
                 // kelly = (p*o - 1) / (o - 1)
                 // where
                 // p = the probability of success, according to player
@@ -63,24 +67,19 @@ void Player::bet(const double houseProbs[buffsz], uint pickCount)
                 const double kelly = ( po - 1.0) /
                     (o - 1.0);
 
-                const double bet = kelly * _bankroll;
+                double bet = kelly * _bankroll;
 
-                _bets[pick] = bet > minBet ? bet : minBet;
+                bet = bet > minBet ? bet : minBet;
+                bet = bet > _bankroll ? _bankroll : bet;
 
-                if ( _bets[pick] >= _bankroll )
-                {
-                    _bets[pick] = _bankroll;
-                    _bankroll = 0.0;
-                }
-                else
-                {
-                    _bankroll -= _bets[pick];
-                }
+                _bankroll -= bet;
                 _picked[pick] = true;
+                _bets[pick] = bet;
             }
             else
             {
                 _picked[pick] = false;
+                _bets[pick] = 0.0;
             }
         }
     }
@@ -89,12 +88,31 @@ void Player::bet(const double houseProbs[buffsz], uint pickCount)
 void Player::reset()
 {
     _bankroll = initialBankroll;
-    _gamesAlive = 1;
 
     for (uint i = 0; i < numCities; ++i)
     {
        _myProb[i] = base::fast_rand01();
     }
+}
+
+bool Player::hasBetOn(uint option)
+{
+    return _picked[option];
+}
+void Player::checkOut(uint winner, double odds)
+{
+    if ( _picked[winner] )
+    _bankroll += _bets[winner] / odds;
+}
+
+bool Player::hasPlayed()
+{
+    return _played;
+}
+
+bool Player::broke()
+{
+    return _bankroll == 0.0;
 }
 
 void Player::setGameParameters(uint numCitiesP, double minBetP, double initialBankrollP)
@@ -103,19 +121,7 @@ void Player::setGameParameters(uint numCitiesP, double minBetP, double initialBa
     minBet = minBetP;
     initialBankroll = initialBankrollP;
 }
-#ifdef __DEBUG__
-#include <iostream>
-#endif
-void atsp::bet::service(Player &p, uint winner, const double houseProbs[])
-{
-    p._gamesAlive++;
+//#ifdef __DEBUG__
+//#include <iostream>
+//#endif
 
-    if ( p._picked[winner] )
-    {
-        p._bankroll += p._bets[winner] / houseProbs[winner];
-    }
-    else if ( p._bankroll == 0.0 )
-    {
-        p.reset();
-    }
-}

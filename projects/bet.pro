@@ -8,7 +8,8 @@ SUBDIRS = \
         ../ATSP/TSPLibLoader/TSPLibLoader_lib.pro \
         ../ATSP/atsp/atsp_base_lib.pro \
         ../ATSP/algorithms/greedy/greedy_lib.pro \
-        ../ATSP/algorithms/betting
+        ../ATSP/algorithms/betting/bet_lib.pro \
+        ../ATSP/algorithms/betting/bet_app.pro
 
 
 # build the project sequentially as listed in SUBDIRS !

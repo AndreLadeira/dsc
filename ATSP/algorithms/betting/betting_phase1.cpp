@@ -41,8 +41,7 @@ uint BetAgorithm1::run(Path &        path,
         }
     }
 
-    // get the set of players to find out how they rank
-    // each available pick (trPoint)
+    // make the players rank each available pick (trPoint)
 
     // holds the sum of rates of all players on all picks
     // used later to calculate the odds
@@ -55,7 +54,11 @@ uint BetAgorithm1::run(Path &        path,
     // based on player's collective knowledge
     double houseProbs[512] = {0.0};
 
-    for(uint i = 0; i < _pickCount; i++)
+    // totalPicks = _pickCount + 1 accounts
+    // for the "none" option
+    uint totalPicks = _pickCount + 1;
+
+    for(uint i = 0; i < totalPicks; i++)
     {
         for(uint j = 0; j < _playerCount; ++j)
             houseProbs[i] += _players[j].rating[i];
@@ -64,26 +67,26 @@ uint BetAgorithm1::run(Path &        path,
 
     // sorts the odds in ascending order, so the players
     // evaluate the best options first
-    std::sort(houseProbs, houseProbs + _pickCount, std::greater<double>());
+    std::sort(houseProbs, houseProbs + totalPicks, std::greater<double>());
 
     // Players then bet or not, according to the given odds
     for(uint j = 0; j < _playerCount; ++j)
-        _players[j].bet(houseProbs,_pickCount);
+        _players[j].bet(houseProbs,totalPicks);
 
     // now, lets run the game
 
     // setup a greedy algorithm
     atsp::GreedyAlgorithm greedyAlgorithm(_trsz);
 
-    uint min = std::numeric_limits<uint>::max();
+    uint min = getLength(data,path); //std::numeric_limits<uint>::max();
     atsp::Path current = path;
     atsp::Path best = path;
 
-    /* NOTA: como está sempre haverá um winner
-     * mesmo que as opçoes sejam todas piores
-     */
+    // setting the winner equal to pickCount is equivalent
+    // to set it to "none", e.g: none of the options
+    // resulted in improvement
 
-    uint winner = 0;
+    uint winner = _pickCount;
 
     // run a gredy transformation for each pick
     for(uint p = 0; p < _pickCount; ++p)
@@ -100,17 +103,40 @@ uint BetAgorithm1::run(Path &        path,
         }
     }
 
+    uint played  = 0;
+    uint winners = 0;
+    uint broken  = 0;
+
     // pays the prizes, replaces the broken
     for(uint j = 0; j < _playerCount; ++j)
     {
 //#ifdef __DEBUG__
 //        std::cout<< "[" << j << "] - ";
 //#endif
-        service(_players[j], winner, houseProbs);
 
-//#ifdef __DEBUG__
-//        std::cout<< "\n";
-//#endif
+       _players[j].checkOut(winner,houseProbs[winner]);
+
+       if ( _players[j].hasPlayed() )
+       {
+            played++;
+            if (_players[j].hasBetOn(winner))
+            {
+                winners++;
+                _consecutiveWins[j]++;
+            }
+            else {
+                _consecutiveWins[j] = 0;
+            }
+       }
+       if ( _players[j].broke())
+       {
+           broken++;
+           _players[j].reset();
+           _gamesAlive[j] = 0;
+       }
+       else {
+           _gamesAlive[j]++;
+       }
     }
 
     // update the best path

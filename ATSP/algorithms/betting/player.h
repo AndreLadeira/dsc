@@ -22,6 +22,10 @@ public:
     double ratePicks(const uint picks[buffsz], uint count);
     void   bet(const double houseProbs[buffsz], uint count);
     void   reset();
+    bool   hasBetOn(uint option);
+    void   checkOut(uint winner, double odds);
+    bool   hasPlayed();
+    bool   broke();
 
     const double * rating; // access point to player's rating
 
@@ -38,14 +42,9 @@ private:
     double _myRating[buffsz]    = {0.0};    // player's rating for each given pick
     bool   _picked[buffsz]      = {false};  //
     double _bets[buffsz]        = {0.0};    // player bets
-
-    friend void service(Player & p, uint winner, const double houseProbs[Player::buffsz] );
-
-    uint _gamesAlive; // number of games this player has been alive
-
+    bool   _played;                         // played or not some round
 };
 
-void service(Player & p, uint winner, const double houseProbs[Player::buffsz] );
 
 }
 }

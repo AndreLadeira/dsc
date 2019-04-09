@@ -1,16 +1,14 @@
-QMAKE_MACOSX_DEPLOYMENT_TARGET = "10.9"
-
-TEMPLATE = app
+TEMPLATE = lib
 CONFIG += console c++11
 CONFIG -= app_bundle
 CONFIG -= qt
+CONFIG += staticlib
 
 INCLUDEPATH += "../../"
 INCLUDEPATH += "../../../"
 INCLUDEPATH += "../"
 
 SOURCES += \
-        main.cpp \
     betting_phase1.cpp \
     player.cpp
 
@@ -18,12 +16,15 @@ HEADERS += \
     betting_phase1.h \
     player.h
 
+DESTDIR = "../../_libs/"
+
 CONFIG(debug, debug|release) {
     DEFINES += "__DEBUG__"
     LIBS += ../../_libs/libatsp_based.a
     LIBS += ../../_libs/libbased.a
     LIBS += ../../_libs/libTSPLibLoaderd.a
     LIBS += ../../_libs/libGreedyAlgod.a
+    TARGET =  "BetAlgod"
 }
 CONFIG(release, debug|release) {
     DEFINES += "__RELEASE__"
@@ -32,6 +33,7 @@ CONFIG(release, debug|release) {
     LIBS += ../../_libs/libTSPLibLoader.a
     LIBS += ../../_libs/libGreedyAlgo.a
     QMAKE_CXXFLAGS += -O3
+    TARGET =  "BetAlgod"
 }
 
-TARGET =  "betATSP.app"
+

@@ -28,6 +28,13 @@ private:
     Player * const    _players;
     const uint        _playerCount;
 
+    // player stats. Usefull in phase 2
+    mutable uint _gamesAlive[512] = {0};
+    mutable uint _consecutiveWins[512] = {0};
+
+    // game stats. To check how the game is evolving
+    //mutable uint _played[];
+
 };
 
 
