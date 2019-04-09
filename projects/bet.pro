@@ -9,6 +9,7 @@ SUBDIRS = \
         ../ATSP/atsp/atsp_base_lib.pro \
         ../ATSP/algorithms/greedy/greedy_lib.pro \
         ../ATSP/algorithms/betting/bet_lib.pro \
+        ../QCustomPlot/sharedlib-compilation.pro \
         ../ATSP/algorithms/betting/bet_app.pro
 
 
