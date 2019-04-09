@@ -16,8 +16,14 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+    void showMessage(const QString &);
+
 private:
+
     Ui::MainWindow *ui;
+
+    void setupGraph();
+    void centerAndResize();
 };
 
 #endif // MAINWINDOW_H
