@@ -11,10 +11,12 @@ INCLUDEPATH += "../../../QCustomPlot/include"
 
 SOURCES += \
         main.cpp \
-        mainwindow.cpp
+        mainwindow.cpp \
+    workerthread.cpp
 
 HEADERS += \
-        mainwindow.h
+        mainwindow.h \
+    workerthread.h
 
 FORMS += \
         mainwindow.ui
@@ -23,7 +25,7 @@ FORMS += \
 DEFINES += QCUSTOMPLOT_USE_LIBRARY
 
 CONFIG(debug, debug|release) {
-    LIBS += ../../../QCustomPlot/lib/libqcustomplotd.a
+    LIBS += ../../../QCustomPlot/lib/libqcustommmplotd.a
 }
 CONFIG(release, debug|release) {
     LIBS += ../../../QCustomPlot/lib/libqcustomplot.a
