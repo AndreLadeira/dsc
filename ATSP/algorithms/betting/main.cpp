@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
 
     w.show();
 
-    WorkerThread thread(w,1000);
+    WorkerThread thread(w,2000);
     thread.start();
 
     return a.exec();

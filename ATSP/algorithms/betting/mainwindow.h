@@ -24,11 +24,14 @@ public:
     };
     enum Graph
     {
-        Cost = 0, Winners, Losers, Out, RoudsAlive, ConsecutiveWins
+        Cost = 0, Winners, Losers, Out, RoundsAlive, ConsecutiveWins,
+        RoundsAliveMax, ConsecutiveWinsMax
     };
 
     void setGraphTitle(GraphRect, const QString&);
     void addData(Graph, double key, double value);
+    void setData(Graph, const QVector<QCPGraphData> &);
+    void setYaxisRange(GraphRect, double lower, double upper);
     void replot();
     void show();
     void setMessage(const QString&);
@@ -44,9 +47,9 @@ private:
     QCPGraph    *GraphLosers;
     QCPGraph    *GraphOutsiders;
     QCPGraph    *GraphPlayerRoundsAlive;
+    QCPGraph    *GraphPlayerRoundsAliveMax;
     QCPGraph    *GraphPlayerConsecutiveWins;
-
-
+    QCPGraph    *GraphPlayerConsecutiveWinsMax;
 
     void setupGraph();
     void centerAndResize();
