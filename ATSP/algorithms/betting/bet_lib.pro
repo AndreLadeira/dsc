@@ -20,20 +20,18 @@ DESTDIR = "../../_libs/"
 
 CONFIG(debug, debug|release) {
     DEFINES += "__DEBUG__"
-    LIBS += ../../_libs/libatsp_based.a
-    LIBS += ../../_libs/libbased.a
-    LIBS += ../../_libs/libTSPLibLoaderd.a
-    LIBS += ../../_libs/libGreedyAlgod.a
+    #LIBS += ../../_libs/libatsp_based.a
+    #LIBS += ../../_libs/libbased.a
+    #LIBS += ../../_libs/libGreedyAlgod.a
     TARGET =  "BetAlgod"
 }
 CONFIG(release, debug|release) {
     DEFINES += "__RELEASE__"
-    LIBS += ../../_libs/libatsp_base.a
-    LIBS += ../../_libs/libbase.a
-    LIBS += ../../_libs/libTSPLibLoader.a
-    LIBS += ../../_libs/libGreedyAlgo.a
+    #LIBS += ../../_libs/libatsp_base.a
+    #LIBS += ../../_libs/libbase.a
+    #LIBS += ../../_libs/libGreedyAlgo.a
     QMAKE_CXXFLAGS += -O3
-    TARGET =  "BetAlgod"
+    TARGET =  "BetAlgo"
 }
 
 

@@ -14,8 +14,10 @@ int main(int argc, char *argv[])
 
     w.show();
 
-    WorkerThread thread(w,2000);
+    WorkerThread thread(w,&a,100);
+    thread.setRunParams(argv[1],2000,1,2);
     thread.start();
+
 
     return a.exec();
 }

@@ -11,7 +11,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    setWindowTitle("BetAlgorithm");
     statusBar()->clearMessage();
 
     setupGraph();
@@ -209,7 +208,7 @@ void MainWindow::centerAndResize()
 //    width *= 0.9; // 90% of the screen size
 //    height *= 0.9; // 90% of the screen size
 //    //qDebug() << "Computed dimensions " << width << "x" << height;
-    QSize newSize( 1000, 618 );
+    QSize newSize( 1200, 618 );
 
     setGeometry(
         QStyle::alignedRect(

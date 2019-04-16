@@ -110,10 +110,6 @@ uint BetAgorithm1::run(Path &        path,
     // pays the prizes, replaces the broken
     for(uint j = 0; j < _playerCount; ++j)
     {
-//#ifdef __DEBUG__
-//        std::cout<< "[" << j << "] - ";
-//#endif
-
        _players[j].checkOut(winner,houseProbs[winner]);
 
        if ( _players[j].hasPlayed() )

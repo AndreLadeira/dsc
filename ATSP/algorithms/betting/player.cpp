@@ -121,7 +121,3 @@ void Player::setGameParameters(uint numCitiesP, double minBetP, double initialBa
     minBet = minBetP;
     initialBankroll = initialBankrollP;
 }
-//#ifdef __DEBUG__
-//#include <iostream>
-//#endif
-

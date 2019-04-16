@@ -16,8 +16,6 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    void showMessage(const QString &);
-
     enum GraphRect
     {
          _1st = 0,_2nd,_3rd,_4th
