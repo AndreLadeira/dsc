@@ -11,11 +11,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    statusBar()->clearMessage();
-
     setupGraph();
     centerAndResize();
-
 }
 
 MainWindow::~MainWindow()
@@ -45,7 +42,6 @@ void MainWindow::setYaxisRange(MainWindow::GraphRect rect, double lower, double 
 
 void MainWindow::replot()
 {
-
     for (int i = 0; i < ui->customPlot->graphCount(); i++ )
     {
        ui->customPlot->graph(i)->rescaleAxes(true);
@@ -162,13 +158,6 @@ void MainWindow::setupGraph()
     GraphRects[2]->axis(QCPAxis::atBottom)->setRange(0.5,30.5);
     GraphRects[2]->axis(QCPAxis::atLeft)->setSubTicks(true);
 
-    //QSharedPointer<QCPAxisTickerFixed> intTicker(new QCPAxisTickerFixed);
-    //intTicker->setTickStep(1.0);
-    //intTicker->setScaleStrategy(QCPAxisTickerFixed::ssMultiples);
-
-    //GraphRects[2]->axis(QCPAxis::atBottom)->setTicker(intTicker);
-
-
     GraphPlayerRoundsAlive->setLineStyle(QCPGraph::lsImpulse);
     GraphPlayerRoundsAlive->setPen(QPen(QColor("#008080"), 30));
 
@@ -178,7 +167,7 @@ void MainWindow::setupGraph()
 
     GraphRects[3]->axis(QCPAxis::atBottom)->setRange(0.5,30.5);
     GraphRects[3]->axis(QCPAxis::atLeft)->setSubTicks(true);
-    //GraphRects[3]->axis(QCPAxis::atBottom)->setTicker(intTicker);
+
 
     GraphPlayerConsecutiveWins->setLineStyle(QCPGraph::lsImpulse);
     GraphPlayerConsecutiveWins->setPen(QPen(QColor("#808080"), 30));
@@ -194,20 +183,12 @@ void MainWindow::setupGraph()
                 GraphRects[3]->axis(QCPAxis::atLeft));
     GraphPlayerConsecutiveWinsMax->setPen( QPen(QColor("#FF4500"),1,Qt::DashLine));
 
-
+    replot();
 
 }
 
 void MainWindow::centerAndResize()
 {
-    // get the dimension available on this screen
-//    QSize availableSize = qApp->desktop()->availableGeometry().size();
-//    int width = availableSize.width();
-//    int height = availableSize.height();
-//    //qDebug() << "Available dimensions " << width << "x" << height;
-//    width *= 0.9; // 90% of the screen size
-//    height *= 0.9; // 90% of the screen size
-//    //qDebug() << "Computed dimensions " << width << "x" << height;
     QSize newSize( 1200, 618 );
 
     setGeometry(
@@ -217,12 +198,16 @@ void MainWindow::centerAndResize()
             newSize,
             qApp->desktop()->availableGeometry()
         )
-    );
+                );
+}
+
+void MainWindow::buttonRunClick()
+{
+
 }
 void MainWindow::show()
 {
    QMainWindow::show();
-   QApplication::processEvents();
 }
 
 void MainWindow::setMessage(const QString& msg)

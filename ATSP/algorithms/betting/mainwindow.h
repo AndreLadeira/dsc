@@ -51,6 +51,9 @@ private:
 
     void setupGraph();
     void centerAndResize();
+
+private slots:
+    void buttonRunClick();
 };
 
 #endif // MAINWINDOW_H
