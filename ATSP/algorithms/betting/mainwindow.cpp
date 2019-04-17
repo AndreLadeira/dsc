@@ -13,6 +13,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     setupGraph();
     centerAndResize();
+
 }
 
 MainWindow::~MainWindow()
@@ -205,7 +206,9 @@ void MainWindow::centerAndResize()
 
 void MainWindow::buttonRunClick()
 {
-
+    QMessageBox mb(this);
+    mb.setText(ui->lineEditFile->text());
+    mb.exec();
 }
 void MainWindow::show()
 {
