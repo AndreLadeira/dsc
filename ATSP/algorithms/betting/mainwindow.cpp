@@ -205,7 +205,7 @@ void MainWindow::centerAndResize()
 
 void MainWindow::buttonRunClick()
 {
-    ui->lineEditFile->setText("Clicked");
+
 }
 void MainWindow::show()
 {
