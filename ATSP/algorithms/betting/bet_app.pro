@@ -28,7 +28,7 @@ FORMS += \
 DEFINES += QCUSTOMPLOT_USE_LIBRARY
 
 CONFIG(debug, debug|release) {
-    LIBS += ../../../QCustomPlot/lib/libqcustommmplotd.a
+    LIBS += ../../../QCustomPlot/lib/libqcustomplotd.a
     LIBS += ../../_libs/libatsp_based.a
     LIBS += ../../_libs/libbased.a
     LIBS += ../../_libs/libTSPLibLoaderd.a
