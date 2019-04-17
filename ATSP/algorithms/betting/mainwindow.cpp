@@ -50,6 +50,8 @@ void MainWindow::replot()
     GraphRects[2]->axis(QCPAxis::atLeft)->ticker()->setTickCount(2);
     GraphRects[3]->axis(QCPAxis::atLeft)->ticker()->setTickCount(2);
 
+    connect( ui->pushButtonRun, SIGNAL(released()), this, SLOT(buttonRunClick()));
+
     ui->customPlot->replot();
 }
 
@@ -203,7 +205,7 @@ void MainWindow::centerAndResize()
 
 void MainWindow::buttonRunClick()
 {
-
+    ui->lineEditFile->setText("Clicked");
 }
 void MainWindow::show()
 {
