@@ -18,7 +18,7 @@ BetAgorithm1::BetAgorithm1(uint trSize, uint pickCount, Player * const players, 
 }
 
 uint BetAgorithm1::run(Path &        path,
-                       const Data &  data) const
+                       const Data &  data)
 {
     // Gets new random points of path transformation
     // huge buffer, avoid allocation....
@@ -102,10 +102,7 @@ uint BetAgorithm1::run(Path &        path,
             best = current;
         }
     }
-
-    uint played  = 0;
-    uint winners = 0;
-    uint broken  = 0;
+    _played = _winners = _broken = 0;
 
     // pays the prizes, replaces the broken
     for(uint j = 0; j < _playerCount; ++j)
@@ -114,10 +111,10 @@ uint BetAgorithm1::run(Path &        path,
 
        if ( _players[j].hasPlayed() )
        {
-            played++;
+            _played++;
             if (_players[j].hasBetOn(winner))
             {
-                winners++;
+                _winners++;
                 _consecutiveWins[j]++;
             }
             else {
@@ -126,7 +123,7 @@ uint BetAgorithm1::run(Path &        path,
        }
        if ( _players[j].broke())
        {
-           broken++;
+           _broken++;
            _players[j].reset();
            _gamesAlive[j] = 0;
        }
@@ -142,4 +139,29 @@ uint BetAgorithm1::run(Path &        path,
     }
 
     return min;
+}
+
+uint BetAgorithm1::getPlayed()
+{
+    return _played;
+}
+
+uint BetAgorithm1::getWinners()
+{
+    return _winners;
+}
+
+uint BetAgorithm1::getBroken()
+{
+    return _broken;
+}
+
+uint BetAgorithm1::getGamesAlive(uint j)
+{
+    return _gamesAlive[j];
+}
+
+uint BetAgorithm1::getConsecutiveWins(uint j)
+{
+    return _consecutiveWins[j];
 }

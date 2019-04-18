@@ -22,7 +22,7 @@ public:
     };
     enum Graph
     {
-        Cost = 0, Winners, Losers, Out, RoundsAlive, ConsecutiveWins,
+        Cost = 0, Won, Played, Broke, RoundsAlive, ConsecutiveWins,
         RoundsAliveMax, ConsecutiveWinsMax
     };
 
@@ -42,8 +42,8 @@ private:
 
     QCPGraph    *GraphCost;
     QCPGraph    *GraphWinners;
-    QCPGraph    *GraphLosers;
-    QCPGraph    *GraphOutsiders;
+    QCPGraph    *GraphPlayed;
+    QCPGraph    *GraphBroken;
     QCPGraph    *GraphPlayerRoundsAlive;
     QCPGraph    *GraphPlayerRoundsAliveMax;
     QCPGraph    *GraphPlayerConsecutiveWins;

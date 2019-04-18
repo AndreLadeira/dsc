@@ -15,7 +15,7 @@ class GreedyAlgorithm : public Algorithm
 public:
 
     explicit GreedyAlgorithm(uint masksz);
-    virtual inline uint run(Path&, const Data &) const;
+    virtual inline uint run(Path&, const Data &);
     void setMask(uint mask);
 private:
 
@@ -24,7 +24,7 @@ private:
 };
 
 
-inline uint GreedyAlgorithm::run(Path & path, const Data & data) const
+inline uint GreedyAlgorithm::run(Path & path, const Data & data)
 {
     //  gets a path without the mask using a specialized constructor.
 

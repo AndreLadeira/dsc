@@ -18,8 +18,14 @@ public:
 
     BetAgorithm1(uint trSize, uint pickCount,
                  Player * const players, uint playerCount);
-    virtual uint run(Path&, const Data &) const;
+    virtual uint run(Path&, const Data &);
     void setMaskCount(uint maskCount);
+
+    uint getPlayed();
+    uint getWinners();
+    uint getBroken();
+    uint getGamesAlive(uint);
+    uint getConsecutiveWins(uint);
 
 private:
 
@@ -29,11 +35,13 @@ private:
     const uint        _playerCount;
 
     // player stats. Usefull in phase 2
-    mutable uint _gamesAlive[512] = {0};
-    mutable uint _consecutiveWins[512] = {0};
+    uint _gamesAlive[512] = {0};
+    uint _consecutiveWins[512] = {0};
 
     // game stats. To check how the game is evolving
-    //mutable uint _played[];
+    uint _played;
+    uint _winners;
+    uint _broken;
 
 };
 

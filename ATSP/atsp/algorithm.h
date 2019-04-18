@@ -11,7 +11,7 @@ class Algorithm
 {
 public:
     virtual ~Algorithm();
-    virtual inline uint run(Path&, const Data &) const = 0;
+    virtual inline uint run(Path&, const Data &) = 0;
 
 protected:
 

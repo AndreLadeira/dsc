@@ -15,74 +15,7 @@ using std::stringstream;
 void WorkerThread::run()
 try
 {
-    stringstream msg;
 
-    msg << "Running BET algoritm with "
-        << _nReps << " restarts, "
-        << _nIters << " iterations per restart, "
-        << " removing/reinserting " << _trSize << " cities, with "
-        << _numPicks << " picks and " << _numPlayers << " players / round";;
-
-    QString str(msg.str().c_str());
-
-    _mainWindow.setWindowTitle(str);
-
-    Data data;
-    data.load( atsp::TSPLibLoader(_fname) );
-    base::fast_srand();
-
-    Path current(data.getSize());
-    Path best = current;
-    std::unique_ptr<Player[]> players( new Player[_numPlayers] );
-
-    Player::setGameParameters(data.getSize(),_minBet,_initialBankroll);
-
-    for (uint i = 0; i < _numPlayers; ++i)
-        players[i].reset();
-
-    bet::BetAgorithm1 bet1(_trSize, _numPicks, players.get(), _numPlayers);
-    uint all_min = atsp::getLength(data,best);
-
-    QTime timer;
-    timer.start();
-
-    uint count = 0;
-
-    if (!_updateRate)
-        _updateRate = (_nReps * _nIters) / 10;
-
-    for (uint run = 0; run < _nReps; run++)
-    {
-        atsp::randomize(current);
-
-        for (uint iter = 0; iter < _nIters; iter++)
-        {
-            uint r = bet1.run(current, data);
-
-            if ( r < all_min )
-            {
-                all_min = r;
-                best = current;
-            }
-            double key = static_cast<double>(count);
-            double value = static_cast<double>(all_min);
-            // graph stuff
-            _mainWindow.addData(MainWindow::Graph::Cost, key,value);
-            if (count % _updateRate == 0)
-            {
-                _mainWindow.replot();
-            }
-            count++;
-
-        }
-    }
-    _mainWindow.replot();
-    msg.str(std::string());
-
-    msg << "Elapsed Time: " << static_cast<double>(timer.elapsed())/1000.0;
-    msg << " Final Result: "<< all_min;
-
-    _mainWindow.setMessage(msg.str().c_str());
 }
 catch( std::runtime_error & e)
 {

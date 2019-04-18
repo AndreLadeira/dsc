@@ -13,11 +13,5 @@ int main(int argc, char *argv[])
     w.setGraphTitle( MainWindow::GraphRect::_4th, "Player: consecutive wins");
 
     w.show();
-
-    WorkerThread thread(w,&a,100);
-    thread.setRunParams(argv[1],2000,1,2);
-    thread.start();
-
-
     return a.exec();
 }
