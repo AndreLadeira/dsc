@@ -4,21 +4,53 @@ using namespace atsp;
 using namespace bet;
 
 
-//BetAgorithm1::BetAgorithm1(bet::uint trSize,
-//                           bet::uint trCount,
-//                           bet::Player * const players,
-//                           bet::uint playerCount)
-//{
-
-//}
-
 BetAgorithm1::BetAgorithm1(uint trSize, uint pickCount, Player * const players, uint playerCount):
     _trsz(trSize),_pickCount(pickCount),_players(players),_playerCount(playerCount)
 {
 }
 
+
 uint BetAgorithm1::run(Path &        path,
                        const Data &  data)
+{
+    switch (algo)
+    {
+    case Algoritm::Basic :
+        return basicAlgorithm(path,data);
+    }
+}
+
+uint BetAgorithm1::getPlayed()
+{
+    return _played;
+}
+
+uint BetAgorithm1::getWinners()
+{
+    return _winners;
+}
+
+uint BetAgorithm1::getBroken()
+{
+    return _broken;
+}
+
+uint BetAgorithm1::getGamesAlive(uint j)
+{
+    return _gamesAlive[j];
+}
+
+uint BetAgorithm1::getConsecutiveWins(uint j)
+{
+    return _consecutiveWins[j];
+}
+
+void BetAgorithm1::setAlgorithm(BetAgorithm1::Algoritm alg)
+{
+    this->algo = alg;
+}
+
+uint BetAgorithm1::basicAlgorithm(Path & path, const Data & data)
 {
     // Gets new random points of path transformation
     // huge buffer, avoid allocation....
@@ -40,6 +72,7 @@ uint BetAgorithm1::run(Path &        path,
             picks[i] = attempt;
         }
     }
+
 
     // make the players rank each available pick (trPoint)
 
@@ -139,29 +172,5 @@ uint BetAgorithm1::run(Path &        path,
     }
 
     return min;
-}
 
-uint BetAgorithm1::getPlayed()
-{
-    return _played;
-}
-
-uint BetAgorithm1::getWinners()
-{
-    return _winners;
-}
-
-uint BetAgorithm1::getBroken()
-{
-    return _broken;
-}
-
-uint BetAgorithm1::getGamesAlive(uint j)
-{
-    return _gamesAlive[j];
-}
-
-uint BetAgorithm1::getConsecutiveWins(uint j)
-{
-    return _consecutiveWins[j];
 }

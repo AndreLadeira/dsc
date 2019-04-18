@@ -265,6 +265,8 @@ void MainWindow::buttonRunClick()
 
     uint refresh = (restarts * iters)/100;
 
+    bet1.setAlgorithm(bet::BetAgorithm1::Algoritm::Basic);
+
     for (uint run = 0; run < restarts; run++)
     {
         for (uint iter = 0; iter < iters; iter++)
@@ -282,10 +284,13 @@ void MainWindow::buttonRunClick()
             ui->customPlot->graph(Graph::Cost)->addData(key,value);
             if ( count % refresh == 0)
             {
-                ui->customPlot->graph(Graph::Won)->addData(key,bet1.getWinners());
-                ui->customPlot->graph(Graph::Played)->addData(key, bet1.getPlayed());
-                ui->customPlot->graph(Graph::Broke)->addData(key, bet1.getBroken());
+
             }
+
+            ui->customPlot->graph(Graph::Played)->addData(key, bet1.getPlayed());
+            ui->customPlot->graph(Graph::Won)->addData(key,bet1.getWinners());
+
+            ui->customPlot->graph(Graph::Broke)->addData(key, bet1.getBroken());
 
             count++;
         }
@@ -300,12 +305,14 @@ void MainWindow::buttonRunClick()
     GraphRects[2]->axis(QCPAxis::atLeft)->ticker()->setTickCount(2);
     GraphRects[3]->axis(QCPAxis::atLeft)->ticker()->setTickCount(2);
     GraphRects[0]->axis(QCPAxis::atLeft)->setRange(0,max);
-    GraphRects[1]->axis(QCPAxis::atLeft)->setRange(0,40);
+    GraphRects[1]->axis(QCPAxis::atLeft)->setRange(0,numPlayers * 1.1);
 
 
 
     uint maxGA = 0;
     uint maxCW = 0;
+
+
 
     for(uint i = 0; i < numPlayers; i++)
     {
@@ -331,7 +338,7 @@ void MainWindow::buttonRunClick()
     msg << " Final Result: "<< all_min;
     double diff = max - all_min;
     msg << " Improvement: " << static_cast<uint>(diff);
-    msg << "(" << std::fixed << std::setprecision(0) << diff*100/max << "%)";
+    msg << " (-" << std::fixed << std::setprecision(0) << diff*100/max << "%)";
 
     setMessage(msg.str().c_str());
 }

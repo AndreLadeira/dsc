@@ -15,12 +15,10 @@ INCLUDEPATH += "../"
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-        workerthread.cpp \
     lineeditfile.cpp
 
 HEADERS += \
         mainwindow.h \
-        workerthread.h \
     lineeditfile.h
 
 FORMS += \

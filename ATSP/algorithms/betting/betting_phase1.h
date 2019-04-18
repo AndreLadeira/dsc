@@ -27,6 +27,13 @@ public:
     uint getGamesAlive(uint);
     uint getConsecutiveWins(uint);
 
+    enum Algoritm
+    {
+        Basic = 0
+    };
+
+    void setAlgorithm(Algoritm);
+
 private:
 
     const uint        _trsz;
@@ -42,6 +49,11 @@ private:
     uint _played;
     uint _winners;
     uint _broken;
+
+private:
+
+    Algoritm algo;
+    uint basicAlgorithm(Path&, const Data &);
 
 };
 
