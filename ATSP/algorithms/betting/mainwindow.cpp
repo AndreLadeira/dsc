@@ -10,6 +10,7 @@
 #include <memory>
 #include <sstream>
 #include <iomanip>
+#include <QtMath>
 
 using namespace atsp;
 using atsp::bet::Player;
@@ -171,6 +172,7 @@ void MainWindow::setupGraph()
                 GraphRects[2]->axis(QCPAxis::atLeft));
     GraphRects[2]->axis(QCPAxis::atBottom)->setRange(0.5,30.5);
     GraphRects[2]->axis(QCPAxis::atLeft)->setSubTicks(true);
+    GraphRects[2]->axis(QCPAxis::atBottom)->setSubTicks(true);
 
     GraphPlayerRoundsAlive->setLineStyle(QCPGraph::lsImpulse);
     GraphPlayerRoundsAlive->setPen(QPen(QColor("#008080"), 30));
@@ -181,10 +183,11 @@ void MainWindow::setupGraph()
 
     GraphRects[3]->axis(QCPAxis::atBottom)->setRange(0.5,30.5);
     GraphRects[3]->axis(QCPAxis::atLeft)->setSubTicks(true);
-
+    GraphRects[3]->axis(QCPAxis::atBottom)->setSubTicks(true);
 
     GraphPlayerConsecutiveWins->setLineStyle(QCPGraph::lsImpulse);
     GraphPlayerConsecutiveWins->setPen(QPen(QColor("#808080"), 30));
+
 
     // the maximum overall value of the last two graphs
     GraphPlayerRoundsAliveMax = customPlot->addGraph(
@@ -197,7 +200,9 @@ void MainWindow::setupGraph()
                 GraphRects[3]->axis(QCPAxis::atLeft));
     GraphPlayerConsecutiveWinsMax->setPen( QPen(QColor("#FF4500"),1,Qt::DashLine));
 
-    replot();
+    customPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectPlottables);
+
+    //replot();
 
 }
 
@@ -256,6 +261,8 @@ void MainWindow::buttonRunClick()
     ui->customPlot->graph(Graph::Broke)->data()->clear();
     ui->customPlot->graph(Graph::RoundsAlive)->data()->clear();
     ui->customPlot->graph(Graph::ConsecutiveWins)->data()->clear();
+    ui->customPlot->graph(Graph::RoundsAliveMax)->data()->clear();
+    ui->customPlot->graph(Graph::ConsecutiveWinsMax)->data()->clear();
 
     Path current(data.getSize());
     atsp::randomize(current);
@@ -302,34 +309,46 @@ void MainWindow::buttonRunClick()
        ui->customPlot->graph(i)->rescaleAxes(false);
     }
 
-    GraphRects[2]->axis(QCPAxis::atLeft)->ticker()->setTickCount(2);
-    GraphRects[3]->axis(QCPAxis::atLeft)->ticker()->setTickCount(2);
+
     GraphRects[0]->axis(QCPAxis::atLeft)->setRange(0,max);
     GraphRects[1]->axis(QCPAxis::atLeft)->setRange(0,numPlayers * 1.1);
 
-
+    GraphRects[2]->axis(QCPAxis::atLeft)->ticker()->setTickCount(2);
+    GraphRects[3]->axis(QCPAxis::atLeft)->ticker()->setTickCount(2);
 
     uint maxGA = 0;
     uint maxCW = 0;
 
-
-
     for(uint i = 0; i < numPlayers; i++)
     {
         uint games = bet1.getGamesAlive(i);
+        uint gamesMax = bet1.getMaxGamesAlive(i);
         uint wins = bet1.getConsecutiveWins(i);
+        uint winsMax = bet1.getMaxConsecutiveWins(i);
 
         ui->customPlot->graph(Graph::RoundsAlive)->addData(i, games);
         ui->customPlot->graph(Graph::ConsecutiveWins)->addData(i,wins);
 
-        if (games > maxGA) maxGA = games;
-        if (wins > maxCW) maxCW = wins;
+        ui->customPlot->graph(Graph::RoundsAliveMax)->addData(i,gamesMax);
+        ui->customPlot->graph(Graph::ConsecutiveWinsMax)->addData(i,winsMax);
+
+        if (gamesMax > maxGA) maxGA = gamesMax;
+        if (winsMax > maxCW) maxCW = winsMax;
 
     }
-    GraphRects[2]->axis(QCPAxis::atBottom)->setRange(0,numPlayers);
-    GraphRects[3]->axis(QCPAxis::atBottom)->setRange(0,numPlayers);
+    GraphRects[2]->axis(QCPAxis::atBottom)->setRange(-0.5,numPlayers-0.5);
+    GraphRects[3]->axis(QCPAxis::atBottom)->setRange(-0.5,numPlayers-0.5);
     GraphRects[2]->axis(QCPAxis::atLeft)->setRange(0,maxGA*1.1);
     GraphRects[3]->axis(QCPAxis::atLeft)->setRange(0,maxCW*1.1);
+
+    int barWidth = GraphRects[MainWindow::GraphRect::_3rd]->width();
+
+    barWidth = qFloor(static_cast<double>(barWidth) / numPlayers);
+    barWidth = barWidth > 0 ? barWidth:1;
+
+    GraphPlayerConsecutiveWins->setPen(QPen(QColor("#808080"), barWidth));
+    GraphPlayerRoundsAlive->setPen(QPen(QColor("#008080"), barWidth));
+
     ui->customPlot->replot();
 
     msg.str(std::string());

@@ -25,7 +25,9 @@ public:
     uint getWinners();
     uint getBroken();
     uint getGamesAlive(uint);
+    uint getMaxGamesAlive(uint);
     uint getConsecutiveWins(uint);
+    uint getMaxConsecutiveWins(uint);
 
     enum Algoritm
     {
@@ -44,6 +46,9 @@ private:
     // player stats. Usefull in phase 2
     uint _gamesAlive[512] = {0};
     uint _consecutiveWins[512] = {0};
+
+    uint _gamesAliveMax[512] = {0};
+    uint _consecutiveWinsMax[512] = {0};
 
     // game stats. To check how the game is evolving
     uint _played;

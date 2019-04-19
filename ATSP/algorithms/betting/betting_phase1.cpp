@@ -40,9 +40,19 @@ uint BetAgorithm1::getGamesAlive(uint j)
     return _gamesAlive[j];
 }
 
+uint BetAgorithm1::getMaxGamesAlive(uint j)
+{
+    return _gamesAliveMax[j];
+}
+
 uint BetAgorithm1::getConsecutiveWins(uint j)
 {
     return _consecutiveWins[j];
+}
+
+uint BetAgorithm1::getMaxConsecutiveWins(uint j)
+{
+    return _consecutiveWinsMax[j];
 }
 
 void BetAgorithm1::setAlgorithm(BetAgorithm1::Algoritm alg)
@@ -149,6 +159,8 @@ uint BetAgorithm1::basicAlgorithm(Path & path, const Data & data)
             {
                 _winners++;
                 _consecutiveWins[j]++;
+                if (_consecutiveWins[j] > _consecutiveWinsMax[j])
+                    _consecutiveWinsMax[j] = _consecutiveWins[j];
             }
             else {
                 _consecutiveWins[j] = 0;
@@ -162,6 +174,8 @@ uint BetAgorithm1::basicAlgorithm(Path & path, const Data & data)
        }
        else {
            _gamesAlive[j]++;
+           if (_gamesAlive[j] > _gamesAliveMax[j])
+               _gamesAliveMax[j] = _gamesAlive[j];
        }
     }
 

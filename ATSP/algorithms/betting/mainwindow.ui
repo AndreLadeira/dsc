@@ -15,17 +15,51 @@
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
-    <property name="rightMargin">
-     <number>12</number>
-    </property>
     <item>
-     <widget class="QCustomPlot" name="customPlot" native="true">
+     <widget class="QTabWidget" name="tabWidget">
       <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
         <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <widget class="QWidget" name="tabPhase1">
+       <attribute name="title">
+        <string>Tab 1</string>
+       </attribute>
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="QCustomPlot" name="customPlot" native="true">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tabPhase2">
+       <attribute name="title">
+        <string>Tab 2</string>
+       </attribute>
+      </widget>
      </widget>
     </item>
     <item>
