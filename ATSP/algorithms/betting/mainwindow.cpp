@@ -33,42 +33,15 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::setGraphTitle(MainWindow::GraphRect rect, const QString & str)
-{
-    this->GraphRects[rect]->axis(QCPAxis::atTop)->setLabel(str);
-}
-
-void MainWindow::addData(MainWindow::Graph graph, double key, double value)
-{
-    ui->customPlot->graph(graph)->addData(key,value);
-}
-
-void MainWindow::setData(MainWindow::Graph graph, const QVector<QCPGraphData> & data)
-{
-    ui->customPlot->graph(graph)->data()->set(data);
-}
-
-void MainWindow::setYaxisRange(MainWindow::GraphRect rect, double lower, double upper)
-{
-    this->GraphRects[rect]->axis(QCPAxis::atLeft)->setRange(lower,upper);
-}
-
-void MainWindow::replot()
-{
-//    for (int i = 0; i < ui->customPlot->graphCount(); i++ )
-//    {
-//       ui->customPlot->graph(i)->rescaleAxes(false);
-//    }
-
-//    GraphRects[2]->axis(QCPAxis::atLeft)->ticker()->setTickCount(2);
-//    GraphRects[3]->axis(QCPAxis::atLeft)->ticker()->setTickCount(2);
-//    //GraphRects[0]->axis(QCPAxis::atLeft)->rescale();
-//    ui->customPlot->replot();
-}
-
-
-
 void MainWindow::setupGraph()
+{
+
+    setupGraphPahse1();
+    setupGraphPhase2();
+
+}
+
+void MainWindow::setupGraphPahse1()
 {
     QCustomPlot *customPlot = ui->customPlot;
 
@@ -200,9 +173,22 @@ void MainWindow::setupGraph()
                 GraphRects[3]->axis(QCPAxis::atLeft));
     GraphPlayerConsecutiveWinsMax->setPen( QPen(QColor("#FF4500"),1,Qt::DashLine));
 
-    customPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectPlottables);
+    this->GraphRects[MainWindow::GraphRect::_1st]->\
+            axis(QCPAxis::atTop)->setLabel("ATSP Path cost");
+    this->GraphRects[MainWindow::GraphRect::_2nd]->\
+            axis(QCPAxis::atTop)->setLabel("Satistics");
+    this->GraphRects[MainWindow::GraphRect::_3rd]->\
+            axis(QCPAxis::atTop)->setLabel("Player: rounds alive");
+    this->GraphRects[MainWindow::GraphRect::_4th]->\
+            axis(QCPAxis::atTop)->setLabel("Player: consecutive wins");
 
-    //replot();
+    customPlot->setInteractions(QCP::iRangeZoom);
+
+}
+
+void MainWindow::setupGraphPhase2()
+{
+
 
 }
 
@@ -220,10 +206,26 @@ void MainWindow::centerAndResize()
                 );
 }
 
+void MainWindow::showExceptionDialog(const QString &msg)
+{
+    QMessageBox msgBox;
 
+    msgBox.setText( QString("An Exception has occurred: " ) + msg);
+    msgBox.setInformativeText("Do you want to quit the application?");
+    msgBox.setIcon(QMessageBox::Warning);
+    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+
+    if ( msgBox.exec() == QMessageBox::Yes )
+    {
+        this->close();
+    }
+
+}
 
 void MainWindow::buttonRunClick()
+try
 {
+
     stringstream msg;
 
     // problem data
@@ -235,7 +237,6 @@ void MainWindow::buttonRunClick()
     const uint      numPlayers = ui->lineEditPlayers->text().toUInt();
     const double    minBet = ui->lineEditMinBet->text().toDouble();
     const double    initialBankroll = ui->lineEditBankroll->text().toDouble();
-
 
     Data data;
     data.load( atsp::TSPLibLoader(fname.toStdString().c_str()));
@@ -291,14 +292,10 @@ void MainWindow::buttonRunClick()
             ui->customPlot->graph(Graph::Cost)->addData(key,value);
             if ( count % refresh == 0)
             {
-
+                ui->customPlot->graph(Graph::Played)->addData(key, bet1.getPlayed());
+                ui->customPlot->graph(Graph::Won)->addData(key,bet1.getWinners());
+                ui->customPlot->graph(Graph::Broke)->addData(key, bet1.getBroken());
             }
-
-            ui->customPlot->graph(Graph::Played)->addData(key, bet1.getPlayed());
-            ui->customPlot->graph(Graph::Won)->addData(key,bet1.getWinners());
-
-            ui->customPlot->graph(Graph::Broke)->addData(key, bet1.getBroken());
-
             count++;
         }
         atsp::randomize(current);
@@ -359,14 +356,21 @@ void MainWindow::buttonRunClick()
     msg << " Improvement: " << static_cast<uint>(diff);
     msg << " (-" << std::fixed << std::setprecision(0) << diff*100/max << "%)";
 
-    setMessage(msg.str().c_str());
+    ui->statusBar->showMessage(msg.str().c_str());
+}
+catch (QException &e)
+{
+    showExceptionDialog(e.what());
+}
+catch (std::exception &e)
+{
+    showExceptionDialog(e.what());
+}
+catch(...)
+{
+    showExceptionDialog("Unknown exception in <Run>");
 }
 void MainWindow::show()
 {
    QMainWindow::show();
-}
-
-void MainWindow::setMessage(const QString& msg)
-{
-    ui->statusBar->showMessage( msg );
 }

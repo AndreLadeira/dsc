@@ -25,14 +25,8 @@ public:
         Cost = 0, Won, Played, Broke, RoundsAlive, ConsecutiveWins,
         RoundsAliveMax, ConsecutiveWinsMax
     };
-
-    void setGraphTitle(GraphRect, const QString&);
-    void addData(Graph, double key, double value);
-    void setData(Graph, const QVector<QCPGraphData> &);
-    void setYaxisRange(GraphRect, double lower, double upper);
-    void replot();
     void show();
-    void setMessage(const QString&);
+
 
 private:
 
@@ -50,7 +44,11 @@ private:
     QCPGraph    *GraphPlayerConsecutiveWinsMax;
 
     void setupGraph();
+    void setupGraphPahse1();
+    void setupGraphPhase2();
     void centerAndResize();
+
+    void showExceptionDialog(const QString & msg);
 
 private slots:
     void buttonRunClick();
