@@ -13,7 +13,6 @@
 #include <QtMath>
 
 using namespace atsp;
-using atsp::bet::Player;
 using std::stringstream;
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -222,6 +221,10 @@ void MainWindow::showExceptionDialog(const QString &msg)
 
 }
 
+using ::bet::Player;
+using ::bet::PlayerStats;
+using atsp::bet::BetAlgorithm1;
+
 void MainWindow::buttonRunClick()
 try
 {
@@ -248,7 +251,7 @@ try
     for (uint i = 0; i < numPlayers; ++i)
         players[i].reset();
 
-    bet::BetAgorithm1 bet1(trSize, numPicks, players.get(), numPlayers);
+    BetAlgorithm1 bet1(trSize, numPicks, players.get(), numPlayers);
 
 
     QTime timer;
@@ -271,9 +274,10 @@ try
     uint all_min = atsp::getLength(data,best);
     uint max = all_min;
 
+
     uint refresh = (restarts * iters)/100;
 
-    bet1.setAlgorithm(bet::BetAgorithm1::Algoritm::Basic);
+    bet1.setAlgorithm(BetAlgorithm1::Algoritm::Basic);
 
     for (uint run = 0; run < restarts; run++)
     {
@@ -292,9 +296,9 @@ try
             ui->customPlot->graph(Graph::Cost)->addData(key,value);
             if ( count % refresh == 0)
             {
-                ui->customPlot->graph(Graph::Played)->addData(key, bet1.getPlayed());
-                ui->customPlot->graph(Graph::Won)->addData(key,bet1.getWinners());
-                ui->customPlot->graph(Graph::Broke)->addData(key, bet1.getBroken());
+                ui->customPlot->graph(Graph::Played)->addData(key, PlayerStats::getRoundPlayers());
+                ui->customPlot->graph(Graph::Won)->addData(key,PlayerStats::getRoundWinners());
+                ui->customPlot->graph(Graph::Broke)->addData(key, PlayerStats::getRoundBroken());
             }
             count++;
         }
@@ -313,24 +317,21 @@ try
     GraphRects[2]->axis(QCPAxis::atLeft)->ticker()->setTickCount(2);
     GraphRects[3]->axis(QCPAxis::atLeft)->ticker()->setTickCount(2);
 
-    uint maxGA = 0;
+    uint maxGA = 0; // will be used to set the graph's y range
     uint maxCW = 0;
 
     for(uint i = 0; i < numPlayers; i++)
     {
-        uint games = bet1.getGamesAlive(i);
-        uint gamesMax = bet1.getMaxGamesAlive(i);
-        uint wins = bet1.getConsecutiveWins(i);
-        uint winsMax = bet1.getMaxConsecutiveWins(i);
+        const ::bet::PlayerStats & stats = players[i].getStatsObject();
 
-        ui->customPlot->graph(Graph::RoundsAlive)->addData(i, games);
-        ui->customPlot->graph(Graph::ConsecutiveWins)->addData(i,wins);
+        ui->customPlot->graph(Graph::RoundsAlive)->addData(i, stats.getGamesAlive());
+        ui->customPlot->graph(Graph::ConsecutiveWins)->addData(i,stats.getConsecutiveWins());
 
-        ui->customPlot->graph(Graph::RoundsAliveMax)->addData(i,gamesMax);
-        ui->customPlot->graph(Graph::ConsecutiveWinsMax)->addData(i,winsMax);
+        ui->customPlot->graph(Graph::RoundsAliveMax)->addData(i,stats.getMaxGamesAlive());
+        ui->customPlot->graph(Graph::ConsecutiveWinsMax)->addData(i,stats.getMaxConsecutiveWins());
 
-        if (gamesMax > maxGA) maxGA = gamesMax;
-        if (winsMax > maxCW) maxCW = winsMax;
+        if (stats.getMaxGamesAlive() > maxGA) maxGA = stats.getMaxGamesAlive();
+        if (stats.getMaxConsecutiveWins() > maxCW) maxCW = stats.getMaxConsecutiveWins();
 
     }
     GraphRects[2]->axis(QCPAxis::atBottom)->setRange(-0.5,numPlayers-0.5);
@@ -338,6 +339,7 @@ try
     GraphRects[2]->axis(QCPAxis::atLeft)->setRange(0,maxGA*1.1);
     GraphRects[3]->axis(QCPAxis::atLeft)->setRange(0,maxCW*1.1);
 
+    // adjust the bar width pf the bar graphs
     int barWidth = GraphRects[MainWindow::GraphRect::_3rd]->width();
 
     barWidth = qFloor(static_cast<double>(barWidth) / numPlayers);

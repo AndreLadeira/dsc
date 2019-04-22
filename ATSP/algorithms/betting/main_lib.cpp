@@ -12,6 +12,7 @@
 
 
 using namespace std;
+using atsp::bet::Player;
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
@@ -32,13 +33,13 @@ try
     atsp::Path current(data.getSize());
     atsp::Path best = current;
 
-    atsp::bet::Player players[numPlayers];
-    atsp::bet::Player::setGameParameters(data.getSize(),1.0,1000.0);
+    Player players[numPlayers];
+    Player::setGameParameters(data.getSize(),1.0,1000.0);
 
     for (uint i = 0; i < numPlayers; ++i)
         players[i].reset();
 
-    atsp::bet::BetAgorithm1 bet1(trsz, numPicks, players, numPlayers);
+    atsp::bet::BetAlgorithm1 bet1(trsz, numPicks, players, numPlayers);
 
     uint runs  = 1; //100k
     uint iters = 5000;

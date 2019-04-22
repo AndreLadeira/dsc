@@ -2,11 +2,14 @@
 #define PLAYER_H
 
 #include "base/random.h"
+#include "playerstats.h"
+
+
+typedef unsigned int uint;
 
 namespace atsp{
 namespace bet{
 
-typedef unsigned int uint;
 
 class Player
 {
@@ -22,16 +25,14 @@ public:
     double ratePicks(const uint picks[buffsz], uint count);
     void   bet(const double houseProbs[buffsz], uint count);
     void   reset();
-    bool   hasBetOn(uint option);
+    //bool   hasBetOn(uint option);
     void   checkOut(uint winner, double odds);
-    bool   hasPlayed();
-    bool   broke();
+    //bool   hasPlayed();
+    //bool   broke();
 
     const double * rating; // access point to player's rating
-
-public:
-
     static void setGameParameters(uint numCities, double minBet, double initialBankroll );
+    const PlayerStats & getStats() const;
 
 private:
 
@@ -43,8 +44,8 @@ private:
     bool   _picked[buffsz]      = {false};  //
     double _bets[buffsz]        = {0.0};    // player bets
     bool   _played;                         // played or not some round
+    PlayerStats  _stats;
 };
-
 
 }
 }

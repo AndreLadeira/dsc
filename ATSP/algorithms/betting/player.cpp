@@ -1,13 +1,13 @@
 #include "player.h"
 
-using namespace atsp::bet;
-
 namespace
 {
     static uint     numCities       = 0;
     static double   minBet          = 0.0;
     static double   initialBankroll = 0.0;
 }
+
+using namespace atsp::bet;
 
 Player::Player():rating(_myRating),_played(false)
 {
@@ -30,7 +30,7 @@ double Player::ratePicks(const uint picks[], const uint pickCount)
     }
     total += _myRating[pickCount];
 
-    for(uint p = 0; p < pickCount + 1; ++p)
+    for(uint p = 0; p <= pickCount; ++p)
     {
       _myRating[p] /= total;
     }
@@ -64,7 +64,7 @@ void Player::bet(const double houseProbs[buffsz], uint pickCount)
                 const double o = 1/houseProbs[pick];
                 const double po = p*o;
 
-                const double kelly = ( po - 1.0) /
+                const double kelly = (po - 1.0) /
                     (o - 1.0);
 
                 double bet = kelly * _bankroll;
@@ -90,9 +90,7 @@ void Player::reset()
     _bankroll = initialBankroll;
 
     for (uint i = 0; i < numCities; ++i)
-    {
        _myProb[i] = base::fast_rand01();
-    }
 }
 
 bool Player::hasBetOn(uint option)
@@ -101,8 +99,28 @@ bool Player::hasBetOn(uint option)
 }
 void Player::checkOut(uint winner, double odds)
 {
-    if ( _picked[winner] )
-    _bankroll += _bets[winner] / odds;
+    _stats.alive();
+
+    if ( _played )
+    {
+        _stats.played();
+
+        if ( _picked[winner] )
+        {
+            _bankroll += _bets[winner] / odds;
+            _stats.won();
+        }
+        else
+        {
+            _stats.lost();
+        }
+    }
+
+    if (_bankroll == 0.0)
+    {
+        _stats.broke();
+        reset();
+    }
 }
 
 bool Player::hasPlayed()
@@ -120,4 +138,9 @@ void Player::setGameParameters(uint numCitiesP, double minBetP, double initialBa
     numCities = numCitiesP;
     minBet = minBetP;
     initialBankroll = initialBankrollP;
+}
+
+const PlayerStats &Player::getStatsObject() const
+{
+    return _stats;
 }

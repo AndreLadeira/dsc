@@ -95,7 +95,7 @@ inline void reset(Path & p)
 
 inline void move(Path & p, uint insert, uint start, uint sz)
 {
-    uint tmp[512]; // fixed size "big" buffer, to avoid memory allocation
+    uint tmp[512]; // "big" buffer, to avoid memory allocation
     uint * _path = p._path;
 
     // The insertion point was obtained in a sub-path that did not contain
