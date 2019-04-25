@@ -13,31 +13,42 @@ Player::Player():rating(_myRating),_played(false)
 {
 }
 
-double Player::ratePicks(const uint picks[], const uint pickCount)
+double Player::ratePicks(const uint *   p,
+                         const uint *   notp,
+                         uint           pickCount,
+                         const uint *   trPoints,
+                         uint           trCount)
 {
     double total = 0.0;
 
-    // _myRating[pickCount] will hold the probability
-    // of no choice result in inprovement
-
-    _myRating[pickCount] = 1.0;
-
-    for(uint p = 0; p < pickCount; ++p)
-    {     
-        _myRating[pickCount] *= ( 1.0 - _myProb[ picks[p] ] );
-        _myRating[p] = _myProb[ picks[p] ];
-        total += _myProb[ picks[p] ];
-    }
-    total += _myRating[pickCount];
-
-    for(uint p = 0; p <= pickCount; ++p)
+    for(uint i = 0; i < pickCount; i++)
     {
-      _myRating[p] /= total;
+        uint bit = 0x1;
+        _myRating[i] = 1.0;
+
+        if ( p[i] != 0 )
+            for(uint mask = 0; mask < trCount; mask++  )
+            {
+                if ( bit & p[i] )
+                    _myRating[i] *= _myProb[trPoints[mask]];
+                bit <<= 1;
+            }
+
+        bit = 0x1;
+
+        if ( notp[i] != 0 )
+            for(uint mask = 0; mask < trCount; mask++  )
+            {
+                if ( bit & notp[i] )
+                    _myRating[i] *= (1.0-_myProb[trPoints[mask]]);
+                bit <<= 1;
+            }
+        total += _myRating[i];
     }
-    return 1.0;
+    return total;
 }
 
-void Player::bet(const double houseProbs[buffsz], uint pickCount)
+void Player::bet(const double * houseProbs, uint pickCount)
 {
     _played = false;
 
@@ -140,7 +151,7 @@ void Player::setGameParameters(uint numCitiesP, double minBetP, double initialBa
     initialBankroll = initialBankrollP;
 }
 
-const PlayerStats &Player::getStatsObject() const
+const PlayerStats &Player::getStats() const
 {
     return _stats;
 }

@@ -10,11 +10,13 @@ INCLUDEPATH += "../"
 
 SOURCES += \
     betting_phase1.cpp \
+    house.cpp \
     player.cpp \
     playerstats.cpp
 
 HEADERS += \
     betting_phase1.h \
+    house.h \
     player.h \
     playerstats.h
 

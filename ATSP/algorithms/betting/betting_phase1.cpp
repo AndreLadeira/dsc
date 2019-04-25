@@ -1,13 +1,16 @@
 #include "betting_phase1.h"
 #include "greedy/greedy_algorithm.h"
+#include "house.h"
 
 using namespace atsp::bet;
 
 BetAlgorithm1::BetAlgorithm1(   uint                    trSize,
-                                uint                    pickCount,
-                                Player * const   players,
+                                uint                    trCount,
+                                uint                    pickPolicy,
+                                Player * const          players,
                                 uint                    playerCount):
-    _trsz(trSize),_pickCount(pickCount),_playerCount(playerCount),_players(players)
+    _trsz(trSize),_trCount(trCount),_pickPolicy(pickPolicy),
+    _players(players),_playerCount(playerCount)
 {
 }
 
@@ -15,30 +18,36 @@ BetAlgorithm1::~BetAlgorithm1()
 {
 }
 
-uint BetAlgorithm1::run(Path &        path,
+uint BetAlgorithm1::run(Path &       currentPath,
                        const Data &  data)
 {
     // Gets new random points of path transformation
     // huge buffer, avoid allocation....
-    uint picks[512] = {0};
-    const uint pathSz = path.getSize();
-    const uint maxPick = pathSz - _trsz;
+    uint trPoints[512] = {0};
+    const uint currPathSz = currentPath.getSize();
+    const uint maxPick = currPathSz - _trsz;
 
-    picks[0] = static_cast<uint>(base::fast_rand()) % maxPick;
+    trPoints[0] = static_cast<uint>(base::fast_rand()) % maxPick;
 
     {
-        for(uint i = 1; i < _pickCount; ++i)
+        for(uint i = 1; i < _trCount; ++i)
         {
             back:
             uint attempt = static_cast<uint>(base::fast_rand()) % maxPick;
             for(uint j = 0; j < i; ++j)
             {
-                if ( attempt == picks[j]) goto back;
+                if ( attempt == trPoints[j]) goto back;
             }
-            picks[i] = attempt;
+            trPoints[i] = attempt;
         }
     }
-
+    //
+    //House house(_trCount, House::Policy::Full );
+    // House house(_trCount, House::Policy::Single | House::Policy::WithNone );
+    House house(_trCount, _pickPolicy );
+    uint p[128], notp[128];
+    uint numPicks = house.getNumPicks();
+    house.getPicks(p,notp);
 
     // make the players rank each available pick (trPoint)
 
@@ -47,13 +56,13 @@ uint BetAlgorithm1::run(Path &        path,
     double R = 0.0;
 
     for (uint i = 0; i < _playerCount; ++i)
-        R += _players[i].ratePicks(picks,_pickCount);
+        R += _players[i].ratePicks(p, notp,numPicks,trPoints,_trCount);
 
     // calculate the house probabilities,
     // based on player's collective knowledge
     double houseProbs[512] = {0.0};
 
-    for(uint i = 0; i < _pickCount; i++)
+    for(uint i = 0; i < numPicks; i++)
     {
         for(uint j = 0; j < _playerCount; ++j)
             houseProbs[i] += _players[j].rating[i];
@@ -62,41 +71,49 @@ uint BetAlgorithm1::run(Path &        path,
 
     // sorts the odds in ascending order, so the players
     // evaluate the best options first
-    std::sort(houseProbs, houseProbs + _pickCount, std::greater<double>());
+    std::sort(houseProbs, houseProbs + numPicks);
 
     // Players then bet or not, according to the given odds
     for(uint j = 0; j < _playerCount; ++j)
-        _players[j].bet(houseProbs,_pickCount);
+        _players[j].bet(houseProbs,numPicks);
 
     // now, lets run the game
 
     // setup a greedy algorithm
     atsp::GreedyAlgorithm greedyAlgorithm(_trsz);
 
-    uint min = getLength(data,path); //std::numeric_limits<uint>::max();
-    atsp::Path current = path;
-    atsp::Path best = path;
+    uint currPathCost   = getLength(data,currentPath); //std::numeric_limits<uint>::max();
+    Path newPath        = currentPath;
+    Path bestPath       = currentPath;
+    uint newBestCost    = currPathCost;
 
-    // setting the winner equal to pickCount is equivalent
-    // to set it to "no option resulted in improvement"
 
-    uint winner = _pickCount;
+    House::resultsVector_t results(_trCount);
 
-    // run a gredy transformation for each pick
-
-    for(uint p = 0; p < _pickCount; ++p)
+    for(uint p = 0; p < _trCount; ++p)
     {
-        greedyAlgorithm.setMask( picks[p] );
+        greedyAlgorithm.setMask( trPoints[p] );
 
-        uint newPathLen = greedyAlgorithm.run(current, data);
-
-        if ( newPathLen < min )
+        results.at(p).index = p;
+        results.at(p).result =
+            greedyAlgorithm.run(newPath, data);
+        if ( results.at(p).result < currPathCost ) // improves?
         {
-            min = newPathLen;
-            winner = p;
-            best = current;
+            results.at(p).improved = true;
+
+            if ( results.at(p).result < newBestCost )
+            {
+                newBestCost = results.at(p).result;
+                bestPath = newPath;
+            }
+
         }
+
+
     }
+
+
+    uint winner = house.getWinner(results);
 
     PlayerStats::resetRoundStats();
 
@@ -105,11 +122,20 @@ uint BetAlgorithm1::run(Path &        path,
        _players[j].checkOut(winner,houseProbs[winner]);
 
     // update the best path
-    if ( min < atsp::getLength(data, path) )
+    // getWinner orders the results vector
+    // so if the resut at the first positon improved
+    // update the best solution
+
+    if ( results.at(0).improved )
     {
-        path = best;
+        currentPath = bestPath;
+
+#ifdef __DEBUG__
+        assert(getLength(data,currentPath) == newBestCost);
+#endif
+
     }
 
-    return min;
+    return results.at(0).result;
 
 }

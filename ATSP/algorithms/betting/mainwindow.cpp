@@ -240,6 +240,7 @@ try
     const uint      numPlayers = ui->lineEditPlayers->text().toUInt();
     const double    minBet = ui->lineEditMinBet->text().toDouble();
     const double    initialBankroll = ui->lineEditBankroll->text().toDouble();
+    const uint      pickPolicy = ui->lineEditPickPolicy->text().toUInt();
 
     Data data;
     data.load( atsp::TSPLibLoader(fname.toStdString().c_str()));
@@ -251,7 +252,7 @@ try
     for (uint i = 0; i < numPlayers; ++i)
         players[i].reset();
 
-    BetAlgorithm1 bet1(trSize, numPicks, players.get(), numPlayers);
+    BetAlgorithm1 bet1(trSize, numPicks, pickPolicy, players.get(), numPlayers);
 
 
     QTime timer;
@@ -277,7 +278,7 @@ try
 
     uint refresh = (restarts * iters)/100;
 
-    bet1.setAlgorithm(BetAlgorithm1::Algoritm::Basic);
+    //bet1.setAlgorithm(BetAlgorithm1::Algoritm::Basic);
 
     for (uint run = 0; run < restarts; run++)
     {
@@ -322,7 +323,7 @@ try
 
     for(uint i = 0; i < numPlayers; i++)
     {
-        const ::bet::PlayerStats & stats = players[i].getStatsObject();
+        const ::bet::PlayerStats & stats = players[i].getStats();
 
         ui->customPlot->graph(Graph::RoundsAlive)->addData(i, stats.getGamesAlive());
         ui->customPlot->graph(Graph::ConsecutiveWins)->addData(i,stats.getConsecutiveWins());

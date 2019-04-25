@@ -12,7 +12,7 @@ class BetAlgorithm1 : public Algorithm
 {
 public:
 
-    BetAlgorithm1(uint trSize, uint pickCount,
+    BetAlgorithm1(uint trSize, uint trCount, uint pickPolicy,
                  Player * const players, uint playerCount);
     ~BetAlgorithm1();
 
@@ -21,11 +21,11 @@ public:
 
 private:
 
-    const uint        _trsz;
-    const uint        _pickCount;
-    const uint        _playerCount;
-
-    Player * const    _players;
+    const uint          _trsz;
+    const uint          _trCount;
+    const uint          _pickPolicy;
+    Player * const      _players;
+    const uint          _playerCount;
 
 private:
 

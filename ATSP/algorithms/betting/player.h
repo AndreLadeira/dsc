@@ -22,13 +22,18 @@ public:
     Player();
 
     // returns the sum of player rate (used to calculate the odds)
-    double ratePicks(const uint picks[buffsz], uint count);
-    void   bet(const double houseProbs[buffsz], uint count);
+    double ratePicks(const uint *   p,
+                     const uint *   notp,
+                     uint           pickCount,
+                     const uint *   trPoints,
+                     uint           trCount);
+
+    void   bet(const double * houseProbs, uint count);
     void   reset();
-    //bool   hasBetOn(uint option);
+    bool   hasBetOn(uint option);
     void   checkOut(uint winner, double odds);
-    //bool   hasPlayed();
-    //bool   broke();
+    bool   hasPlayed();
+    bool   broke();
 
     const double * rating; // access point to player's rating
     static void setGameParameters(uint numCities, double minBet, double initialBankroll );
