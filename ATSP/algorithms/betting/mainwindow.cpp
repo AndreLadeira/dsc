@@ -23,6 +23,7 @@ MainWindow::MainWindow(QWidget *parent) :
     setupGraph();
     centerAndResize();
     connect( ui->pushButtonRun, SIGNAL(released()), this, SLOT(buttonRunClick()));
+    connect(ui->customPlot, SIGNAL(plottableClick(QCPAbstractPlottable*,int,QMouseEvent*)), this, SLOT(resetGraphZoom(QCPAbstractPlottable*,int,QMouseEvent*)));
     base::fast_srand();
 
 }
@@ -181,7 +182,7 @@ void MainWindow::setupGraphPahse1()
     this->GraphRects[MainWindow::GraphRect::_4th]->\
             axis(QCPAxis::atTop)->setLabel("Player: consecutive wins");
 
-    customPlot->setInteractions(QCP::iRangeZoom);
+    customPlot->setInteractions( QCP::iRangeZoom | QCP::iRangeDrag );
 
 }
 
@@ -203,6 +204,13 @@ void MainWindow::centerAndResize()
             qApp->desktop()->availableGeometry()
         )
                 );
+}
+
+void MainWindow::resetGraphZoom(QCPAbstractPlottable*,int,QMouseEvent*)
+{
+//    ui->customPlot->rescaleAxes(true);
+//    ui->customPlot->replot();
+    showExceptionDialog("Unknown exception in <Run>");
 }
 
 void MainWindow::showExceptionDialog(const QString &msg)
@@ -241,6 +249,7 @@ try
     const double    minBet = ui->lineEditMinBet->text().toDouble();
     const double    initialBankroll = ui->lineEditBankroll->text().toDouble();
     const uint      pickPolicy = ui->lineEditPickPolicy->text().toUInt();
+    const uint      update     = ui->lineEditUpdate->text().toUInt();
 
     Data data;
     data.load( atsp::TSPLibLoader(fname.toStdString().c_str()));
@@ -275,9 +284,6 @@ try
     uint all_min = atsp::getLength(data,best);
     uint max = all_min;
 
-
-    uint refresh = (restarts * iters)/100;
-
     //bet1.setAlgorithm(BetAlgorithm1::Algoritm::Basic);
 
     for (uint run = 0; run < restarts; run++)
@@ -295,7 +301,7 @@ try
             double value = static_cast<double>(all_min);
             // graph stuff
             ui->customPlot->graph(Graph::Cost)->addData(key,value);
-            if ( count % refresh == 0)
+            if ( count % update == 0)
             {
                 ui->customPlot->graph(Graph::Played)->addData(key, PlayerStats::getRoundPlayers());
                 ui->customPlot->graph(Graph::Won)->addData(key,PlayerStats::getRoundWinners());
@@ -339,6 +345,7 @@ try
     GraphRects[3]->axis(QCPAxis::atBottom)->setRange(-0.5,numPlayers-0.5);
     GraphRects[2]->axis(QCPAxis::atLeft)->setRange(0,maxGA*1.1);
     GraphRects[3]->axis(QCPAxis::atLeft)->setRange(0,maxCW*1.1);
+
 
     // adjust the bar width pf the bar graphs
     int barWidth = GraphRects[MainWindow::GraphRect::_3rd]->width();

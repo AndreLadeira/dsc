@@ -48,10 +48,12 @@ private:
     void setupGraphPhase2();
     void centerAndResize();
 
+
     void showExceptionDialog(const QString & msg);
 
 private slots:
     void buttonRunClick();
+    void resetGraphZoom(QCPAbstractPlottable*,int,QMouseEvent*);
 };
 
 #endif // MAINWINDOW_H
