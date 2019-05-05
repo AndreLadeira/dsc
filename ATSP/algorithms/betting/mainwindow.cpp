@@ -23,7 +23,9 @@ MainWindow::MainWindow(QWidget *parent) :
     setupGraph();
     centerAndResize();
     connect( ui->pushButtonRun, SIGNAL(released()), this, SLOT(buttonRunClick()));
-    connect(ui->customPlot, SIGNAL(plottableClick(QCPAbstractPlottable*,int,QMouseEvent*)), this, SLOT(resetGraphZoom(QCPAbstractPlottable*,int,QMouseEvent*)));
+    //connect( ui->customPlot, SIGNAL(plottableClick(QCPAbstractPlottable*,int,QMouseEvent*)), this, SLOT(resetGraphZoom(QCPAbstractPlottable*,int,QMouseEvent*)));
+    //connect( ui->customPlot, SIGNAL(mouseDoubleClick(QMouseEvent *event)), this, SLOT(cpMouseDblClick(QMouseEvent *)) );
+    connect(ui->customPlot, SIGNAL(mouseDoubleClick(QMouseEvent*)), this, SLOT(cpMousePress()));
     base::fast_srand();
 
 }
@@ -213,6 +215,25 @@ void MainWindow::resetGraphZoom(QCPAbstractPlottable*,int,QMouseEvent*)
     showExceptionDialog("Unknown exception in <Run>");
 }
 
+void MainWindow::cpMouseDblClick(QMouseEvent *)
+{
+    showExceptionDialog("Unknown exception in <DBCLICK>");
+}
+
+void MainWindow::cpMousePress()
+{
+    ui->customPlot->rescaleAxes();
+    bool foundRange = false;
+    QCPRange range = ui->customPlot->graph(Graph::Cost)->getValueRange(foundRange);
+    GraphRects[0]->axis(QCPAxis::atLeft)->setRange(0,range.upper);
+
+    const uint      numPlayers = ui->lineEditPlayers->text().toUInt();
+
+    GraphRects[1]->axis(QCPAxis::atLeft)->setRange(0,numPlayers + 10);
+
+    ui->customPlot->replot();
+}
+
 void MainWindow::showExceptionDialog(const QString &msg)
 {
     QMessageBox msgBox;
@@ -267,7 +288,7 @@ try
     QTime timer;
     timer.start();
 
-    uint count = 0;
+
 
     ui->customPlot->graph(Graph::Cost)->data()->clear();
     ui->customPlot->graph(Graph::Won)->data()->clear();
@@ -283,9 +304,9 @@ try
     Path best = current;
     uint all_min = atsp::getLength(data,best);
     uint max = all_min;
-
+    ui->customPlot->graph(Graph::Cost)->addData(0,max);
     //bet1.setAlgorithm(BetAlgorithm1::Algoritm::Basic);
-
+    uint count = 1;
     for (uint run = 0; run < restarts; run++)
     {
         for (uint iter = 0; iter < iters; iter++)
@@ -319,7 +340,7 @@ try
 
 
     GraphRects[0]->axis(QCPAxis::atLeft)->setRange(0,max);
-    GraphRects[1]->axis(QCPAxis::atLeft)->setRange(0,numPlayers * 1.1);
+    GraphRects[1]->axis(QCPAxis::atLeft)->setRange(0,numPlayers + 10);
 
     GraphRects[2]->axis(QCPAxis::atLeft)->ticker()->setTickCount(2);
     GraphRects[3]->axis(QCPAxis::atLeft)->ticker()->setTickCount(2);

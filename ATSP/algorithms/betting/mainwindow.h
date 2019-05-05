@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QMouseEvent>
 #include "qcustomplot.h"
 
 namespace Ui {
@@ -54,6 +55,8 @@ private:
 private slots:
     void buttonRunClick();
     void resetGraphZoom(QCPAbstractPlottable*,int,QMouseEvent*);
+    void cpMouseDblClick(QMouseEvent *event);
+    void cpMousePress();
 };
 
 #endif // MAINWINDOW_H
