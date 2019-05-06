@@ -95,8 +95,6 @@ void MainWindow::setupGraphPahse1()
     GraphRects[2]->axis(QCPAxis::atLeft)->setLabel("Rounds");
     GraphRects[3]->axis(QCPAxis::atLeft)->setLabel("Wins");
 
-
-
     // create and configure plottables:
     GraphCost = customPlot->addGraph(
                 GraphRects[0]->axis(QCPAxis::atBottom),
@@ -108,6 +106,12 @@ void MainWindow::setupGraphPahse1()
                 GraphRects[1]->axis(QCPAxis::atLeft));
     GraphWinners->setPen( QPen(QColor("#FF8C00"),2));//darkorange
     GraphWinners->setName("Winners");
+
+    GraphWinnersMovAvg = customPlot->addGraph(
+                GraphRects[1]->axis(QCPAxis::atBottom),
+                GraphRects[1]->axis(QCPAxis::atLeft));
+    GraphWinnersMovAvg->setPen( QPen(QColor("#000000"),1));//black
+    GraphWinnersMovAvg->setName("Mov. Avg.");
 
     GraphPlayed = customPlot->addGraph(
                 GraphRects[1]->axis(QCPAxis::atBottom),
@@ -138,6 +142,7 @@ void MainWindow::setupGraphPahse1()
     GraphWinners->addToLegend(legend);
     GraphPlayed->addToLegend(legend);
     GraphBroken->addToLegend(legend);
+    GraphWinnersMovAvg->addToLegend(legend);
 
     // create plotabbles for 3rd and 4th graphs
     // and set them to show bars
@@ -271,6 +276,7 @@ try
     const double    initialBankroll = ui->lineEditBankroll->text().toDouble();
     const uint      pickPolicy = ui->lineEditPickPolicy->text().toUInt();
     const uint      update     = ui->lineEditUpdate->text().toUInt();
+    const uint      movAvgSz   = ui->lineEditMovAvg->text().toUInt();
 
     Data data;
     data.load( atsp::TSPLibLoader(fname.toStdString().c_str()));
@@ -292,6 +298,7 @@ try
 
     ui->customPlot->graph(Graph::Cost)->data()->clear();
     ui->customPlot->graph(Graph::Won)->data()->clear();
+    ui->customPlot->graph(Graph::WonAvg)->data()->clear();
     ui->customPlot->graph(Graph::Played)->data()->clear();
     ui->customPlot->graph(Graph::Broke)->data()->clear();
     ui->customPlot->graph(Graph::RoundsAlive)->data()->clear();
@@ -306,6 +313,12 @@ try
     uint max = all_min;
     ui->customPlot->graph(Graph::Cost)->addData(0,max);
     //bet1.setAlgorithm(BetAlgorithm1::Algoritm::Basic);
+
+    //
+    //
+    //  THE GAME
+    //
+    //
     uint count = 1;
     for (uint run = 0; run < restarts; run++)
     {
@@ -328,10 +341,26 @@ try
                 ui->customPlot->graph(Graph::Won)->addData(key,PlayerStats::getRoundWinners());
                 ui->customPlot->graph(Graph::Broke)->addData(key, PlayerStats::getRoundBroken());
             }
+            if ( count % movAvgSz == 0 )
+            {
+                double movAvg = 0.0;
+                for(uint i = count - movAvgSz; i < count; i++)
+                {
+                   movAvg += ui->customPlot->graph(Graph::Won)->data()->at(static_cast<int>(i))->value;
+                }
+                movAvg /= movAvgSz;
+                ui->customPlot->graph(Graph::WonAvg)->addData(key,movAvg);
+            }
             count++;
         }
         atsp::randomize(current);
     }
+
+    //
+    //
+    //  GRAPH UPDATE
+    //
+    //
 
     for (int i = 0; i < ui->customPlot->graphCount(); i++ )
     {
@@ -379,6 +408,13 @@ try
 
     ui->customPlot->replot();
 
+
+    //
+    //
+    //  STATUS BAR UPDATE
+    //
+    //
+
     msg.str(std::string());
     msg << "Elapsed Time: " << static_cast<double>(timer.elapsed())/1000.0 << "s ";
     msg << "Initial Value: " << max;
@@ -386,6 +422,12 @@ try
     double diff = max - all_min;
     msg << " Improvement: " << static_cast<uint>(diff);
     msg << " (-" << std::fixed << std::setprecision(0) << diff*100/max << "%)";
+
+    double finalWonAvg = ui->customPlot->graph(Graph::WonAvg)->data()->at(
+                ui->customPlot->graph(Graph::WonAvg)->dataCount() - 1 )->value;
+    msg << " mean # of Winners : " << finalWonAvg;
+    msg << " ( " << finalWonAvg / numPlayers * 100 << "%)";
+
 
     ui->statusBar->showMessage(msg.str().c_str());
 }
