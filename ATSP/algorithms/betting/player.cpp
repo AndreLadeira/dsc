@@ -155,3 +155,34 @@ const PlayerStats &Player::getStats() const
 {
     return _stats;
 }
+
+bool Player::operator>(const Player &rhs) const
+{
+    return _stats > rhs._stats;
+}
+
+bool Player::operator<(const Player &rhs) const
+{
+    return !(*this > rhs);
+}
+
+bool Player::operator==(const Player & rhs) const
+{
+    for (uint i = 0; i < numCities; i++)
+        if ( (_myProb[i] - rhs._myProb[i]) > 1e-6 ) return false;
+
+    return true;
+}
+
+//#include <memory>
+
+//uint Player::getUID() const
+//{
+//    double dId = 0;
+//    for (uint i = 0; i < numCities; ++i) {
+//        dId += _myProb[i];
+//    }
+//    uint UID = 0;
+//    std::memcpy(&UID,&dId,sizeof(uint));
+//    return UID;
+//}

@@ -32,7 +32,8 @@ public:
     };
 
     static void setComparisson(compareBy);
-    bool operator ()(const PlayerStats & a, const PlayerStats & b)const;
+    bool operator>(const PlayerStats &)const;
+    bool operator<(const PlayerStats &)const;
 
     void alive();  // call every round
     void played(); // call when player bets

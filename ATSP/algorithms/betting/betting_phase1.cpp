@@ -25,7 +25,7 @@ uint BetAlgorithm1::run(Path &       currentPath,
     // huge buffer, avoid allocation....
     uint trPoints[512] = {0};
     const uint currPathSz = currentPath.getSize();
-    const uint maxPick = currPathSz - _trsz;
+    const uint maxPick = currPathSz - _trsz + 1;
 
     trPoints[0] = static_cast<uint>(base::fast_rand()) % maxPick;
 

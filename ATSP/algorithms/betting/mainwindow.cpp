@@ -7,6 +7,7 @@
 #include <QMetaEnum>
 #include "TSPLibLoader/TSPLibLoader.h"
 #include "betting_phase1.h"
+#include "greedy/greedy_algorithm.h"
 #include <memory>
 #include <sstream>
 #include <iomanip>
@@ -195,7 +196,16 @@ void MainWindow::setupGraphPahse1()
 
 void MainWindow::setupGraphPhase2()
 {
+    QCustomPlot *customPlot = ui->plotPhase2;
 
+    GraphPhase2Greedy = customPlot->addGraph();
+    GraphPhase2Greedy->setPen( QPen(QColor("#8B0000"),2));//darkred
+    GraphPhase2Greedy->setName("Greedy");
+
+    customPlot->xAxis->setLabel("Round");
+    customPlot->yAxis->setLabel("ATSP Path Cost");
+    customPlot->legend->setVisible(true);
+    //customPlot->legend->setFont(QFont("Helvetica",9));
 
 }
 
@@ -277,6 +287,7 @@ try
     const uint      pickPolicy = ui->lineEditPickPolicy->text().toUInt();
     const uint      update     = ui->lineEditUpdate->text().toUInt();
     const uint      movAvgSz   = ui->lineEditMovAvg->text().toUInt();
+    const uint      itersPh2   = ui->lineEditIters2->text().toUInt();
 
     Data data;
     data.load( atsp::TSPLibLoader(fname.toStdString().c_str()));
@@ -305,6 +316,8 @@ try
     ui->customPlot->graph(Graph::ConsecutiveWins)->data()->clear();
     ui->customPlot->graph(Graph::RoundsAliveMax)->data()->clear();
     ui->customPlot->graph(Graph::ConsecutiveWinsMax)->data()->clear();
+
+    GraphPhase2Greedy->data()->clear();
 
     Path current(data.getSize());
     atsp::randomize(current);
@@ -358,6 +371,60 @@ try
 
     //
     //
+    //  PHASE 2
+    //
+    //
+
+
+    // find the player with most games won
+//    PlayerStats::setComparisson(PlayerStats::compareBy::gamesAlive);
+//    uint pos = 0;
+//    for(uint i = 1; i < numPlayers; ++i)
+//        if ( players[i] > players[pos] ) pos = i;
+
+//    const Player & winnerByTotal = players[pos];
+
+//    // find the player with the best recent record
+//    PlayerStats::setComparisson(PlayerStats::compareBy::recentPerformance);
+//    pos = 0;
+//    for(uint i = 1; i < numPlayers; ++i)
+//        if ( players[i] > players[pos] ) pos = i;
+//    const Player & winnerByRecPerf = players[pos];
+
+
+    // run phase 2 greedy, for comparisson
+    // setup a greedy algorithm
+    atsp::GreedyAlgorithm greedyAlgorithm(trSize);
+    base::fast_srand();
+
+    current = best;
+    uint mskRange = data.getSize() - trSize + 1;
+
+    GraphPhase2Greedy->addData(0,all_min);
+
+    for(uint i = 1; i < itersPh2; ++i)
+    {
+        greedyAlgorithm.setMask( static_cast<uint>(base::fast_rand()) % mskRange );
+        uint r = greedyAlgorithm.run(current,data);
+
+        GraphPhase2Greedy->addData(i,r);
+
+    }
+//    // run phase 2 bet2 using P1
+//    for(uint i = 0; i < itersPh2; ++i)
+//    {
+
+//    }
+//    // if P1 != P2 run bet2 bet using P2
+//    if ( &winnerByTotal != &winnerByRecPerf )
+//        for(uint i = 0; i < itersPh2; ++i)
+//        {
+
+//        }
+
+
+    //
+    //
     //  GRAPH UPDATE
     //
     //
@@ -408,7 +475,10 @@ try
 
     ui->customPlot->replot();
 
+    // phase 2 graphs
 
+    ui->plotPhase2->rescaleAxes();
+    ui->plotPhase2->replot();
     //
     //
     //  STATUS BAR UPDATE

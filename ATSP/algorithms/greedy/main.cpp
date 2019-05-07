@@ -37,7 +37,7 @@ try
     //std::srand( static_cast<unsigned int>(time(nullptr)));
 
     const uint dataSize = data.getSize();
-    const uint mskRange = dataSize - msksz;
+    const uint mskRange = dataSize - msksz + 1;
 
     atsp::Path current(dataSize);
     atsp::Path best = current;

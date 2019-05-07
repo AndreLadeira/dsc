@@ -39,6 +39,14 @@ public:
     static void setGameParameters(uint numCities, double minBet, double initialBankroll );
     const PlayerStats & getStats() const;
 
+    bool operator>(const Player&) const;
+    bool operator<(const Player& ) const;
+
+    //uint getUID() const;
+
+    bool operator==(const Player&) const;
+
+
 private:
 
 

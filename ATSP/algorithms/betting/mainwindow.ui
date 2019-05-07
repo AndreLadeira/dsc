@@ -186,7 +186,7 @@
        <item row="2" column="0">
         <widget class="QLabel" name="label_3">
          <property name="text">
-          <string>Iters.:</string>
+          <string>Iters. 1</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -196,7 +196,7 @@
        <item row="2" column="1">
         <widget class="QLineEdit" name="lineEditIters">
          <property name="text">
-          <string>500</string>
+          <string>50</string>
          </property>
         </widget>
        </item>
@@ -298,7 +298,7 @@
        <item row="8" column="1">
         <widget class="QLineEdit" name="lineEditPickPolicy">
          <property name="text">
-          <string>1</string>
+          <string>3</string>
          </property>
         </widget>
        </item>
@@ -332,11 +332,28 @@
        <item row="10" column="1">
         <widget class="QLineEdit" name="lineEditMovAvg">
          <property name="text">
-          <string>20</string>
+          <string>5</string>
          </property>
         </widget>
        </item>
-       <item row="11" column="0" colspan="2">
+       <item row="11" column="0">
+        <widget class="QLabel" name="label_12">
+         <property name="text">
+          <string>Iters. 2</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="11" column="1">
+        <widget class="QLineEdit" name="lineEditIters2">
+         <property name="text">
+          <string>50</string>
+         </property>
+        </widget>
+       </item>
+       <item row="12" column="0" colspan="2">
         <widget class="QPushButton" name="pushButtonRun">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">

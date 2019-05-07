@@ -88,20 +88,25 @@ void PlayerStats::setComparisson(PlayerStats::compareBy c)
     _compare = c;
 }
 
-bool PlayerStats::operator ()(const PlayerStats &a, const PlayerStats &b) const
+bool PlayerStats::operator>(const PlayerStats & rhs) const
 {
     if (_compare == PlayerStats::compareBy::gamesAlive)
     {
-        if (a._gamesAlive == b._gamesAlive)
-            return a._consecutiveWins > b._consecutiveWins;
+        if (_gamesAlive == rhs._gamesAlive)
+            return _consecutiveWins > rhs._consecutiveWins;
         else
-            return  a._gamesAlive > b._gamesAlive;
+            return  _gamesAlive > rhs._gamesAlive;
     }
     else
     {
-        if ( a._consecutiveWins == b._consecutiveWins )
-            return  a._gamesAlive > b._gamesAlive;
+        if ( _consecutiveWins == rhs._consecutiveWins )
+            return  _gamesAlive > rhs._gamesAlive;
         else
-            return a._consecutiveWins > b._consecutiveWins;
+            return _consecutiveWins > rhs._consecutiveWins;
     }
+}
+
+bool PlayerStats::operator<(const PlayerStats &rhs) const
+{
+    return !( *this > rhs );
 }

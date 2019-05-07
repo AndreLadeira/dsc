@@ -26,6 +26,10 @@ public:
         Cost = 0, Won, WonAvg, Played, Broke, RoundsAlive, ConsecutiveWins,
         RoundsAliveMax, ConsecutiveWinsMax
     };
+    enum GraphPhase2
+    {
+        Greedy = 0, BetRoundsAlive, BetRecentPerformance
+    };
     void show();
 
 
@@ -44,6 +48,10 @@ private:
     QCPGraph    *GraphPlayerRoundsAliveMax;
     QCPGraph    *GraphPlayerConsecutiveWins;
     QCPGraph    *GraphPlayerConsecutiveWinsMax;
+
+    QCPGraph    *GraphPhase2Greedy;
+    QCPGraph    *GraphPhase2BetOp1;
+    QCPGraph    *GraphPhase2BetOp2;
 
     void setupGraph();
     void setupGraphPahse1();
