@@ -202,6 +202,15 @@ void MainWindow::setupGraphPhase2()
     GraphPhase2Greedy->setPen( QPen(QColor("#8B0000"),2));//darkred
     GraphPhase2Greedy->setName("Greedy");
 
+    GraphPhase2BetOp1 = customPlot->addGraph();
+    GraphPhase2BetOp1->setPen(QPen(QColor("#FF8C00"),2));//darkorange)
+    GraphPhase2BetOp1->setName("Bet, most wins");
+
+    GraphPhase2BetOp2 = customPlot->addGraph();
+    GraphPhase2BetOp2->setPen(QPen(QColor("#4286f4"),2));//blue
+    GraphPhase2BetOp2->setName("Bet, recent wins");
+
+
     customPlot->xAxis->setLabel("Round");
     customPlot->yAxis->setLabel("ATSP Path Cost");
     customPlot->legend->setVisible(true);
@@ -288,6 +297,8 @@ try
     const uint      update     = ui->lineEditUpdate->text().toUInt();
     const uint      movAvgSz   = ui->lineEditMovAvg->text().toUInt();
     const uint      itersPh2   = ui->lineEditIters2->text().toUInt();
+    const uint      saveCount1      = ui->lineEditSave1->text().toUInt();
+    const uint      saveCount2      = ui->lineEditSave2->text().toUInt();
 
     Data data;
     data.load( atsp::TSPLibLoader(fname.toStdString().c_str()));
@@ -318,6 +329,8 @@ try
     ui->customPlot->graph(Graph::ConsecutiveWinsMax)->data()->clear();
 
     GraphPhase2Greedy->data()->clear();
+    GraphPhase2BetOp1->data()->clear();
+    GraphPhase2BetOp2->data()->clear();
 
     Path current(data.getSize());
     atsp::randomize(current);
@@ -333,6 +346,11 @@ try
     //
     //
     uint count = 1;
+
+    // saved paths
+    std::unique_ptr<Path> savedPath1 = nullptr, savedPath2 = nullptr;
+
+
     for (uint run = 0; run < restarts; run++)
     {
         for (uint iter = 0; iter < iters; iter++)
@@ -364,9 +382,35 @@ try
                 movAvg /= movAvgSz;
                 ui->customPlot->graph(Graph::WonAvg)->addData(key,movAvg);
             }
+
+            if (count == saveCount1)
+                savedPath1.reset( new Path(best) );
+
+            if (count == saveCount2)
+                savedPath2.reset( new Path(best) );
+
             count++;
         }
         atsp::randomize(current);
+    }
+
+    if ( savedPath1!=nullptr && savedPath2 != nullptr)
+    {
+
+        // log the selected paths
+        msg.str(std::string());
+        msg << data;
+        //msg << "Problem: " << fname.right(fname.size() - fname.lastIndexOf("/") - 1).toStdString() << std::endl;
+        msg << atsp::getLength(data,*savedPath1) << "\t"
+            << atsp::getLength(data, *savedPath2) << "\n";
+        for(uint i = 0; i < data.getSize(); ++i)
+        {
+            msg << savedPath1->getDataPtr()[i] << "\t" <<
+                   savedPath2->getDataPtr()[i] << "\n";
+        }
+
+        ui->plainTextEdit->insertPlainText( QString( msg.str().c_str()));
+
     }
 
     //
@@ -377,32 +421,81 @@ try
 
 
     // find the player with most games won
-//    PlayerStats::setComparisson(PlayerStats::compareBy::gamesAlive);
-//    uint pos = 0;
-//    for(uint i = 1; i < numPlayers; ++i)
-//        if ( players[i] > players[pos] ) pos = i;
+    PlayerStats::setComparisson(PlayerStats::compareBy::gamesAlive);
+    uint pos = 0;
+    for(uint i = 1; i < numPlayers; ++i)
+        if ( players[i] > players[pos] ) pos = i;
 
-//    const Player & winnerByTotal = players[pos];
+    const Player & winnerByTotal = players[pos];
 
-//    // find the player with the best recent record
-//    PlayerStats::setComparisson(PlayerStats::compareBy::recentPerformance);
-//    pos = 0;
-//    for(uint i = 1; i < numPlayers; ++i)
-//        if ( players[i] > players[pos] ) pos = i;
-//    const Player & winnerByRecPerf = players[pos];
+    // find the player with the best recent record
+    PlayerStats::setComparisson(PlayerStats::compareBy::recentPerformance);
+    pos = 0;
+    for(uint i = 1; i < numPlayers; ++i)
+        if ( players[i] > players[pos] ) pos = i;
+    const Player & winnerByRecPerf = players[pos];
 
 
-    // run phase 2 greedy, for comparisson
+
     // setup a greedy algorithm
     atsp::GreedyAlgorithm greedyAlgorithm(trSize);
     base::fast_srand();
-
-    current = best;
     uint mskRange = data.getSize() - trSize + 1;
 
-    GraphPhase2Greedy->addData(0,all_min);
 
+    // run phase 2 bet2 using P1
+    GraphPhase2BetOp1->addData(0,all_min);
+    current = best;
+    uint p2IterCount1 = 1;
     for(uint i = 1; i < itersPh2; ++i)
+    {
+        // get the masks from the player's knowledge
+        bool trPoints[512] = {false};
+        winnerByTotal.getTrPoints(trPoints);
+
+        for (uint j = 0; j < mskRange; ++j)
+        {
+            if ( trPoints[j] )
+            {
+               greedyAlgorithm.setMask( j );
+               GraphPhase2BetOp1->addData(p2IterCount1++,greedyAlgorithm.run(current,data));
+               // update player knowledge???
+            }
+        }
+
+    }
+    uint p2IterCount2 = 1;
+    if ( &winnerByTotal != &winnerByRecPerf )
+    {
+        // run phase 2 bet2 using P2
+        GraphPhase2BetOp2->addData(0,all_min);
+        current = best;
+
+        for(uint i = 1; i < itersPh2; ++i)
+        {
+            // get the masks from the player's knowledge
+            bool trPoints[512] = {false};
+            winnerByRecPerf.getTrPoints(trPoints);
+
+            for (uint j = 0; j < mskRange; ++j)
+            {
+                if ( trPoints[j] )
+                {
+                   greedyAlgorithm.setMask( j );
+                   GraphPhase2BetOp2->addData(p2IterCount2++,greedyAlgorithm.run(current,data));
+                   // update player knowledge???
+                }
+            }
+
+        }
+    }
+
+    // run phase 2 greedy, for comparisson
+    current = best;
+    GraphPhase2Greedy->addData(0,all_min);
+    uint p2IterCount = p2IterCount1 > p2IterCount2 ? p2IterCount1 : p2IterCount2;
+
+    for(uint i = 1; i < p2IterCount; ++i)
     {
         greedyAlgorithm.setMask( static_cast<uint>(base::fast_rand()) % mskRange );
         uint r = greedyAlgorithm.run(current,data);
@@ -410,18 +503,6 @@ try
         GraphPhase2Greedy->addData(i,r);
 
     }
-//    // run phase 2 bet2 using P1
-//    for(uint i = 0; i < itersPh2; ++i)
-//    {
-
-//    }
-//    // if P1 != P2 run bet2 bet using P2
-//    if ( &winnerByTotal != &winnerByRecPerf )
-//        for(uint i = 0; i < itersPh2; ++i)
-//        {
-
-//        }
-
 
     //
     //
@@ -485,17 +566,39 @@ try
     //
     //
 
+    uint all_min2 = static_cast<uint>(
+                std::ceil( GraphPhase2Greedy->data()->at(GraphPhase2Greedy->dataCount()-1)->value ) );
+    uint tmp = static_cast<uint>(
+            std::ceil( GraphPhase2BetOp1->data()->at(GraphPhase2BetOp1->dataCount()-1)->value ) );
+
+    if ( tmp < all_min2 ) all_min2 = tmp;
+
+    tmp = static_cast<uint>(
+            std::ceil( GraphPhase2BetOp2->data()->at(GraphPhase2BetOp2->dataCount()-1)->value ) );
+
+    if ( tmp < all_min2 ) all_min2 = tmp;
+
     msg.str(std::string());
     msg << "Elapsed Time: " << static_cast<double>(timer.elapsed())/1000.0 << "s ";
     msg << "Initial Value: " << max;
-    msg << " Final Result: "<< all_min;
-    double diff = max - all_min;
-    msg << " Improvement: " << static_cast<uint>(diff);
-    msg << " (-" << std::fixed << std::setprecision(0) << diff*100/max << "%)";
+    msg << " Final Result: "<< all_min << " / " << all_min2;
+    double diff1 = max - all_min;
+    double diff2 = max - all_min2;
+    double diff3 = all_min - all_min2;
+
+    msg << " Improvement: ";
+    msg << "-" << std::fixed << std::setprecision(0) << diff1*100/max << "% / ";
+    msg << "-" << std::fixed << std::setprecision(0) << diff2*100/max << "% / ";
+    msg << "-" << std::fixed << std::setprecision(0) << diff3*100/all_min << "% ";
+
+    msg << " Impr./round: ";
+    msg << "-" << std::fixed << std::setprecision(0) << diff1/count << " / ";
+    msg << "-" << std::fixed << std::setprecision(0) << diff2/count << " / ";
+    msg << "-" << std::fixed << std::setprecision(0) << diff3/p2IterCount;
 
     double finalWonAvg = ui->customPlot->graph(Graph::WonAvg)->data()->at(
                 ui->customPlot->graph(Graph::WonAvg)->dataCount() - 1 )->value;
-    msg << " mean # of Winners : " << finalWonAvg;
+    msg << " Avg.Win. : " << finalWonAvg;
     msg << " ( " << finalWonAvg / numPlayers * 100 << "%)";
 
 

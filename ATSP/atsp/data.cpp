@@ -80,9 +80,9 @@ ostream & atsp::operator <<(ostream & os, const Data & d)
     for(unsigned int i = 0; i < d._size; ++i)
     {
         for(unsigned int j = 0; j <d._size;++j)
-            os<< d._data[i][j] << "  ";
+            os<< d._data[i][j] << "\t";
         os << endl;
     }
-    os<< "\n--- end of atsp data dump ---\n";
+    os<< "\n--- end of atsp data dump ---\n\n";
     return os;
 }

@@ -3,7 +3,7 @@
 
 #include "base/random.h"
 #include "playerstats.h"
-
+#include <vector>
 
 typedef unsigned int uint;
 
@@ -46,6 +46,9 @@ public:
 
     bool operator==(const Player&) const;
 
+    // phase 2
+
+    void getTrPoints(bool trPoints[buffsz]) const;
 
 private:
 

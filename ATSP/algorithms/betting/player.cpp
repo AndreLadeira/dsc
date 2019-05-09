@@ -174,6 +174,13 @@ bool Player::operator==(const Player & rhs) const
     return true;
 }
 
+void Player::getTrPoints(bool trPoints[]) const
+{
+    for (uint i = 0; i < numCities; ++i)
+        if ( _myProb[i] > base::fast_rand01() )
+            trPoints[i] = true;
+}
+
 //#include <memory>
 
 //uint Player::getUID() const
