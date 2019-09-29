@@ -10,4 +10,5 @@ SOURCES += \
 
 HEADERS += \
     atsp.h \
-    greedysdhc.h
+    greedysdhc.h \
+    types.h
