@@ -5,7 +5,9 @@ CONFIG -= qt
 
 SOURCES += \
         atsp.cpp \
-        main.cpp
+        main.cpp \
+    greedysdhc.cpp
 
 HEADERS += \
-    atsp.h
+    atsp.h \
+    greedysdhc.h
