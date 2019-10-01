@@ -11,4 +11,6 @@ SOURCES += \
 HEADERS += \
     atsp.h \
     greedysdhc.h \
-    types.h
+    types.h \
+    functor.h \
+    noncopyable.h

@@ -1,6 +1,6 @@
 #include "greedysdhc.h"
 
-greedySDHC::greedySDHC()
-{
+//greedySDHC::greedySDHC()
+//{
 
-}
+//}

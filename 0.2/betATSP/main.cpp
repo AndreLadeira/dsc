@@ -1,5 +1,6 @@
 #include <iostream>
-#include <vector>
+#include "functor.h"
+#include <utility>
 
 using namespace std;
 
@@ -13,6 +14,7 @@ struct Corolla : public Car
 {
     ~Corolla() { cout << "Corolla dtor\n"; }
     virtual string operator()() { return "Toyota Corolla ";}
+
 
 };
 struct Civic : public Car
@@ -60,15 +62,19 @@ try
     myCar = new Tire( myCar, "1 old pirelli step");
     myCar = new Tire( myCar, "4 brand new michellin");
 
+
+
     //throw std::exception();
 
     std::cout<< (*myCar)() << endl;
 
+    delete myCar;
 
     return 0;
 }
 catch(...)
 {
+
     return 0;
 }
 

@@ -1,6 +1,6 @@
 #ifndef TYPES_H
 #define TYPES_H
-
+/*
 template< typename result_t, typename solution_t, typename problem_data_t >
 using objective_function_t = result_t (*)(solution_t, problem_data_t);
 
@@ -19,7 +19,7 @@ class Functor
 public:
     Functor(function_t f):_fcn(f){}
     inline function_t operator()(void){ return _fcn; }
-private:
+protected:
     function_t _fcn;
 };
 
@@ -28,8 +28,10 @@ class FunctorWithCallCounter : public Functor< function_t >
 {
 public:
     FunctorWithCallCounter(function_t f):_calls(0), Functor<function_t>(f){}
-    unsigned int getCalls(){ return _calls;}
-    void resetCallCaounter(){ _calls = 0; }
+    unsigned int getTimesCalled(){ return _calls;}
+    void resetCounter(){ _calls = 0; }
+
+    inline function_t operator()(void){ ++_calls; return Functor<function_t>::_fcn; }
 
 private:
     unsigned int _calls;
@@ -63,8 +65,6 @@ public:
     AcceptSolutionFunctor(accept_solution_function_t);
 };
 
-
-
 class NonCopyable
 {
 protected:
@@ -80,25 +80,29 @@ template< typename create_solution_function_t,
           typename accept_solution_function_t >
 class Algorithm : public NonCopyable
 {
+protected:
+    using create_solution_functor_t = CreateSolutionFunctor<create_solution_function_t>;
+    using neighborhood_functor_t    = NeighborhoodFunctor<neighborhood_function_t>;
+    using objective_functor_t       = ObjectiveFunctor<objective_function_t>;
+    using accept_solution_functor_t = AcceptSolutionFunctor<accept_solution_function_t>;
+
 public:
-    void setCreateSolutionFunctor(
-            CreateSolutionFunctor<create_solution_function_t> f){ _create_solution_functor = f;}
-    void setNeighborhoodFunctor(
-            NeighborhoodFunctor<neighborhood_function_t> f){ _neighborhood_functor = f;}
-    void setObjectiveFunctor(
-            ObjectiveFunctor<objective_function_t> f ) { _objective_functor = f; }
-    void setAcceptSolutionFunctor(
-            AcceptSolutionFunctor<accept_solution_function_t> f ) { _accept_solution_functor = f; }
+    void setCreateSolutionFunctor( create_solution_functor_t f){ _create_solution_functor = f;}
+    void setNeighborhoodFunctor( neighborhood_functor_t f){ _neighborhood_functor = f;}
+    void setObjectiveFunctor( objective_functor_t f ) { _objective_functor = f; }
+    void setAcceptSolutionFunctor( accept_solution_functor_t f ) { _accept_solution_functor = f; }
 
-    virtual void run() = 0;
+    virtual void run(unsigned int) = 0;
+    void setData(objective_function_t);
+    void setInitialSolution( decltype (create_solution_function_t()));
 
-private:
+protected:
 
-    CreateSolutionFunctor<create_solution_function_t> _create_solution_functor;
-    NeighborhoodFunctor<neighborhood_function_t> _neighborhood_functor;
-    ObjectiveFunctor<objective_function_t> _objective_functor;
-    AcceptSolutionFunctor<accept_solution_function_t> _accept_solution_functor;
+    create_solution_functor_t    _create_solution_functor;
+    neighborhood_functor_t       _neighborhood_functor;
+    objective_functor_t          _objective_functor;
+    accept_solution_functor_t    _accept_solution_functor;
 };
 
-
+*/
 #endif // TYPES_H
