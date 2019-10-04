@@ -1,32 +1,10 @@
-#ifndef CREATESOLUTION_H
-#define CREATESOLUTION_H
+#ifndef CREATE_DECORATORS_H
+#define CREATE_DECORATORS_H
 
-#include "noncopyable.h"
+#include "create_functor.h"
 #include <memory>
+#include <iostream>
 
-template< typename solution_t , typename problem_data_t >
-class CreateFunctor : NonCopyable
-{
-public:
-
-    using create_function_t =
-        solution_t (*)(const problem_data_t &, size_t, const solution_t * const);
-
-    explicit CreateFunctor(create_function_t f = nullptr):_fcn(f){}
-    virtual ~CreateFunctor() = default;
-
-    virtual solution_t operator()(
-            const problem_data_t & data,
-            size_t sz,
-            const solution_t * const sol = nullptr)
-    {
-        return _fcn(data,sz,sol);
-    }
-
-protected:
-
-    create_function_t _fcn;
-};
 
 template< typename solution_t , typename problem_data_t >
 class CreateFunctorDecorator : public CreateFunctor<solution_t,problem_data_t>
@@ -75,6 +53,9 @@ private:
     unsigned int _counter;
 };
 
+using std::ostream;
+using std::cout;
+
 template< typename solution_t, typename problem_data_t >
 class PrintSolution : public CreateFunctorDecorator<solution_t, problem_data_t>
 {
@@ -84,12 +65,18 @@ public:
 
     using base = CreateFunctorDecorator<solution_t,problem_data_t>;
 
-    PrintSolution( create_functor_ptr_t F ):base(F),_counter(0){}
+    PrintSolution( create_functor_ptr_t F, ostream & os = cout):
+        base(F),_counter(0),_os(os){}
 
-    virtual solution_t run(const problem_data_t & data, size_t sz,
+    virtual solution_t operator()(const problem_data_t & data, size_t sz,
                            const solution_t * const sol = nullptr)
     {
-        return base::_fctor->operator()(data,sz,sol);
+        // get the newly created solution
+        solution_t s = base::_fctor->operator()(data,sz,sol);
+        //print it
+        for (auto const& i: s) _os << i << " ";
+        _os << "\n";
+        return s;
     }
     unsigned int getCounter(){return _counter;}
     void resetCounter(){ _counter = 0;}
@@ -97,7 +84,8 @@ public:
 private:
 
     unsigned int _counter;
+    ostream & _os;
 };
 
 
-#endif // CREATESOLUTION_H
+#endif // CREATE_DECORATORS_H

@@ -9,11 +9,15 @@ SOURCES += \
     greedysdhc.cpp
 
 HEADERS += \
-    atsp.h \
-    createsolution.h \
+    atsp_decision.h \
+    create_decorators.h \
+    create_functor.h \
+    decorators.h \
+    functors.h \
     greedysdhc.h \
-    neighborhood.h \
+    neighborhood_decorators.h \
+    neighborhood_functor.h \
     repository.h \
     types.h \
-    functor.h \
-    noncopyable.h
+    noncopyable.h \
+    typetraits.h
