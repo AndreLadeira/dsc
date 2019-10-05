@@ -11,37 +11,51 @@ template< class res >
 class param
 {
 public:
-    using type = res;
+    typedef res type;
+    using utype = res;
 };
 
 using fcnT = int(*)(int);
 
-template< class a, class b >
-class x
+template< class T > bool compare(T a, T b)
 {
-public:
-    param<a>::type getX(void){};
-
+    return (a<b);
 }
 
-//class wrapper
-//{
-//public:
+template<typename ... Args> void g(Args ... args) {
+cout << sizeof...(Args) << endl; // number of type parameters
+cout << sizeof...(args) << endl; // number of function parameters
+}
 
-//    //wrapper( _1ParamOperator(_fcnT) op );
-////    void setOperator(T f){_op = f;}
-////    void operator()(){ std::cout<< _op(_v) << endl; }
+class wrapper
+{
+public:
 
-//private:
-//    //T _op;
-//    int _v;
-//};
+    //wrapper( _1ParamOperator(_fcnT) op );
+//    void setOperator(T f){_op = f;}
+//    void operator()(){ std::cout<< _op(_v) << endl; }
+
+
+
+private:
+    //T _op;
+    //int _v;
+};
 
 
 
 int main()
 {
-    std::pair<int,string> p(1,"maria");
+//    std::pair<int,string> p(1,"maria");
+//    long x = 20;
+//    bool res = compare(10,20);
+//    pair p2(10,10);
+
+    int i = 0; double d = 3.14; string s = "how now brown cow";
+    g(i, s, 42, d); // three parameters in the pack
+    g(s, 42, "hi"); // two parameters in the pack
+    g(d, s); // one parameter in the pack
+    g("hi"); // empty pack
 
 //    wrapper<fcnT> wrap(4);
 
