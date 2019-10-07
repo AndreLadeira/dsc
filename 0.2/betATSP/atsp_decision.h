@@ -4,42 +4,56 @@
 #include <utility>
 #include <vector>
 #include <numeric>
+#include <ostream>
 
 #include "functors.h"
 
 namespace algorithm{
 namespace atsp_decision{
 
-using node_t = std::pair<size_t,size_t>;
+struct node_t
+{
+    node_t():_node(){}
+    node_t(size_t prev, size_t next):_node(prev,next){}
+    size_t& prev = _node.first;
+    size_t& next = _node.second;
+
+    friend std::ostream& operator<<(std::ostream&, const node_t&);
+
+private:
+
+    std::pair<size_t,size_t> _node;
+};
+
+
 using solution_t = std::vector< node_t >;
+using transformation_t = std::pair<size_t,size_t>;
 using problem_data_t = std::vector< std::vector<size_t> >;
 
-solution_t create_function_basic(const problem_data_t & data,
-                                size_t sz,
-                                const solution_t * const = nullptr)
+using namespace core;
+
+class BasicCreateFunctor : public core::CreateFunctor<solution_t>
 {
-    // create a random path
+public:
+    BasicCreateFunctor(size_t sz):_size(sz){}
 
-    std::vector<size_t> path(sz+1);
-    std::iota(path.begin(),path.end()-1,0);
+    virtual solution_t operator()(void);
 
-    // begin+1 / end-1 to make paths always starting and ending at city 0,
-    // with no loss of generality
+private:
 
-    std::random_shuffle(path.begin()+1,path.end()-1);
+    size_t _size;
 
-    // store it in the decision-node structure
-    solution_t s(sz);
-    for(size_t i = 0; i < sz; ++i)
-    {
-        auto city = path.at(i);
-        auto next_city = path.at(i+1);
-        s.at(city).second = next_city;
-        s.at(next_city).first = city;
-    }
+};
 
-    return s;
-}
+class NeighborhoodFunctor : public core::NeighborhoodFunctor<solution_t,transformation_t>
+{
+public:
+    NeighborhoodFunctor() = default;
+    using trvec_t = std::vector<transformation_t>;
+
+    virtual trvec_t operator()(const solution_t & s);
+
+};
 
 
 } // algorithm

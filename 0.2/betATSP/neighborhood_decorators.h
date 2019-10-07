@@ -13,36 +13,33 @@ class NeighborhoodFunctorDecorator : public NeighborhoodFunctor<solution_t,trans
 {
 public:
 
-    using neighborhood_functor_ptr_t =
+    using functor_ptr_t =
     std::shared_ptr<NeighborhoodFunctor<solution_t,transformation_t>>;
 
-
     NeighborhoodFunctorDecorator() = delete;
-    NeighborhoodFunctorDecorator(neighborhood_functor_ptr_t F):_fptr(F){}
+    NeighborhoodFunctorDecorator(functor_ptr_t F):_fptr(F){}
 
     virtual ~NeighborhoodFunctorDecorator() = default;
     virtual std::vector<solution_t> operator()( const solution_t & s ) = 0;
 
-
 protected:
 
-    neighborhood_functor_ptr_t _fptr;
+    functor_ptr_t _fptr;
 };
 
-template< typename solution_t , typename transformation_t >
-class CallCounter : public NeighborhoodFunctorDecorator<solution_t,transformation_t>
+template< typename S , typename T >
+class NeighborhoodFunctorCallCounter : public NeighborhoodFunctorDecorator<S,T>
 {
 public:
-    using neighborhood_functor_ptr_t =
-    typename NeighborhoodFunctorDecorator<solution_t,transformation_t>::neighborhood_functor_ptr_t;
 
-    using base = NeighborhoodFunctorDecorator<solution_t,transformation_t>;
+    using base = NeighborhoodFunctorDecorator<S,T>;
+    using functor_ptr_t = typename base::neighborhood_functor_ptr_t;
 
-    CallCounter( neighborhood_functor_ptr_t F ):base(F),_counter(0){}
+    NeighborhoodFunctorCallCounter( functor_ptr_t F ):base(F),_counter(0){}
 
-    virtual solution_t operator()(solution_t & s, size_t pos){
+    virtual std::vector<S> operator()( const S & s ){
         ++_counter;
-        return base::_fctor->operator()(s,pos);
+        return base::_fptr->operator()(s);
     }
 
     unsigned int getCounter(){return _counter;}

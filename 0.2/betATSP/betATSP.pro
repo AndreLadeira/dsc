@@ -4,9 +4,9 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 SOURCES += \
-        atsp.cpp \
         main.cpp \
-    greedysdhc.cpp
+    greedysdhc.cpp \
+    atsp_decision.cpp
 
 HEADERS += \
     atsp_decision.h \
