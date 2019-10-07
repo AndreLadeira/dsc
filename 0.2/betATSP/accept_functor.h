@@ -1,0 +1,4 @@
+#ifndef ACCEPT_FUNCTOR_H
+#define ACCEPT_FUNCTOR_H
+
+#endif // ACCEPT_FUNCTOR_H

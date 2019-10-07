@@ -3,5 +3,6 @@
 
 #include "create_functor.h"
 #include "neighborhood_functor.h"
+#include "objective_functor.h"
 
 #endif // FUNCTORS_H

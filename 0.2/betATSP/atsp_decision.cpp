@@ -55,7 +55,7 @@ solution_t BasicCreateFunctor::operator()()
 
     // begin+1 / end-1 to make paths always starting and ending at city 0,
     // with no loss of generality
-    std::default_random_engine e( time(nullptr) );
+    std::default_random_engine e( static_cast<unsigned int>(time(nullptr)) );
     std::shuffle(path.begin()+1,path.end()-1,e);
 
     // store it in the decision-node structure
@@ -75,37 +75,49 @@ atsp_decision::NeighborhoodFunctor::trvec_t
 atsp_decision::NeighborhoodFunctor::operator()(const solution_t &s)
 {
     const auto sz = s.size();
-    trvec_t tr;
-    tr.reserve( (sz-2)*(sz-2) );
+    trvec_t trvec;
+    trvec.reserve( (sz-2)*(sz-2) );
 
-    const auto range = sz - 2;
+    const auto range = sz - 1;
 
-    for(size_t node = 1; node < sz; ++node)
+    for(int node = 1; node < signed(sz); ++node)// sz = 7, node [1..6]
     {
-        for( size_t i = 0; i < range; ++i )
+        for( int i = 0; i < signed(range); ++i )
         {
-
+            int tr = 1 -node + i;// 1 -[1..6] + [0 1 2 3 4 5] = 0..5/-1..4/....-5..0
+            if ( tr != -1 && tr != 0 )
+                trvec.push_back( transformation_t(node,tr));
         }
     }
 
-    size_t self = 0;
-
-    for(auto const & node  : s)
-    {
-        for(size_t city = 0; city < sz; ++city)
-            if( city != self && city != node.next )
-                tr.push_back( transformation_t(self,city) );
-        self++;
-    }
-
 #ifdef __DEBUG__
-        assert( tr.size() == (sz-2)*(sz-2));
+        assert( trvec.size() == (sz-2)*(sz-2));
 #endif
 
-    return tr;
+    return trvec;
 }
 
 std::ostream& atsp_decision::operator<<(std::ostream &os, const node_t &n)
 {
   return os << "<" << n.prev << ","<< n.next << ">";
+}
+
+
+
+void atsp_decision::ObjectiveFunctor::operator()(
+        const solution_t & s,
+        const trvec_t & trvec,
+        resvec_t & resvec) const
+{
+    size_t pos = 0;
+
+    for( const auto& trans : trvec)
+    {
+        auto my_pos = trans.first;
+        auto offset = trans.second;
+
+        size_t res = 0;
+
+        resvec.at(pos++) = res;
+    }
 }

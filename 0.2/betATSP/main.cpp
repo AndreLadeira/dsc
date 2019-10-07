@@ -15,7 +15,7 @@ int main(void)
     using createCallCnt = core::CreateFunctorCallCounter<atsp_decision::solution_t>;
     using printCreated = core::PrintSolution<atsp_decision::solution_t>;
 
-    shared_ptr<createFunctor> create = make_shared<atsp_decision::BasicCreateFunctor>(4);
+    shared_ptr<createFunctor> create = make_shared<atsp_decision::BasicCreateFunctor>(100);
     create = make_shared<printCreated>(create);
     create = make_shared<createCallCnt>(create);
 

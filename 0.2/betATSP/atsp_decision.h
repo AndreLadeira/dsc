@@ -26,7 +26,7 @@ private:
 };
 
 using solution_t = std::vector< node_t >;
-using transformation_t = std::pair<size_t,size_t>;
+using transformation_t = std::pair<size_t,int>;
 using problem_data_t = std::vector< std::vector<size_t> >;
 
 using namespace core;
@@ -51,6 +51,18 @@ public:
     using trvec_t = std::vector<transformation_t>;
 
     virtual trvec_t operator()(const solution_t & s);
+
+};
+
+class ObjectiveFunctor : public core::ObjectiveFunctor<solution_t,transformation_t,problem_data_t, size_t>
+{
+public:
+    using base = core::ObjectiveFunctor<solution_t,transformation_t,problem_data_t>;
+    using trvec_t = std::vector<transformation_t>;
+    using resvec_t = std::vector<size_t>;
+
+    ObjectiveFunctor(const problem_data_t & d): base(d){}
+    virtual void operator()(const solution_t&, const trvec_t&,resvec_t&) const;
 
 };
 

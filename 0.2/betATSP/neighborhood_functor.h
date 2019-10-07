@@ -17,7 +17,6 @@ public:
     virtual ~NeighborhoodFunctor() = default;
 
     virtual std::vector<transformation_t> operator()(const solution_t &) = 0;
-
 };
 
 }}// namespace

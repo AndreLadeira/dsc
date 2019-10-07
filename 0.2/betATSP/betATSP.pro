@@ -9,10 +9,12 @@ SOURCES += \
     atsp_decision.cpp
 
 HEADERS += \
+    accept_functor.h \
     atsp_decision.h \
     create_decorators.h \
     create_functor.h \
     decorators.h \
+    execution_controller.h \
     functors.h \
     greedysdhc.h \
     neighborhood_decorators.h \
