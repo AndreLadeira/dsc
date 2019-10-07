@@ -25,7 +25,6 @@ private:
     std::pair<size_t,size_t> _node;
 };
 
-
 using solution_t = std::vector< node_t >;
 using transformation_t = std::pair<size_t,size_t>;
 using problem_data_t = std::vector< std::vector<size_t> >;

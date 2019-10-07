@@ -71,7 +71,7 @@ public:
         // get the newly created solution
         solution_t s = base::_fctor->operator()();
         //print it
-        for (auto const& i: s) _os << i << " ";
+        for (auto const& i: s) _os << i << "\t";
         _os << "\n";
         return s;
     }

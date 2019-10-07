@@ -17,7 +17,15 @@ HEADERS += \
     greedysdhc.h \
     neighborhood_decorators.h \
     neighborhood_functor.h \
+    objective_functor.h \
     repository.h \
     types.h \
     noncopyable.h \
     typetraits.h
+
+CONFIG(debug, debug|release) {
+    DEFINES += "__DEBUG__"
+}
+CONFIG(release, debug|release) {
+    macx | linux: QMAKE_CXXFLAGS += -O3
+}

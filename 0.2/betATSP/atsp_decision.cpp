@@ -1,6 +1,7 @@
 #include "atsp_decision.h"
 #include <string>
 #include <ostream>
+#include <random>
 
 //#include <fstream>
 //#include <regex>
@@ -54,8 +55,8 @@ solution_t BasicCreateFunctor::operator()()
 
     // begin+1 / end-1 to make paths always starting and ending at city 0,
     // with no loss of generality
-
-    std::random_shuffle(path.begin()+1,path.end()-1);
+    std::default_random_engine e( time(nullptr) );
+    std::shuffle(path.begin()+1,path.end()-1,e);
 
     // store it in the decision-node structure
     solution_t s(_size);
@@ -74,16 +75,32 @@ atsp_decision::NeighborhoodFunctor::trvec_t
 atsp_decision::NeighborhoodFunctor::operator()(const solution_t &s)
 {
     const auto sz = s.size();
-    trvec_t tr( sz * sz );
-    size_t i = 0;
+    trvec_t tr;
+    tr.reserve( (sz-2)*(sz-2) );
 
-    for(auto const & city  : s)
+    const auto range = sz - 2;
+
+    for(size_t node = 1; node < sz; ++node)
     {
-        for(size_t j = 0; j < sz; ++j)
-            if( j != i && j != city.prev )
-                tr.push_back( transformation_t(i,j) );
-        i++;
+        for( size_t i = 0; i < range; ++i )
+        {
+
+        }
     }
+
+    size_t self = 0;
+
+    for(auto const & node  : s)
+    {
+        for(size_t city = 0; city < sz; ++city)
+            if( city != self && city != node.next )
+                tr.push_back( transformation_t(self,city) );
+        self++;
+    }
+
+#ifdef __DEBUG__
+        assert( tr.size() == (sz-2)*(sz-2));
+#endif
 
     return tr;
 }
