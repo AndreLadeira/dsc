@@ -7,46 +7,10 @@
 //#include <regex>
 
 using namespace algorithm;
-using namespace atsp_decision;
+using namespace problems::atsp;
 
-//void loadData(std::ifstream file, ProblemData & data)
-//{
-//    string line;
-//    getline(file,line); // problem name
-//    getline(file,line); // type
-//    getline(file,line); // comment
-//    getline(file,line); // matrix size
-
-//    smatch m;
-//    regex e("^\\s*DIMENSION\\s*:\\s*(\\d+)");
-
-//    if ( regex_search (line,m,e) )
-//    {
-//        const uint size = static_cast<uint>(stoul(m[1]));
-
-//        getline(file,line); // weight type
-//        getline(file,line); // weight format
-//        getline(file,line); // weight section
-
-//        data.reserve(size);
-
-//        for( uint i = 0; i < size; ++i )
-//        {
-//            vector<int> row(size,0);
-
-//            for( uint j = 0; j < size; ++j )
-//                file >> row[j];
-
-//            data.push_back(row);
-//        }
-//    }
-//    else
-//    {
-//        throw std::runtime_error("Could not read data from tsplib input file.");
-//    }
-//}
-
-solution_t BasicCreateFunctor::operator()()
+atsp_decision::solution_t
+atsp_decision::BasicCreateFunctor::operator()()
 {
     // create a random path
 
@@ -60,14 +24,7 @@ solution_t BasicCreateFunctor::operator()()
 
     // store it in the decision-node structure
     solution_t s(_size);
-    for(size_t i = 0; i < _size; ++i)
-    {
-        auto city = path.at(i);
-        auto next_city = path.at(i+1);
-        s.at(city).next = next_city;
-        s.at(next_city).prev = city;
-    }
-
+    from_path(path,s);
     return s;
 }
 
@@ -78,15 +35,49 @@ atsp_decision::NeighborhoodFunctor::operator()(const solution_t &s)
     trvec_t trvec;
     trvec.reserve( (sz-2)*(sz-2) );
 
-    const auto range = sz - 1;
+    // a transformation is defined as put city B after A
+    // in the decision problem is equal to "activate bit AB"
+    // the possible ways to do that to any given path without repetition
+    // are limited.
+    // each city on the path has a range of positions it can be switched to
+    // for example
+    // B on aBcdef can only be put after c,d,e,f: acBdef...acdefB
+    // C on abCdef can only go after d,e,f. Note that before B is a repetition aCBdef
+    //
+    // the general rule is: a city at position P on the path, P=[1...N-1], can
+    // only go back 1-P, forward N-P-1, cannot stay at the same place (0)
+    // and go back one position (-1)
+    // obs: starting at 1 and not at zero because, by definition, we consider
+    // paths always starting and ending at city 0, with no loss of generality.
+    //
+    // Example
+    //          0123456 (N = 7)
+    // the D in abcDefg can go
+    // 1-P = 1-3 = -2 postions backward (aDbcefg) to
+    // N-P-1 = 7-3-1 = 3 positions forward (abcefgD)
+    // cant stay at the same place (0)
+    // cant move one position back (-1)
+    //
+    // each valid move defines a transformation AB: activate bit AB = put city B after A
+    // on the path
 
-    for(int node = 1; node < signed(sz); ++node)// sz = 7, node [1..6]
+    path_t path;
+    to_path(s,path);
+
+    for(int P = 1; P < signed(sz); ++P)// sz = 7, cities [1..6]
     {
-        for( int i = 0; i < signed(range); ++i )
+        auto cityB = path.at(size_t(P));
+
+        for( int DP = 0; DP < signed(sz-1); ++DP )
         {
-            int tr = 1 -node + i;// 1 -[1..6] + [0 1 2 3 4 5] = 0..5/-1..4/....-5..0
-            if ( tr != -1 && tr != 0 )
-                trvec.push_back( transformation_t(node,tr));
+            int offset = 1 - P + DP;// 1 -[1..6] + [0 1 2 3 4 5] = 0..5/-1..4/....-5..0
+
+            if ( offset != -1 && offset != 0 )
+            {
+                offset -= offset < 0 ? 1 : 0;
+                auto cityA = path.at( size_t(P + offset) );
+                trvec.push_back(transformation_t(cityA,cityB));
+            }
         }
     }
 
@@ -102,22 +93,128 @@ std::ostream& atsp_decision::operator<<(std::ostream &os, const node_t &n)
   return os << "<" << n.prev << ","<< n.next << ">";
 }
 
+namespace  {
+
+    using matrix = std::vector<std::vector<size_t>>;
+    using path = std::vector<size_t>;
+
+    size_t getCost(const matrix& data, const path& p)
+    {
+        uint cost = 0;
+        auto sz = p.size();
+        //path costs;
+        for (uint i = 0; i < sz-1; ++i)
+        {
+          cost += data.at( p.at(i) ).at( p.at(i+1) );
+          //costs.push_back( data.at( p.at(i) ).at( p.at(i+1) ) );
+        }
+        return cost;
+    }
+
+}
+
+size_t atsp_decision::ObjectiveFunctor::operator()(const solution_t & s)
+{
+   size_t cost = 0;
+   size_t curr_city = 0;
+   for(const auto& city : s)
+   {
+       cost += base::_data.at(curr_city++).at(city.next);
+   }
+#ifdef __DEBUG__
+
+    path_t p;
+    to_path(s,p);
+    auto compare = getCost(_data,p);
+    assert(cost == compare);
+
+#endif
+   return cost;
+}
 
 
-void atsp_decision::ObjectiveFunctor::operator()(
-        const solution_t & s,
-        const trvec_t & trvec,
-        resvec_t & resvec) const
+void atsp_decision::DeltaObjectiveFunctor::operator()
+(const solution_t & s, const trvec_t& trvec, resvec_t& resvec)
 {
     size_t pos = 0;
-
-    for( const auto& trans : trvec)
+    for(const auto& tr : trvec)
     {
-        auto my_pos = trans.first;
-        auto offset = trans.second;
+        const auto & A = tr.first;
+        const auto & Anext = s.at(A).next;
+        const auto & B = tr.second;
+        const auto & Bprev = s.at(B).prev;
+        const auto & Bnext = s.at(B).next;
 
-        size_t res = 0;
-
-        resvec.at(pos++) = res;
+        signed delta = - int(_data.at(Bprev).at(B) +_data.at(B).at(Bnext) +_data.at(A).at(Anext) )
+                + int(_data.at(Bprev).at(Bnext) + _data.at(A).at(B) + _data.at(B).at(Anext) );
+        resvec.at(pos++) = delta;
     }
+}
+
+void atsp_decision::to_path(const solution_t &s, path_t &path)
+{
+    path.reserve( s.size() + 1);
+    path.push_back(0);
+
+    // traverse the solution like a linked list
+    auto iter = s.begin();
+    do
+    {
+        path.push_back(iter->next);
+        iter = s.begin() + signed(iter->next);
+    }
+    while( iter != s.begin() );
+}
+
+void atsp_decision::from_path(const path_t & path, solution_t &s )
+{
+    for(size_t i = 0; i < path.size()-1; ++i)
+    {
+        auto city = path.at(i);
+        auto next_city = path.at(i+1);
+        s.at(city).next = next_city;
+        s.at(next_city).prev = city;
+    }
+}
+
+atsp_decision::AcceptFunctor::result_t
+atsp_decision::AcceptFunctor::operator()
+(const atsp_decision::AcceptFunctor::delta_vector & delta_vec) const
+{
+    result_t res(false,0);
+    delta_type min = 0;
+    size_t index = 0;
+
+    for(const auto& d : delta_vec)
+    {
+        if (d < min)
+        {
+            min = d;
+            res.second = index;
+        }
+        index++;
+    }
+    if (min<0) res.first = true;
+    return res;
+}
+
+void atsp_decision::TransformFunctor::operator()
+(atsp_decision::solution_t & s, const atsp_decision::transformation_t & t)
+{
+    const auto& A = t.first;
+    const auto& B = t.second;
+    auto Bnext = s.at(B).next;
+    auto Bprev = s.at(B).prev;
+    auto Anext = s.at(A).next;
+
+    // remove B
+    s.at(Bprev).next = Bnext;
+    s.at(Bnext).prev = Bprev;
+
+    // reinsert B after of A
+
+    s.at(B).next = Anext;
+    s.at(Anext).prev = B;
+    s.at(B).prev = A;
+    s.at(A).next = B;
 }

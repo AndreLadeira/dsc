@@ -3,5 +3,6 @@
 
 #include "create_decorators.h"
 #include "neighborhood_decorators.h"
+#include "objective_decorators.h"
 
 #endif // STD_DECORATORS_H

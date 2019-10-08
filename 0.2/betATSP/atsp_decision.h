@@ -8,7 +8,8 @@
 
 #include "functors.h"
 
-namespace algorithm{
+namespace problems{
+namespace atsp {
 namespace atsp_decision{
 
 struct node_t
@@ -25,11 +26,16 @@ private:
     std::pair<size_t,size_t> _node;
 };
 
+using path_t = std::vector<size_t>;
 using solution_t = std::vector< node_t >;
-using transformation_t = std::pair<size_t,int>;
+using transformation_t = std::pair<size_t,size_t>;
 using problem_data_t = std::vector< std::vector<size_t> >;
 
-using namespace core;
+// solution to-from path conversions
+void to_path(const solution_t&, path_t&);
+void from_path(const path_t&, solution_t&);
+
+using namespace algorithm;
 
 class BasicCreateFunctor : public core::CreateFunctor<solution_t>
 {
@@ -54,19 +60,55 @@ public:
 
 };
 
-class ObjectiveFunctor : public core::ObjectiveFunctor<solution_t,transformation_t,problem_data_t, size_t>
+class ObjectiveFunctor : public core::ObjectiveFunctor<solution_t,problem_data_t,size_t>
 {
 public:
-    using base = core::ObjectiveFunctor<solution_t,transformation_t,problem_data_t>;
-    using trvec_t = std::vector<transformation_t>;
-    using resvec_t = std::vector<size_t>;
+    using base = core::ObjectiveFunctor<solution_t,problem_data_t>;
 
-    ObjectiveFunctor(const problem_data_t & d): base(d){}
-    virtual void operator()(const solution_t&, const trvec_t&,resvec_t&) const;
+    explicit ObjectiveFunctor(const problem_data_t& d):base(d){}
+    virtual size_t operator()(const solution_t&);
 
 };
 
 
-} // algorithm
+class DeltaObjectiveFunctor :
+public core::DeltaObjectiveFunctor<solution_t,transformation_t, problem_data_t>
+{
+public:
+
+    using base = core::DeltaObjectiveFunctor<solution_t,transformation_t, problem_data_t>;
+    using trvec_t = std::vector<transformation_t>;
+    using resvec_t = std::vector<base::result_type>;
+
+    explicit DeltaObjectiveFunctor( const problem_data_t & d ):base(d){}
+
+    virtual void operator()(const solution_t &,
+                            const trvec_t&,
+                            resvec_t&);
+
+};
+
+class AcceptFunctor :
+public core::AcceptFunctor<>
+{
+public:
+    AcceptFunctor() = default;
+    virtual ~AcceptFunctor() = default;
+
+    virtual result_t operator()(const AcceptFunctor::delta_vector& ) const;
+
+};
+
+class TransformFunctor : public core::TransformFunctor<solution_t, transformation_t>
+{
+public:
+
+    TransformFunctor() = default;
+    virtual ~TransformFunctor() = default;
+    virtual void operator()(solution_t&, const transformation_t&);
+};
+
+} // problems
+} // atsp
 } // atsp_decision
 #endif // ATSP_H
