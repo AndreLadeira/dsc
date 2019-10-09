@@ -25,6 +25,13 @@ atsp_decision::BasicCreateFunctor::operator()()
     // store it in the decision-node structure
     solution_t s(_size);
     from_path(path,s);
+
+#ifdef __DEBUG__
+    std::vector<size_t> p;
+    atsp_decision::to_path(s,p);
+    assert(path == p);
+#endif
+
     return s;
 }
 
@@ -121,6 +128,7 @@ size_t atsp_decision::ObjectiveFunctor::operator()(const solution_t & s)
    {
        cost += base::_data.at(curr_city++).at(city.next);
    }
+
 #ifdef __DEBUG__
 
     path_t p;
@@ -129,6 +137,7 @@ size_t atsp_decision::ObjectiveFunctor::operator()(const solution_t & s)
     assert(cost == compare);
 
 #endif
+
    return cost;
 }
 
@@ -153,6 +162,7 @@ void atsp_decision::DeltaObjectiveFunctor::operator()
 
 void atsp_decision::to_path(const solution_t &s, path_t &path)
 {
+    path.clear();
     path.reserve( s.size() + 1);
     path.push_back(0);
 
