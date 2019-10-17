@@ -1,0 +1,4 @@
+#ifndef ACCEPT_DECORATOR_H
+#define ACCEPT_DECORATOR_H
+
+#endif // ACCEPT_DECORATOR_H
