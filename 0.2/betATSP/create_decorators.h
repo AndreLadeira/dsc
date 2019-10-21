@@ -2,85 +2,54 @@
 #define CREATE_DECORATORS_H
 
 #include "create_functor.h"
-#include <memory>
+#include "core.h"
 #include <iostream>
 
 namespace algorithm{
 namespace core{
+namespace create{
 
-
-template< typename solution_t >
-class CreateFunctorDecorator : public CreateFunctor<solution_t>
+template< typename T >
+class CallCounter : public Create<T>, public Decorator<Create<T>>, public Counter<size_t>
 {
 public:
 
-    using functor_ptr_t = std::shared_ptr<CreateFunctor<solution_t> >;
+    CallCounter( typename Decorator<Create<T>>::ptr_t ptr ):
+        Decorator<Create<T>>(ptr){}
 
-
-    CreateFunctorDecorator() = delete;
-    CreateFunctorDecorator(functor_ptr_t F):_fctor(F){}
-
-    virtual ~CreateFunctorDecorator() = default;
-    virtual solution_t operator()(void) = 0;
-
-
-protected:
-
-    functor_ptr_t _fctor;
-};
-
-template< typename solution_t >
-class CreateFunctorCallCounter : public CreateFunctorDecorator<solution_t>
-{
-public:
-    using base = CreateFunctorDecorator<solution_t>;
-    using functor_ptr_t = typename base::functor_ptr_t;
-
-    CreateFunctorCallCounter( functor_ptr_t F ):base(F),_counter(0){}
-
-    virtual solution_t operator()(void){
-        ++_counter;
-        return base::_fctor->operator()();
-
+    virtual T operator()(void){
+        Counter::increment(1);
+        return Decorator<Create<T>>::_ptr->operator()();
     }
 
-    unsigned int getCounter(){return _counter;}
-    void resetCounter(){ _counter = 0;}
-
-private:
-
-    unsigned int _counter;
 };
 
-using std::ostream;
-using std::cout;
-
-template< typename solution_t >
-class PrintSolution : public CreateFunctorDecorator<solution_t>
+template< typename T >
+class PrintSolution : public Create<T>, public Decorator<Create<T>>
 {
 public:
 
-    using base = CreateFunctorDecorator<solution_t>;
-    using functor_ptr_t = typename base::functor_ptr_t;
+    PrintSolution( typename Decorator<Create<T>>::ptr_t ptr, std::ostream & os = std::cout):
+        Decorator<Create<T>>(ptr),_os(os){}
 
-    PrintSolution( functor_ptr_t F, ostream & os = cout):
-        base(F),_os(os){}
-
-    virtual solution_t operator()(void)
+    virtual T operator()(void)
     {
         // get the newly created solution
-        solution_t s = base::_fctor->operator()();
+        T s = Decorator<Create<T>>::_ptr->operator()();
+
         //print it
         for (auto const& i: s) _os << i << "\t";
         _os << "\n";
+
+        // pass it along
         return s;
     }
 
 private:
 
-    ostream & _os;
+    std::ostream & _os;
 };
 
-}}
+}}}
 
 #endif // CREATE_DECORATORS_H

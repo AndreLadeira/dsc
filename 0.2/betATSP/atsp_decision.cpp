@@ -2,15 +2,39 @@
 #include <string>
 #include <ostream>
 #include <random>
+#include <chrono>
 
-//#include <fstream>
-//#include <regex>
-
-using namespace algorithm;
 using namespace problems::atsp;
+using namespace atsp_decision;
 
-atsp_decision::solution_t
-atsp_decision::BasicCreateFunctor::operator()()
+void atsp_decision::to_path(const solution_t &s, path_t &path)
+{
+    path.clear();
+    path.reserve( s.size() + 1);
+    path.push_back(0);
+
+    // traverse the solution like a linked list
+    auto iter = s.begin();
+    do
+    {
+        path.push_back(iter->next);
+        iter = s.begin() + signed(iter->next);
+    }
+    while( iter != s.begin() );
+}
+
+void atsp_decision::from_path(const path_t & path, solution_t &s )
+{
+    for(size_t i = 0; i < path.size()-1; ++i)
+    {
+        auto city = path.at(i);
+        auto next_city = path.at(i+1);
+        s.at(city).next = next_city;
+        s.at(next_city).prev = city;
+    }
+}
+
+solution_t CreateRandom::operator()()
 {
     // create a random path
 
@@ -19,7 +43,7 @@ atsp_decision::BasicCreateFunctor::operator()()
 
     // begin+1 / end-1 to make paths always starting and ending at city 0,
     // with no loss of generality
-    std::default_random_engine e( static_cast<unsigned int>(time(nullptr)) );
+    std::default_random_engine e( static_cast<unsigned int>(clock()) );
     std::shuffle(path.begin()+1,path.end()-1,e);
 
     // store it in the decision-node structure
@@ -35,8 +59,12 @@ atsp_decision::BasicCreateFunctor::operator()()
     return s;
 }
 
-atsp_decision::NeighborhoodFunctor::trvec_t
-atsp_decision::NeighborhoodFunctor::operator()(const solution_t &s)
+std::ostream& atsp_decision::operator<<(std::ostream &os, const node_t &n)
+{
+  return os << "<" << n.prev << ","<< n.next << ">";
+}
+
+Neighborhood::trvec_t Neighborhood::operator()(const solution_t &s)
 {
     const auto sz = s.size();
     trvec_t trvec;
@@ -95,12 +123,8 @@ atsp_decision::NeighborhoodFunctor::operator()(const solution_t &s)
     return trvec;
 }
 
-std::ostream& atsp_decision::operator<<(std::ostream &os, const node_t &n)
+namespace
 {
-  return os << "<" << n.prev << ","<< n.next << ">";
-}
-
-namespace  {
 
     using matrix = std::vector<std::vector<size_t>>;
     using path = std::vector<size_t>;
@@ -120,13 +144,13 @@ namespace  {
 
 }
 
-size_t atsp_decision::ObjectiveFunctor::operator()(const solution_t & s)
+size_t atsp_decision::Objective::operator()(const solution_t & s)
 {
    size_t cost = 0;
    size_t curr_city = 0;
    for(const auto& city : s)
    {
-       cost += base::_data.at(curr_city++).at(city.next);
+       cost += _data.at(curr_city++).at(city.next);
    }
 
 #ifdef __DEBUG__
@@ -142,8 +166,8 @@ size_t atsp_decision::ObjectiveFunctor::operator()(const solution_t & s)
 }
 
 
-void atsp_decision::DeltaObjectiveFunctor::operator()
-(const solution_t & s, const trvec_t& trvec, resvec_t& resvec)
+void atsp_decision::DeltaObjective::operator()
+(const solution_t & s, const std::vector<transformation_t>& trvec, std::vector<int>& resvec)
 {
     size_t pos = 0;
     for(const auto& tr : trvec)
@@ -160,36 +184,8 @@ void atsp_decision::DeltaObjectiveFunctor::operator()
     }
 }
 
-void atsp_decision::to_path(const solution_t &s, path_t &path)
-{
-    path.clear();
-    path.reserve( s.size() + 1);
-    path.push_back(0);
-
-    // traverse the solution like a linked list
-    auto iter = s.begin();
-    do
-    {
-        path.push_back(iter->next);
-        iter = s.begin() + signed(iter->next);
-    }
-    while( iter != s.begin() );
-}
-
-void atsp_decision::from_path(const path_t & path, solution_t &s )
-{
-    for(size_t i = 0; i < path.size()-1; ++i)
-    {
-        auto city = path.at(i);
-        auto next_city = path.at(i+1);
-        s.at(city).next = next_city;
-        s.at(next_city).prev = city;
-    }
-}
-
-atsp_decision::AcceptFunctor::result_t
-atsp_decision::AcceptFunctor::operator()
-(const atsp_decision::AcceptFunctor::delta_vector & delta_vec) const
+Accept::result_t Accept::operator()
+(const delta_vector & delta_vec) const
 {
     result_t res(false,0);
     delta_type min = 0;
@@ -208,8 +204,7 @@ atsp_decision::AcceptFunctor::operator()
     return res;
 }
 
-void atsp_decision::TransformFunctor::operator()
-(atsp_decision::solution_t & s, const atsp_decision::transformation_t & t)
+void Transform::operator()(solution_t & s, const transformation_t & t)
 {
     const auto& A = t.first;
     const auto& B = t.second;

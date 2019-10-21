@@ -10,15 +10,15 @@ namespace algorithm {
 namespace core {
 
 template< typename delta_t = int >
-class AcceptFunctor : public NonCopyable
+class Accept : public NonCopyable
 {
 public:
     using delta_type = delta_t;
     using delta_vector = std::vector<delta_t>;
     using result_t = std::pair<bool,size_t>;
 
-    AcceptFunctor() = default;
-    virtual ~AcceptFunctor() = default;
+    Accept() = default;
+    virtual ~Accept() = default;
 
     virtual result_t operator()(const delta_vector&) const = 0;
 

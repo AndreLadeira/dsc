@@ -2,54 +2,31 @@
 #define OBJECTIVE_DECORATORS_H
 
 #include "objective_functor.h"
-#include <memory>
+#include "core.h"
 
 namespace algorithm {
 namespace core{
+namespace objective{
 
-template< typename solution_t , typename data_t, typename result_t = size_t>
-class ObjectiveFunctorDecorator : public ObjectiveFunctor<solution_t,data_t, result_t>
-{
+
+template< typename S, typename D, typename R = size_t>
+class CallCounter:
+        public Objective<S,D,R>,
+        public Decorator<Objective<S,D,R>>,
+        public Counter<int>{
+
 public:
 
-    using functor_ptr_t =
-    std::shared_ptr< ObjectiveFunctor<solution_t,data_t, result_t> >;
+    CallCounter() = delete;
+    CallCounter( typename Decorator<Objective<S,D,R>>::ptr_t ptr ):
+       Decorator<Objective<S,D,R>>(ptr){}
 
-    ObjectiveFunctorDecorator(functor_ptr_t F):_fctor(F){}
-
-    virtual ~ObjectiveFunctorDecorator() = default;
-    virtual result_t operator()(const solution_t&) = 0;
-
-protected:
-
-    functor_ptr_t _fctor;
-};
-
-template< typename solution_t , typename data_t, typename result_t = size_t>
-class ObjectiveFunctorCallCounter :
-        public ObjectiveFunctorDecorator<solution_t,data_t, result_t>
-{
-public:
-
-    using base = ObjectiveFunctorDecorator<solution_t, data_t, result_t>;
-    using functor_ptr_t = typename base::functor_ptr_t;
-
-    ObjectiveFunctorCallCounter() = delete;
-    ObjectiveFunctorCallCounter( functor_ptr_t F ):base(F),_counter(0){}
-
-    virtual result_t operator()(const solution_t& s){
-        ++_counter;
-        return base::_fctor->operator()(s);
+    virtual R operator()(const S& s){
+        increment(1);
+        return Decorator<Objective<S,D,R>>::_ptr->operator()(s);
     }
-
-    unsigned int getCounter(){return _counter;}
-    void resetCounter(){ _counter = 0;}
-
-private:
-
-    unsigned int _counter;
 };
 
-}}
+}}}
 
 #endif // OBJECTIVE_DECORATORS_H

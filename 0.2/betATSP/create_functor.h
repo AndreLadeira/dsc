@@ -8,12 +8,12 @@ namespace algorithm{
 namespace core{
 
 template< typename solution_t>
-class CreateFunctor : public NonCopyable
+class Create : public NonCopyable
 {
 public:
 
-    explicit CreateFunctor() = default;
-    virtual ~CreateFunctor() = default;
+    explicit Create() = default;
+    virtual ~Create() = default;
 
     virtual solution_t operator()(void) = 0;
 };

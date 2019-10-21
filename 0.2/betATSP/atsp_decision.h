@@ -14,16 +14,12 @@ namespace atsp_decision{
 
 struct node_t
 {
-    node_t():_node(){}
-    node_t(size_t prev, size_t next):_node(prev,next){}
-    size_t& prev = _node.first;
-    size_t& next = _node.second;
+    node_t():prev(0),next(0){}
+    node_t(size_t p, size_t n):prev(p),next(n){}
+    size_t prev;
+    size_t next;
 
     friend std::ostream& operator<<(std::ostream&, const node_t&);
-
-private:
-
-    std::pair<size_t,size_t> _node;
 };
 
 using path_t = std::vector<size_t>;
@@ -37,74 +33,64 @@ void from_path(const path_t&, solution_t&);
 
 using namespace algorithm;
 
-class BasicCreateFunctor : public core::CreateFunctor<solution_t>
+class CreateRandom : public core::Create<solution_t>
 {
 public:
-    BasicCreateFunctor(size_t sz):_size(sz){}
-
+    CreateRandom(size_t sz):_size(sz){}
     virtual solution_t operator()(void);
-
 private:
-
     size_t _size;
-
 };
 
-class NeighborhoodFunctor : public core::NeighborhoodFunctor<solution_t,transformation_t>
+class Neighborhood : public core::Neighborhood<solution_t,transformation_t>
 {
 public:
-    NeighborhoodFunctor() = default;
+    Neighborhood() = default;
     using trvec_t = std::vector<transformation_t>;
-
     virtual trvec_t operator()(const solution_t & s);
-
 };
 
-class ObjectiveFunctor : public core::ObjectiveFunctor<solution_t,problem_data_t,size_t>
+class Objective : public core::Objective<solution_t,problem_data_t,size_t>
 {
 public:
-    using base = core::ObjectiveFunctor<solution_t,problem_data_t>;
 
-    explicit ObjectiveFunctor(const problem_data_t& d):base(d){}
+    explicit Objective(const problem_data_t& data):
+        core::Objective<solution_t,problem_data_t,size_t>(data){}
+
     virtual size_t operator()(const solution_t&);
 
 };
 
-
-class DeltaObjectiveFunctor :
-public core::DeltaObjectiveFunctor<solution_t,transformation_t, problem_data_t>
+class DeltaObjective :
+public core::DeltaObjective<solution_t,transformation_t, problem_data_t>
 {
 public:
 
-    using base = core::DeltaObjectiveFunctor<solution_t,transformation_t, problem_data_t>;
-    using trvec_t = std::vector<transformation_t>;
-    using resvec_t = std::vector<base::result_type>;
-
-    explicit DeltaObjectiveFunctor( const problem_data_t & d ):base(d){}
+    explicit DeltaObjective( const problem_data_t & data ):
+        core::DeltaObjective<solution_t,transformation_t, problem_data_t>(data){}
 
     virtual void operator()(const solution_t &,
-                            const trvec_t&,
-                            resvec_t&);
+                            const std::vector<transformation_t>&,
+                            std::vector<int>&);
+};
+
+class Accept :
+public core::Accept<>
+{
+public:
+    Accept() = default;
+    virtual ~Accept() = default;
+
+    virtual result_t operator()(const Accept::delta_vector& ) const;
 
 };
 
-class AcceptFunctor :
-public core::AcceptFunctor<>
-{
-public:
-    AcceptFunctor() = default;
-    virtual ~AcceptFunctor() = default;
-
-    virtual result_t operator()(const AcceptFunctor::delta_vector& ) const;
-
-};
-
-class TransformFunctor : public core::TransformFunctor<solution_t, transformation_t>
+class Transform : public core::Transform<solution_t, transformation_t>
 {
 public:
 
-    TransformFunctor() = default;
-    virtual ~TransformFunctor() = default;
+    Transform() = default;
+    virtual ~Transform() = default;
     virtual void operator()(solution_t&, const transformation_t&);
 };
 

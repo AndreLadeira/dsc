@@ -1,239 +1,110 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <iomanip>
+#include <ctime>
 
 #include "functors.h"
 #include "decorators.h"
 #include "atsp.h"
 #include "atsp_decision.h"
+#include "execution_controller.h"
 
 using namespace std;
 using namespace algorithm;
 using namespace problems::atsp;
+using namespace atsp_decision;
+using namespace core;
 
-
-template<typename T>
-struct value
+int main(int, char * argv[])
 {
-    value():_v(T(0)){}
-    T get(void) const {return _v;}
+    problem_data_t tspdata;
+    problems::atsp::loadTSPLIB(std::ifstream(argv[1]),tspdata);
 
-protected:
+    // CREATE FUNCTION AND ACCESSORIES
 
-    T _v;
+    shared_ptr< Create<solution_t> > create_solution = make_shared<CreateRandom>(tspdata.size());
+    auto create_counter = make_shared< create::CallCounter<solution_t>>(create_solution);
+    create_solution = create_counter;
+    //create_solution = make_shared< create::PrintSolution<solution_t>>(create_counter);
 
-};
-template<typename T>
-struct counter : public value<T>
-{
-    counter() = default;
-protected:
-    void increment(T amount){ value<T>::_v += amount;}
-    void reset(){ value<T>::_v = T(0);}
-};
+    // NEIGHBOR FUNCTION AND ACCESSORIES
 
-struct base
-{   base(){}
-    virtual ~base() = default;
-    virtual int exec(){ return std::rand() % 100;}
-};
+    shared_ptr< core::Neighborhood<solution_t,transformation_t> >
+            neighbor = make_shared< atsp_decision::Neighborhood >();
 
-struct deco : public base
-{
-    deco(base* bp):ptr(bp){}
-    virtual int exec() override = 0;
+    auto neighbor_callcounter = make_shared< neighbor::CallCounter<solution_t,transformation_t > >(neighbor);
+    neighbor = neighbor_callcounter;
 
-protected:
+    auto neighbor_counter = make_shared< neighbor::NeighborCounter<solution_t,transformation_t > >(neighbor);
+    neighbor = neighbor_counter;
 
-    base * ptr;
-};
+    // OBJECTIVE FUNCTION AND ACCESSORIES
 
-struct down10 : public deco, public value<int>
-{
-    down10(base* bp):deco(bp){}
-    virtual int exec() override
+    shared_ptr< core::Objective<solution_t, problem_data_t> >
+            cost = make_shared<atsp_decision::Objective>(tspdata);
+    auto cost_counter = make_shared< objective::CallCounter<solution_t, problem_data_t> >(cost);
+    cost = cost_counter;
+
+    // DELTA OBJECTIVE FUNCTION AND ACCESSORIES
+
+    shared_ptr< core::DeltaObjective<solution_t,transformation_t,problem_data_t> >
+            deltacost = make_shared< atsp_decision::DeltaObjective >(tspdata);
+
+    // ACCEPT FUNCTION AND ACCESSORIES
+
+    auto accept = make_shared<atsp_decision::Accept>();
+
+    // TRANSFORM FUNCTION AND ACCESSORIES
+
+    auto transform = make_shared<atsp_decision::Transform>();
+
+    core::ExecutionController exec;
+
+    auto restarts = strtoul(argv[2],nullptr,0);
+
+    exec.addStopTrigger( make_shared<core::Trigger<size_t>>(create_counter,restarts));
+    exec.addStopTrigger( make_shared<core::Trigger<size_t>>(neighbor_counter,800000));
+
+    auto solution = (*create_solution)();
+    auto best = solution;
+    auto best_cost = (*cost)(best);
+
+    clock_t begin = clock();
+
+    while(!exec.stop())
     {
-       value::_v = ptr->exec() - 10;
-       return _v;
-    }
-};
+        auto neighbors = (*neighbor)(solution);
 
+        vector<int> deltas( neighbors.size() );
 
-struct sensor
-{
-    virtual ~sensor() = default;
-    virtual operator bool() const = 0;
-};
+        (*deltacost)(solution,neighbors,deltas);
 
+        auto accepted = (*accept)(deltas);
 
-template <typename T>
-struct concrete_sensor : public sensor
-{
-    using compare = bool (*)(T,T);
-    static T abs(T x){ if (x<0) return -x; else return x; }
-    static bool less(const T a, const T b){return a<b;}
-    static bool greater(const T a, const T b){return a>b;}
-    static bool equal_to(const T a, const T b){return a==b;}
-
-    concrete_sensor(const value<T> & value, T limit , compare c = greater):
-        _value(value),_limit(limit), _compare(c){}
-
-    virtual operator bool() const
-    {
-        return _compare(_value.get(),_limit);
+        if ( accepted.first )
+        {
+            (*transform)(solution,neighbors.at(accepted.second));
+        }
+        else
+        {
+            auto newcost = (*cost)(solution);
+            if ( newcost < best_cost ) // save current best
+            {
+                best = solution;
+                best_cost = newcost;
+            }
+            solution = (*create_solution)(); // restart
+        }
     }
 
-private:
-
-    const value<T> & _value;
-    T _limit;
-    compare _compare;
-};
-
-
-struct callcounter : public deco, public counter<int>
-{
-    callcounter(base* bp):deco(bp){}
-    virtual int exec() override
-    {
-        counter::increment(1);
-        return ptr->exec();
-    }
-};
-
-struct execution_controller
-{
-
-    bool restart(){
-        for( auto * sensor : restartSensors )
-            if (*sensor) return true;
-        return false;
-    }
-    bool stop(){
-        for( auto * sensor : stopSensors )
-            if (*sensor) return true;
-        return false;
-    }
-
-    void addRestartTrigger( sensor * s){
-        restartSensors.push_back(s);
-    }
-    void addStopTrigger( sensor * s){
-        stopSensors.push_back(s);
-    }
-
-private:
-
-    std::vector<sensor*> stopSensors;
-    std::vector<sensor*> restartSensors;
-
-
-};
-
-
-
-
-int main(void)
-{
-    //const std::vector<size_t> p = {0,12,16,11,1,9,2,13,8,3,10,5,6,14,15,7,4,0};
-    execution_controller exec;
-
-    auto * basep = new base;
-    basep = new down10(basep);
-    exec.addRestartTrigger( new concrete_sensor<int>(dynamic_cast<down10&>(*basep),0,
-                                                     concrete_sensor<int>::equal_to));
-
-    basep = new callcounter( basep );
-    exec.addStopTrigger( new concrete_sensor<int>(dynamic_cast<callcounter&>(*basep),1000) );
-
-    while( !exec.stop() )
-    {
-        std::cout<< basep->exec() << endl;
-
-        if ( exec.restart() )
-        std::cout<<"======== RESTARTING ========\n";
-    }
-
-
-    using createFunctor = core::CreateFunctor<atsp_decision::solution_t>;
-    using createCallCnt = core::CreateFunctorCallCounter<atsp_decision::solution_t>;
-    using printCreated = core::PrintSolution<atsp_decision::solution_t>;
-
-    atsp_decision::problem_data_t tspdata;
-    problems::atsp::loadTSPLIB(std::ifstream("../tsplib/br17.atsp"),tspdata);
-
-    shared_ptr<createFunctor> create = make_shared<atsp_decision::BasicCreateFunctor>(tspdata.size());
-    create = make_shared<printCreated>(create);
-    create = make_shared<createCallCnt>(create);
-
-    auto s = (*create)();
-
-    using neighborFunctor =
-    core::NeighborhoodFunctor< atsp_decision::solution_t, atsp_decision::transformation_t >;
-    using neighborCallCnt =
-    core::NeighborhoodFunctorCallCounter< atsp_decision::solution_t, atsp_decision::transformation_t >;
-
-    shared_ptr<neighborFunctor>  neighbor = make_shared< atsp_decision::NeighborhoodFunctor >();
-    neighbor = make_shared< neighborCallCnt >(neighbor);
-
-    auto neighbors = (*neighbor)(s);
-    std::cout<< "Number of neighbors: " << neighbors.size() << endl;
-
-    using objFunctor =
-    core::ObjectiveFunctor< atsp_decision::solution_t, atsp_decision::problem_data_t>;
-    using objCallCounter = core::ObjectiveFunctorCallCounter< atsp_decision::solution_t, atsp_decision::problem_data_t>;
-
-    shared_ptr<objFunctor> cost = make_shared<atsp_decision::ObjectiveFunctor>(tspdata);
-    cost = make_shared<objCallCounter>(cost);
-
-    std::cout<< "Solution cost: " << (*cost)(s) << endl;
-
-    using deltaObjFunctor =
-    core::DeltaObjectiveFunctor< atsp_decision::solution_t, atsp_decision::transformation_t, atsp_decision::problem_data_t>;
-
-    shared_ptr<deltaObjFunctor> deltacost = make_shared<atsp_decision::DeltaObjectiveFunctor>(tspdata);
-    atsp_decision::DeltaObjectiveFunctor::result_vector_type deltas( neighbors.size() );
-
-    (*deltacost)(s,neighbors,deltas);
-
-    shared_ptr<atsp_decision::AcceptFunctor> accept = make_shared<atsp_decision::AcceptFunctor>();
-
-    atsp_decision::AcceptFunctor::result_t accepted = (*accept)(deltas);
-
-    std::cout<< "Improvement possible: " << std::boolalpha << accepted.first << endl;
-
-    auto bestimprove = deltas.at(accepted.second);
-
-    if ( accepted.first )
-    {
-        std::cout<< "Best solution cost improvement: " << bestimprove
-                 << " at index " << accepted.second << endl;
-
-        auto expectedCost = signed((*cost)(s)) + bestimprove;
-
-        std::cout<< "Expected modified solution cost is: " << expectedCost << endl;
-
-        auto transform = make_shared<atsp_decision::TransformFunctor>();
-        (*transform)(s,neighbors.at(accepted.second));
-
-        auto obtainedCost = signed((*cost)(s));
-
-        std::cout<< "Obtained solution cost is: " << obtainedCost << endl;
-
-#ifdef __DEBUG__
-        assert( expectedCost == obtainedCost );
-#endif
-
-    }
-    std::cout<< "Times create called: " <<
-                dynamic_cast<createCallCnt*>(create.get())->getCounter() << endl;
-    std::cout<< "Times neighbor called: " <<
-                dynamic_cast<neighborCallCnt*>(neighbor.get())->getCounter() << endl;
-    std::cout<< "Times objective function was called: " <<
-                dynamic_cast<objCallCounter*>(cost.get())->getCounter() << endl;
-
-    std::sort(deltas.begin(),deltas.end(),less<int>());
-
+    cout<< "Elapsed time: " << fixed << std::setprecision(2) <<
+           (clock() - begin) / static_cast<double>(CLOCKS_PER_SEC) << endl;
+    std::cout<< "Final result: " << (*cost)(best) << endl;
+    std::cout<< "Times create called: " << create_counter->getValue() << endl;
+    std::cout<< "Times neighbor called: " << neighbor_callcounter->getValue() << endl;
+    std::cout<< "Total Number of neighbors evaluated: " << neighbor_counter->getValue() << endl;
+    std::cout<< "Times objective function was called: " << cost_counter->getValue() << endl;
 
     return 0;
 }

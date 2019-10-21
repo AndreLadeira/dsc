@@ -422,7 +422,39 @@ void someFunc( const shared_ptr<base> bp )
 //   std::cout<< "Function was called " << create_with_callcount->getCounter() << " times\n";
    //std::cout<< "Function was called " << create_with_callcount->getCounter() << " times\n";
 
+/*
+ *
+ * vector<int> deltas( neighbors.size() );
 
+    (*deltacost)(s,neighbors,deltas);
+
+    atsp_decision::Accept::result_t accepted = (*accept)(deltas);
+
+    std::cout<< "Improvement possible: " << std::boolalpha << accepted.first << endl;
+
+    auto bestimprove = deltas.at(accepted.second);
+
+    if ( accepted.first )
+    {
+        std::cout<< "Best solution cost improvement: " << bestimprove
+                 << " at index " << accepted.second << endl;
+
+        auto expectedCost = signed((*cost)(s)) + bestimprove;
+
+        std::cout<< "Expected modified solution cost is: " << expectedCost << endl;
+
+        auto transform = make_shared<atsp_decision::Transform>();
+        (*transform)(s,neighbors.at(accepted.second));
+
+        auto obtainedCost = signed((*cost)(s));
+
+        std::cout<< "Obtained solution cost is: " << obtainedCost << endl;
+
+#ifdef __DEBUG__
+        assert( expectedCost == obtainedCost );
+#endif
+
+    }
 
 
 */
