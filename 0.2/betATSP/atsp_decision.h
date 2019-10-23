@@ -31,8 +31,6 @@ using problem_data_t = std::vector< std::vector<size_t> >;
 void to_path(const solution_t&, path_t&);
 void from_path(const path_t&, solution_t&);
 
-using namespace algorithm;
-
 class CreateRandom : public core::Create<solution_t>
 {
 public:

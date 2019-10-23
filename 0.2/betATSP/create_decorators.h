@@ -5,7 +5,6 @@
 #include "core.h"
 #include <iostream>
 
-namespace algorithm{
 namespace core{
 namespace create{
 
@@ -50,6 +49,6 @@ private:
     std::ostream & _os;
 };
 
-}}}
+}}
 
 #endif // CREATE_DECORATORS_H

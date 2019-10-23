@@ -4,7 +4,6 @@
 #include "neighborhood_functor.h"
 #include "core.h"
 
-namespace algorithm{
 namespace core{
 namespace neighbor{
 
@@ -41,6 +40,6 @@ public:
     }
 };
 
-}}}
+}}
 
 #endif // NEIGHBORHOOD_DECORATORS_H

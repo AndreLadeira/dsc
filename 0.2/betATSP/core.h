@@ -3,7 +3,6 @@
 
 #include <memory>
 
-namespace algorithm{
 namespace core{
 
 template<typename T>
@@ -16,7 +15,7 @@ protected:
 
     T _v;
 };
-template<typename T>
+template<typename T = size_t>
 struct Counter : public Value<T>
 {
     Counter() = default;
@@ -36,7 +35,6 @@ protected:
     ptr_t _ptr;
 };
 
-}
 }
 
 #endif // TYPES_H

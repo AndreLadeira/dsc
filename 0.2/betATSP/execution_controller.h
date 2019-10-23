@@ -4,7 +4,6 @@
 #include "core.h"
 #include <vector>
 
-namespace algorithm{
 namespace core{
 
 struct __Trigger
@@ -54,5 +53,5 @@ public:
     std::vector<trigger_ptr_t> restartTriggers;
 };
 
-}}
+}
 #endif // EXECUTION_CONTROLLER_H

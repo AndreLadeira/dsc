@@ -2,7 +2,7 @@
 #define ATSP_H
 
 #include <fstream>
-#include <iosfwd>
+#include <vector>
 
 namespace problems{
 namespace atsp{

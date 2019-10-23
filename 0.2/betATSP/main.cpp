@@ -9,9 +9,9 @@
 #include "atsp.h"
 #include "atsp_decision.h"
 #include "execution_controller.h"
+#include "betatsp_decorators.h"
 
 using namespace std;
-using namespace algorithm;
 using namespace problems::atsp;
 using namespace atsp_decision;
 using namespace core;
@@ -28,6 +28,12 @@ int main(int, char * argv[])
     create_solution = create_counter;
     //create_solution = make_shared< create::PrintSolution<solution_t>>(create_counter);
 
+    // BET stuff
+    Gambler::setProblemSize(tspdata.size());
+    auto trsz = (tspdata.size() - 2)*(tspdata.size() - 2);
+    std::vector<Gambler> gamblers(20);
+    House house(gamblers,1000.0,1.0, trsz);
+
     // NEIGHBOR FUNCTION AND ACCESSORIES
 
     shared_ptr< core::Neighborhood<solution_t,transformation_t> >
@@ -38,6 +44,8 @@ int main(int, char * argv[])
 
     auto neighbor_counter = make_shared< neighbor::NeighborCounter<solution_t,transformation_t > >(neighbor);
     neighbor = neighbor_counter;
+
+    neighbor = make_shared< BetATSP_Bet >(neighbor,house);
 
     // OBJECTIVE FUNCTION AND ACCESSORIES
 
@@ -50,6 +58,8 @@ int main(int, char * argv[])
 
     shared_ptr< core::DeltaObjective<solution_t,transformation_t,problem_data_t> >
             deltacost = make_shared< atsp_decision::DeltaObjective >(tspdata);
+
+    deltacost = make_shared< BetATSP_Check >(deltacost,house);
 
     // ACCEPT FUNCTION AND ACCESSORIES
 

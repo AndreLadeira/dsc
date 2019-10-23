@@ -5,7 +5,6 @@
 #include <utility>
 #include <vector>
 
-namespace algorithm {
 namespace core {
 
 template< typename solution_t , typename transformation_t >
@@ -17,7 +16,7 @@ public:
     virtual std::vector<transformation_t> operator()(const solution_t &) = 0;
 };
 
-}}// namespace
+}// namespace
 
 
 #endif // NEIGHBORHOOD_H

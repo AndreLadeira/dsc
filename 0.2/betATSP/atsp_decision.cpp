@@ -4,6 +4,10 @@
 #include <random>
 #include <chrono>
 
+#ifdef __DEBUG__
+#include <cassert>
+#endif
+
 using namespace problems::atsp;
 using namespace atsp_decision;
 

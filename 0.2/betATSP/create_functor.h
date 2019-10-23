@@ -4,7 +4,6 @@
 #include "noncopyable.h"
 #include <utility>
 
-namespace algorithm{
 namespace core{
 
 template< typename solution_t>
@@ -18,6 +17,6 @@ public:
     virtual solution_t operator()(void) = 0;
 };
 
-}}
+}
 
 #endif // CREATEFUNCTOR_H

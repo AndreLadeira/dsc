@@ -6,8 +6,7 @@
 #include <memory>
 #include <vector>
 
-namespace algorithm {
-namespace core {
+namespace core{
 
 template< typename delta_t = int >
 class Accept : public NonCopyable
@@ -24,8 +23,7 @@ public:
 
 };
 
-}}
-
+}
 
 
 #endif // ACCEPT_FUNCTOR_H

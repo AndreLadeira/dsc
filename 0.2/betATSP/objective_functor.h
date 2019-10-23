@@ -6,7 +6,6 @@
 #include <memory>
 #include <vector>
 
-namespace algorithm {
 namespace core {
 
 template< typename solution_t, typename data_t, typename result_t = size_t>
@@ -58,6 +57,6 @@ public:
     virtual void operator()(solution_t&, const transformation_t&) = 0;
 };
 
-}}
+}
 
 #endif // OBJECTIVE__H

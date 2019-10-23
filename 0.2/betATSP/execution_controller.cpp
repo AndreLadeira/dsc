@@ -1,6 +1,6 @@
 #include "execution_controller.h"
 
-using namespace algorithm::core;
+using namespace core;
 
 bool ExecutionController::restart(){
     for( auto trigger : restartTriggers )
