@@ -173,8 +173,8 @@ size_t atsp_decision::Objective::operator()(const solution_t & s)
 std::vector<int> atsp_decision::DeltaObjective::operator()
 (const solution_t & s, const std::vector<transformation_t>& trvec)
 {
-    //size_t pos = 0;
-    std::vector<int> resvec;
+    size_t pos = 0;
+    static thread_local std::vector<int> resvec( trvec.size() , 0);
 
     for(const auto& tr : trvec)
     {
@@ -186,11 +186,11 @@ std::vector<int> atsp_decision::DeltaObjective::operator()
 
         signed delta = - int(_data.at(Bprev).at(B) +_data.at(B).at(Bnext) +_data.at(A).at(Anext) )
                 + int(_data.at(Bprev).at(Bnext) + _data.at(A).at(B) + _data.at(B).at(Anext) );
-        //resvec.at(pos++) = delta;
-        resvec.push_back(delta);
+        resvec.at(pos++) = delta;
+        //resvec.push_back(delta);
     }
 
-    return resvec;
+    return std::vector<int>(resvec);
 }
 
 Accept::result_t Accept::operator()

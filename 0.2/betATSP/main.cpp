@@ -89,7 +89,7 @@ int main(int, char * argv[])
     {
         auto neighbors = (*neighbor)(solution);
 
-        vector<int> deltas( neighbors.size() );
+        //vector<int> deltas( neighbors.size() );
 
         auto deltas = (*deltacost)(solution,neighbors);
 
