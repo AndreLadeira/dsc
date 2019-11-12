@@ -91,7 +91,7 @@ int main(int, char * argv[])
 
         vector<int> deltas( neighbors.size() );
 
-        (*deltacost)(solution,neighbors,deltas);
+        auto deltas = (*deltacost)(solution,neighbors);
 
         auto accepted = (*accept)(deltas);
 

@@ -67,9 +67,8 @@ public:
     explicit DeltaObjective( const problem_data_t & data ):
         core::DeltaObjective<solution_t,transformation_t, problem_data_t>(data){}
 
-    virtual void operator()(const solution_t &,
-                            const std::vector<transformation_t>&,
-                            std::vector<int>&);
+    virtual std::vector<int> operator()(
+            const solution_t &,const std::vector<transformation_t>&);
 };
 
 class Accept :

@@ -34,9 +34,8 @@ public:
     explicit DeltaObjective( const data_t & d ):_data(d){}
     virtual ~DeltaObjective() = default;
 
-    virtual void operator()(const solution_t&,
-                            const std::vector<transformation_t>&,
-                            std::vector<result_t>&) = 0;
+    virtual std::vector<result_t> operator()(
+            const solution_t&, const std::vector<transformation_t>&) = 0;
 protected:
 
     const data_t _data;
