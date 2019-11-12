@@ -1,14 +1,8 @@
 #ifndef ACCEPT_DECORATOR_H
 #define ACCEPT_DECORATOR_H
 
-#include "create_functor.h"
-#include "core.h"
-
 namespace core{
-namespace create{
-
-
-
+namespace accept{
 
 }}
 

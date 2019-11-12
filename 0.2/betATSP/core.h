@@ -15,6 +15,7 @@ protected:
 
     T _v;
 };
+
 template<typename T = size_t>
 struct Counter : public Value<T>
 {

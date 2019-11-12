@@ -6,7 +6,7 @@
 
 namespace core{
 
-template< typename solution_t>
+template< typename solution_t >
 class Create : public NonCopyable
 {
 public:
