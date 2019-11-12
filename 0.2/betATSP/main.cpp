@@ -23,7 +23,7 @@ int main(int, char * argv[])
 
     // CREATE FUNCTION AND ACCESSORIES
 
-    shared_ptr< core::Create< solution_t> > create_solution =
+    shared_ptr< core::Create< solution_t > > create_solution =
             make_shared< CreateRandom >(tspdata.size());
 
     auto create_counter = make_shared< core::create::CallCounter< solution_t >>(create_solution);
@@ -104,7 +104,7 @@ int main(int, char * argv[])
         else
         {
             // saving only when a particular solution
-            // was exausted to reduce execution complexity/cost
+            // fully explored, to reduce execution costs
 
             // 1st, check if this particular maximum/minumum
             // is a new absolute max/min
