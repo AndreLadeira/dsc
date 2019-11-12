@@ -10,11 +10,11 @@ std::vector<t> BetATSP_Bet::operator()(const s& sol)
     return transfs;
 }
 
-void BetATSP_Check::operator()(
-        const s &sol,
-        const std::vector<t> &trvec,
-        DeltaObjective::result_vector_type &resvec)
-{
-   _ptr->operator()(sol,trvec,resvec);
-   _house.processResults(resvec);
-}
+//void BetATSP_Check::operator()(
+//        const s &sol,
+//        const std::vector<t> &trvec,
+//        DeltaObjective::result_vector_type &resvec)
+//{
+//   _ptr->operator()(sol,trvec,resvec);
+//   _house.processResults(resvec);
+//}

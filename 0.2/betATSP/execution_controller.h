@@ -12,27 +12,28 @@ struct __Trigger
     virtual operator bool() const = 0;
 };
 
-template <typename T>
+template <typename T = size_t>
 struct Trigger : public __Trigger
 {
     using compare = bool (*)(T,T);
-    static T abs(T x){ if (x<0) return -x; else return x; }
+
+    //static T abs(T x){ if (x<0) return -x; else return x; }
     static bool less(const T a, const T b){return a<b;}
     static bool greater(const T a, const T b){return a>b;}
     static bool equal_to(const T a, const T b){return a==b;}
 
-    Trigger(const std::shared_ptr<const Value<T>> vptr, T limit , compare c = greater):
-        _vptr(vptr),_limit(limit), _compare(c){}
+    Trigger(const std::shared_ptr<const Value<T>> valueptr, T limit , compare c = greater):
+        _valueptr(valueptr),_limit(limit), _compare(c){}
 
     virtual operator bool() const
     {
-        return _compare(_vptr->getValue(),_limit);
+        return _compare(_valueptr->getValue(),_limit);
     }
 
 private:
 
-    std::shared_ptr<const Value<T>> _vptr;
-    T _limit;
+    std::shared_ptr<const Value<T>> _valueptr;
+    const T _limit;
     compare _compare;
 };
 

@@ -13,8 +13,6 @@ class Objective : public NonCopyable
 {
 public:
 
-    using result_type = result_t;
-
     Objective() = default;
     explicit Objective(const data_t & d):_data(d){}
     virtual ~Objective() = default;
@@ -32,16 +30,13 @@ class DeltaObjective : public NonCopyable
 {
 public:
 
-    using result_type = result_t;
-    using result_vector_type = std::vector<result_t>;
-
     DeltaObjective() = default;
     explicit DeltaObjective( const data_t & d ):_data(d){}
     virtual ~DeltaObjective() = default;
 
     virtual void operator()(const solution_t&,
                             const std::vector<transformation_t>&,
-                            result_vector_type&) = 0;
+                            std::vector<result_t>&) = 0;
 protected:
 
     const data_t _data;

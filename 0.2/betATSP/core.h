@@ -17,11 +17,18 @@ protected:
 };
 
 template<typename T = size_t>
-struct Counter : public Value<T>
+struct Accumulator : public Value<T>
+{
+    Accumulator() = default;
+protected:
+    void increment(T amount){ Value<T>::_v += amount;}
+};
+
+template<typename T = size_t>
+struct Counter : public Accumulator<T>
 {
     Counter() = default;
 protected:
-    void increment(T amount){ Value<T>::_v += amount;}
     void reset(){ Value<T>::_v = T(0);}
 };
 

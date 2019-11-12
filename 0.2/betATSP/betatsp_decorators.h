@@ -31,22 +31,22 @@ private:
     House& _house;
 };
 
-class BetATSP_Check:
-public core::DeltaObjective<s,t,d,int>,
-public core::Decorator<core::DeltaObjective<s,t,d,int>>
-{
-public:
-    BetATSP_Check(typename Decorator<DeltaObjective<s,t,d>>::ptr_t ptr, House& house):
-        Decorator<DeltaObjective<s,t,d>>(ptr),_house(house){}
+//class BetATSP_Check:
+//public core::DeltaObjective<s,t,d,int>,
+//public core::Decorator<core::DeltaObjective<s,t,d,int>>
+//{
+//public:
+//    BetATSP_Check(typename Decorator<DeltaObjective<s,t,d>>::ptr_t ptr, House& house):
+//        Decorator<DeltaObjective<s,t,d>>(ptr),_house(house){}
 
-    virtual void operator()( const s& solution,
-                             const std::vector<t>& trvec,
-                             typename DeltaObjective<s,t,d,int>::result_vector_type& resvec);
-private:
+//    virtual void operator()( const s& solution,
+//                             const std::vector<t>& trvec,
+//                             typename DeltaObjective<s,t,d,int>::result_vector_type& resvec);
+//private:
 
-    House& _house;
+//    House& _house;
 
-};
+//};
 
 }}}
 
