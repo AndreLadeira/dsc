@@ -80,11 +80,10 @@ int main(int, char * argv[])
 
     auto transform = make_shared<atsp_decision::Transform>();
 
-
     core::ExecutionController exec;
     auto restarts = strtoul(argv[2],nullptr,0);
     exec.addStopTrigger( make_shared< core::Trigger<> >(create_counter,restarts));
-    //exec.addStopTrigger( make_shared<core::Trigger<size_t>>(neighbor_counter,400000));
+    exec.addStopTrigger( make_shared<core::Trigger<size_t>>(neighbor_counter,400000));
 
 
     auto solution = (*create_solution)();
