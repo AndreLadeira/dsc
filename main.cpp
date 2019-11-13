@@ -133,6 +133,7 @@ int main(int, char * argv[])
     std::cout<< "Times neighbor called: " << neighbor_callcounter->getValue() << endl;
     cout.imbue( std::locale("en_US"));
     std::cout<< "Total Number of neighbors evaluated: " << neighbor_counter->getValue() << endl;
+    cout.imbue( std::locale(""));
     std::cout<< "Times objective function was called: " << cost_counter->getValue() << endl;
 
     return 0;
