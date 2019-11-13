@@ -71,14 +71,14 @@ public:
             const solution_t &,const std::vector<transformation_t>&);
 };
 
-class Accept :
-public core::Accept<>
+class DeltaAccept :
+public core::DeltaAccept<>
 {
 public:
-    Accept() = default;
-    virtual ~Accept() = default;
+    DeltaAccept() = default;
+    virtual ~DeltaAccept() = default;
 
-    virtual result_t operator()(const Accept::delta_vector& ) const;
+    virtual Result operator()(const delta_vector_t& ) const;
 
 };
 

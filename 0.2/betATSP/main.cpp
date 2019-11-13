@@ -26,7 +26,7 @@ int main(int, char * argv[])
     shared_ptr< core::Create< solution_t > > create_solution =
             make_shared< CreateRandom >(tspdata.size());
 
-    auto create_counter = make_shared< core::create::CallCounter< solution_t >>(create_solution);
+    auto create_counter = make_shared< core::CreateCallsAccumulator< solution_t >>(create_solution);
     create_solution = create_counter;
     //create_solution = make_shared< create::PrintSolution<solution_t>>(create_counter);
 
@@ -41,31 +41,35 @@ int main(int, char * argv[])
     shared_ptr< core::Neighborhood<solution_t,transformation_t> >
             neighbor = make_shared< atsp_decision::Neighborhood >();
 
-    auto neighbor_callcounter = make_shared< neighbor::CallCounter<solution_t,transformation_t > >(neighbor);
+    auto neighbor_callcounter = make_shared< core::NeighborCallAccumulator<solution_t,transformation_t > >(neighbor);
     neighbor = neighbor_callcounter;
 
-    auto neighbor_counter = make_shared< neighbor::NeighborCounter<solution_t,transformation_t > >(neighbor);
+    auto neighbor_counter = make_shared< core::NeighborAccumulator<solution_t,transformation_t > >(neighbor);
     neighbor = neighbor_counter;
 
     //neighbor = make_shared< BetATSP_Bet >(neighbor,house);
 
     // OBJECTIVE FUNCTION AND ACCESSORIES
 
-    shared_ptr< core::Objective<solution_t, problem_data_t> >
-            cost = make_shared<atsp_decision::Objective>(tspdata);
-    auto cost_counter = make_shared< objective::CallCounter<solution_t, problem_data_t> >(cost);
-    cost = cost_counter;
+    shared_ptr< core::Objective<solution_t, problem_data_t> > cost =
+            make_shared<atsp_decision::Objective>(tspdata);
+
+    auto cost_call_counter = make_shared< core::ObjectiveCallAccumulator<solution_t, problem_data_t> >(cost);
+    cost = cost_call_counter;
 
     // DELTA OBJECTIVE FUNCTION AND ACCESSORIES
 
     shared_ptr< core::DeltaObjective<solution_t,transformation_t,problem_data_t> >
             deltacost = make_shared< atsp_decision::DeltaObjective >(tspdata);
+    auto delta_call_counter = make_shared<
+            core::DeltaObjectiveCallAccumulator< solution_t, transformation_t, problem_data_t > >(deltacost);
+    deltacost = delta_call_counter;
 
 //    deltacost = make_shared< BetATSP_Check >(deltacost,house);
 
     // ACCEPT FUNCTION AND ACCESSORIES
 
-    auto accept = make_shared<atsp_decision::Accept>();
+    auto accept = make_shared<atsp_decision::DeltaAccept>();
 
     // TRANSFORM FUNCTION AND ACCESSORIES
 
@@ -93,11 +97,11 @@ int main(int, char * argv[])
 
         auto deltas = (*deltacost)(solution,neighbors);
 
-        auto accepted = (*accept)(deltas);
+        auto acceptResult = (*accept)(deltas);
 
-        if ( accepted.first )
+        if ( acceptResult.accepted )
         {
-            (*transform)(solution,neighbors.at(accepted.second));
+            (*transform)(solution,neighbors.at(acceptResult.index));
         }
         else
         {
@@ -123,16 +127,20 @@ int main(int, char * argv[])
     assert( best_cost == (*cost)(best));
 #endif
 
+
+
     cout<< "Elapsed time: " << fixed << std::setprecision(2) <<
            (clock() - begin) / static_cast<double>(CLOCKS_PER_SEC) << endl;
     std::cout<< "Initial result: " << start_cost << endl;
     std::cout<< "Final result: " << best_cost << endl;
-    std::cout<< "Improvement: " << ( start_cost - best_cost ) << "/" << 100.0 * ( start_cost - best_cost ) / start_cost << "%\n";
+    std::cout<< "Improvement: " << ( start_cost - best_cost ) << " / " << 100.0 * ( start_cost - best_cost ) / start_cost << "%\n";
     std::cout<< "Times create solution called: " << create_counter->getValue() << endl;
     std::cout<< "Times neighbor called: " << neighbor_callcounter->getValue() << endl;
     cout.imbue( std::locale("en_US"));
     std::cout<< "Total Number of neighbors evaluated: " << neighbor_counter->getValue() << endl;
-    std::cout<< "Times objective function was called: " << cost_counter->getValue() << endl;
+    cout.imbue( std::locale(""));
+    std::cout<< "Times objective function was called: " << cost_call_counter->getValue() << endl;
+    std::cout<< "Times delta function was called: " << delta_call_counter->getValue() << endl;
 
     return 0;
 }

@@ -1,7 +1,6 @@
 #ifndef BETATSP_DECORATORS_H
 #define BETATSP_DECORATORS_H
 
-#include "neighborhood_functor.h"
 #include "core.h"
 #include "atsp_decision.h"
 #include "betatsp_core.h"

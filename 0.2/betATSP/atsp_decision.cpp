@@ -154,7 +154,7 @@ size_t atsp_decision::Objective::operator()(const solution_t & s)
    size_t curr_city = 0;
    for(const auto& city : s)
    {
-       cost += _data.at(curr_city++).at(city.next);
+       cost += _data->at(curr_city++).at(city.next);
    }
 
 #ifdef __DEBUG__
@@ -184,8 +184,8 @@ std::vector<int> atsp_decision::DeltaObjective::operator()
         const auto & Bprev = s.at(B).prev;
         const auto & Bnext = s.at(B).next;
 
-        signed delta = - int(_data.at(Bprev).at(B) +_data.at(B).at(Bnext) +_data.at(A).at(Anext) )
-                + int(_data.at(Bprev).at(Bnext) + _data.at(A).at(B) + _data.at(B).at(Anext) );
+        signed delta = - int(_data->at(Bprev).at(B) +_data->at(B).at(Bnext) +_data->at(A).at(Anext) )
+                + int(_data->at(Bprev).at(Bnext) + _data->at(A).at(B) + _data->at(B).at(Anext) );
         resvec.at(pos++) = delta;
         //resvec.push_back(delta);
     }
@@ -193,11 +193,11 @@ std::vector<int> atsp_decision::DeltaObjective::operator()
     return std::vector<int>(resvec);
 }
 
-Accept::result_t Accept::operator()
-(const delta_vector & delta_vec) const
+DeltaAccept::Result DeltaAccept::operator()
+(const delta_vector_t & delta_vec) const
 {
-    result_t res(false,0);
-    delta_type min = 0;
+    Result res;
+    delta_t min = 0;
     size_t index = 0;
 
     for(const auto& d : delta_vec)
@@ -205,11 +205,11 @@ Accept::result_t Accept::operator()
         if (d < min)
         {
             min = d;
-            res.second = index;
+            res.index = index;
         }
         index++;
     }
-    if (min<0) res.first = true;
+    if (min<0) res.accepted = true;
     return res;
 }
 

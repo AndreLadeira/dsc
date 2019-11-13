@@ -13,24 +13,14 @@ SOURCES += \
     betatsp_core.cpp
 
 HEADERS += \
-    accept_decorator.h \
-    accept_functor.h \
     atsp.h \
     atsp_decision.h \
     core.h \
-    create_decorators.h \
-    create_functor.h \
     decorators.h \
     execution_controller.h \
     functors.h \
-    greedysdhc.h \
-    neighborhood_decorators.h \
-    neighborhood_functor.h \
-    objective_decorators.h \
-    objective_functor.h \
     repository.h \
     noncopyable.h \
-    typetraits.h \
     betatsp_decorators.h \
     betatsp_core.h
 

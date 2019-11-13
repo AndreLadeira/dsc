@@ -1,7 +1,6 @@
 #ifndef BETATSP_CORE_H
 #define BETATSP_CORE_H
 
-#include "neighborhood_functor.h"
 #include "core.h"
 #include "atsp_decision.h"
 
