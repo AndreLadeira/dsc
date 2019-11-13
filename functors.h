@@ -2,7 +2,7 @@
 #define FUNCTORS_H
 
 #include "noncopyable.h"
-#include <iosfwd>
+#include <vector>
 
 namespace core{
 
