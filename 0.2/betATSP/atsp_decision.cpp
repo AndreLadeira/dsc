@@ -163,7 +163,7 @@ size_t atsp_decision::Objective::operator()(const solution_t & s)
 
     path_t p;
     to_path(s,p);
-    auto compare = getCost(_data,p);
+    auto compare = getCost((*_data),p);
     assert(cost == compare);
 
 #endif

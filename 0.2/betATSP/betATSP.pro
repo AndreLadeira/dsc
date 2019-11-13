@@ -7,7 +7,6 @@ SOURCES += \
     atsp.cpp \
     execution_controller.cpp \
         main.cpp \
-    greedysdhc.cpp \
     atsp_decision.cpp \
     betatsp_decorators.cpp \
     betatsp_core.cpp

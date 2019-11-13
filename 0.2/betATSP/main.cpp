@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <iomanip>
 #include <ctime>
+#include <cassert>
 
 #include "functors.h"
 #include "decorators.h"
