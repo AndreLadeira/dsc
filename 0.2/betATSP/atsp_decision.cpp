@@ -71,8 +71,8 @@ std::ostream& atsp_decision::operator<<(std::ostream &os, const node_t &n)
 Neighborhood::trvec_t Neighborhood::operator()(const solution_t &s)
 {
     const auto sz = s.size();
-    trvec_t trvec;
-    trvec.reserve( (sz-2)*(sz-2) );
+    static thread_local trvec_t trvec((sz-2)*(sz-2));
+    //trvec_t trvec((sz-2)*(sz-2));
 
     // a transformation is defined as put city B after A
     // in the decision problem is equal to "activate bit AB"
@@ -102,6 +102,7 @@ Neighborhood::trvec_t Neighborhood::operator()(const solution_t &s)
 
     path_t path;
     to_path(s,path);
+    size_t pos = 0;
 
     for(int P = 1; P < signed(sz); ++P)// sz = 7, cities [1..6]
     {
@@ -115,16 +116,17 @@ Neighborhood::trvec_t Neighborhood::operator()(const solution_t &s)
             {
                 offset -= offset < 0 ? 1 : 0;
                 auto cityA = path.at( size_t(P + offset) );
-                trvec.push_back(transformation_t(cityA,cityB));
+                trvec.at(pos++) = transformation_t(cityA,cityB);
             }
         }
     }
 
 #ifdef __DEBUG__
-        assert( trvec.size() == (sz-2)*(sz-2));
+        assert( pos == (sz-2)*(sz-2));
 #endif
 
-    return trvec;
+    return trvec_t(trvec);
+    //return trvec;
 }
 
 namespace
@@ -231,4 +233,28 @@ void Transform::operator()(solution_t & s, const transformation_t & t)
     s.at(Anext).prev = B;
     s.at(B).prev = A;
     s.at(A).next = B;
+}
+
+DeltaAccept::Result DeltaAccept1stImprove::operator()
+(const DeltaAccept::delta_vector_t & delta_vec) const
+{
+    Result res;
+    size_t index = 0;
+
+    for(const auto& d : delta_vec)
+    {
+        if (d < 0)
+        {
+            res.accepted = true;
+            res.index = index;
+            return res;
+        }
+        index++;
+    }
+    return res;
+}
+
+Neighborhood1StImprove::trvec_t Neighborhood1StImprove::operator()(const solution_t &s)
+{
+
 }

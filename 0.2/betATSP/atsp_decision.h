@@ -48,6 +48,14 @@ public:
     virtual trvec_t operator()(const solution_t & s);
 };
 
+class Neighborhood1StImprove : public core::Neighborhood<solution_t,transformation_t>
+{
+public:
+    Neighborhood1StImprove() = default;
+    using trvec_t = std::vector<transformation_t>;
+    virtual trvec_t operator()(const solution_t & s);
+};
+
 class Objective : public core::Objective<solution_t,problem_data_t,size_t>
 {
 public:
@@ -77,6 +85,17 @@ public core::DeltaAccept<>
 public:
     DeltaAccept() = default;
     virtual ~DeltaAccept() = default;
+
+    virtual Result operator()(const delta_vector_t& ) const;
+
+};
+
+class DeltaAccept1stImprove :
+public core::DeltaAccept<>
+{
+public:
+    DeltaAccept1stImprove() = default;
+    virtual ~DeltaAccept1stImprove() = default;
 
     virtual Result operator()(const delta_vector_t& ) const;
 

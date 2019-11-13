@@ -41,11 +41,14 @@ int main(int, char * argv[])
     shared_ptr< core::Neighborhood<solution_t,transformation_t> >
             neighbor = make_shared< atsp_decision::Neighborhood >();
 
-    auto neighbor_callcounter = make_shared< core::NeighborCallAccumulator<solution_t,transformation_t > >(neighbor);
-    neighbor = neighbor_callcounter;
+    auto neighbor_totalcalls = make_shared< core::NeighborCallAccumulator<solution_t,transformation_t > >(neighbor);
+    neighbor = neighbor_totalcalls;
 
     auto neighbor_counter = make_shared< core::NeighborAccumulator<solution_t,transformation_t > >(neighbor);
     neighbor = neighbor_counter;
+
+    auto neighbor_callcounter = make_shared< core::NeighborAccumulator<solution_t,transformation_t > >(neighbor);
+    neighbor = neighbor_callcounter;
 
     //neighbor = make_shared< BetATSP_Bet >(neighbor,house);
 
@@ -70,6 +73,7 @@ int main(int, char * argv[])
     // ACCEPT FUNCTION AND ACCESSORIES
 
     auto accept = make_shared<atsp_decision::DeltaAccept>();
+    //auto accept = make_shared<atsp_decision::DeltaAccept1stImprove>();
 
     // TRANSFORM FUNCTION AND ACCESSORIES
 
@@ -135,7 +139,7 @@ int main(int, char * argv[])
     std::cout<< "Final result: " << best_cost << endl;
     std::cout<< "Improvement: " << ( start_cost - best_cost ) << " / " << 100.0 * ( start_cost - best_cost ) / start_cost << "%\n";
     std::cout<< "Times create solution called: " << create_counter->getValue() << endl;
-    std::cout<< "Times neighbor called: " << neighbor_callcounter->getValue() << endl;
+    std::cout<< "Times neighbor called: " << neighbor_totalcalls->getValue() << endl;
     cout.imbue( std::locale("en_US"));
     std::cout<< "Total Number of neighbors evaluated: " << neighbor_counter->getValue() << endl;
     cout.imbue( std::locale(""));

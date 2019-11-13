@@ -94,6 +94,26 @@ public:
     }
 };
 
+template< typename solution_t , typename transformation_t >
+class NeighborCounter:
+        public Neighborhood< solution_t, transformation_t >,
+        public Decorator< Neighborhood< solution_t, transformation_t > >,
+        public Counter<>
+{
+public:
+
+    using DecoratorBase = Decorator< Neighborhood< solution_t, transformation_t > >;
+
+    NeighborCounter(typename DecoratorBase::ptr_t ptr):DecoratorBase(ptr){}
+
+    virtual ~NeighborCounter() = default;
+    virtual std::vector<transformation_t> operator()( const solution_t& s ){
+        auto n = DecoratorBase::_ptr->operator()(s);
+        Counter::increment(n.size());
+        return n;
+    }
+};
+
 template< typename solution_t, typename data_t, typename result_t = size_t >
 class ObjectiveCallAccumulator:
         public Objective< solution_t, data_t, result_t >,
