@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <iomanip>
 #include <ctime>
+#include <cassert>
 
 #include "functors.h"
 #include "decorators.h"
@@ -127,7 +128,7 @@ int main(int, char * argv[])
            (clock() - begin) / static_cast<double>(CLOCKS_PER_SEC) << endl;
     std::cout<< "Initial result: " << start_cost << endl;
     std::cout<< "Final result: " << best_cost << endl;
-    std::cout<< "Improvement: " << ( start_cost - best_cost ) << "/" << 100.0 * ( start_cost - best_cost ) / start_cost << "%\n";
+    std::cout<< "Improvement: " << ( start_cost - best_cost ) << " / " << 100.0 * ( start_cost - best_cost ) / start_cost << "%\n";
     std::cout<< "Times create solution called: " << create_counter->getValue() << endl;
     std::cout<< "Times neighbor called: " << neighbor_callcounter->getValue() << endl;
     cout.imbue( std::locale("en_US"));
