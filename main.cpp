@@ -73,8 +73,8 @@ int main(int, char * argv[])
 
     // ACCEPT FUNCTION AND ACCESSORIES
 
-    auto accept = make_shared<atsp_decision::DeltaAccept>();
-    //auto accept = make_shared<atsp_decision::DeltaAccept1stImprove>();
+    //auto accept = make_shared<atsp_decision::DeltaAccept>();
+    auto accept = make_shared<atsp_decision::DeltaAccept1stImprove>();
 
     // TRANSFORM FUNCTION AND ACCESSORIES
 
@@ -83,8 +83,7 @@ int main(int, char * argv[])
     core::ExecutionController exec;
     auto restarts = strtoul(argv[2],nullptr,0);
     exec.addStopTrigger( make_shared< core::Trigger<> >(create_counter,restarts));
-    exec.addStopTrigger( make_shared<core::Trigger<size_t>>(neighbor_counter,400000));
-
+    //exec.addStopTrigger( make_shared<core::Trigger<size_t>>(neighbor_counter,800000));
 
     auto solution = (*create_solution)();
     auto best = solution;
@@ -95,6 +94,7 @@ int main(int, char * argv[])
 
     while(!exec.stop())
     {
+
         auto neighbors = (*neighbor)(solution);
 
         //vector<int> deltas( neighbors.size() );
@@ -106,6 +106,12 @@ int main(int, char * argv[])
         if ( acceptResult.accepted )
         {
             (*transform)(solution,neighbors.at(acceptResult.index));
+//            auto newcost = (*cost)(solution);
+//            if ( newcost < best_cost )
+//            {
+//                best = solution;
+//                best_cost = newcost;
+//            }
         }
         else
         {
@@ -132,7 +138,6 @@ int main(int, char * argv[])
 #endif
 
 
-
     cout<< "Elapsed time: " << fixed << std::setprecision(2) <<
            (clock() - begin) / static_cast<double>(CLOCKS_PER_SEC) << endl;
     std::cout<< "Initial result: " << start_cost << endl;
@@ -141,7 +146,7 @@ int main(int, char * argv[])
     std::cout<< "Times create solution called: " << create_counter->getValue() << endl;
     std::cout<< "Times neighbor called: " << neighbor_totalcalls->getValue() << endl;
     cout.imbue( std::locale("en_US"));
-    std::cout<< "Total Number of neighbors evaluated: " << neighbor_counter->getValue() << endl;
+    std::cout<< "Total Number of transitions listed: " << neighbor_counter->getValue() << endl;
     cout.imbue( std::locale(""));
     std::cout<< "Times objective function was called: " << cost_call_counter->getValue() << endl;
     std::cout<< "Times delta function was called: " << delta_call_counter->getValue() << endl;

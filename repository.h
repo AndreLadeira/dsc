@@ -2,6 +2,10 @@
 #define REPOSITORY_H
 /*
 
+    //exec.addAlgorithm( make_shared< atsp_decision::GreedyBestChoice >(create,neighbor,delta,accept,transform));
+    //auto final_solution = exec.runAlgorithms(start_solution);
+
+
 struct Car
 {
     virtual ~Car() = default;

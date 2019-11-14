@@ -256,5 +256,20 @@ DeltaAccept::Result DeltaAccept1stImprove::operator()
 
 Neighborhood1StImprove::trvec_t Neighborhood1StImprove::operator()(const solution_t &s)
 {
+    const auto max_sz = ( s.size() - 2 )*( s.size() - 2 );
+    static thread_local trvec_t trvec(max_sz);
+    static thread_local size_t index = max_sz;
 
+    if (index < max_sz)
+    {
+        index++;
+        return trvec_t(1,trvec.at(index-1));
+    }
+    else
+    {
+        index = 1;
+        atsp_decision::Neighborhood n;
+        trvec = n(s);
+        return trvec_t(1,trvec.at(0));
+    }
 }
