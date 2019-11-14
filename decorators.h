@@ -134,6 +134,27 @@ public:
 
 };
 
+template< typename solution_t, typename data_t, typename result_t = size_t >
+class ObjectiveProgress:
+        public Objective< solution_t, data_t, result_t >,
+        public Decorator< Objective< solution_t, data_t, result_t > >,
+        public Progress<>{
+
+public:
+
+    using DecoratorBase = Decorator< Objective< solution_t, data_t, result_t > >;
+
+    ObjectiveProgress() = delete;
+    ObjectiveProgress( typename DecoratorBase::ptr_t ptr, size_t c0 ):
+        DecoratorBase(ptr),Progress<>(c0){}
+
+    virtual size_t operator()(const solution_t& s){
+        auto c = DecoratorBase::_ptr->operator()(s);
+        setProgress(c);
+        return c;
+    }
+};
+
 
 template< typename solution_t, typename transformation_t, typename data_t, typename delta_t = int>
 class DeltaObjectiveCallAccumulator:

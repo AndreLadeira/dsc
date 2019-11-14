@@ -18,13 +18,13 @@ public:
 };
 
 
-template< typename solution_t , typename transformation_t >
+template< typename solution_t , typename transition_t >
 class Neighborhood : public NonCopyable
 {
 public:
 
     virtual ~Neighborhood() = default;
-    virtual std::vector<transformation_t> operator()(const solution_t &) = 0;
+    virtual std::vector<transition_t> operator()(const solution_t &) = 0;
 };
 
 
@@ -45,7 +45,7 @@ protected:
 };
 
 
-template< typename solution_t, typename transformation_t, typename data_t, typename delta_t = int>
+template< typename solution_t, typename transition_t, typename data_t, typename delta_t = int>
 class DeltaObjective : public NonCopyable
 {
 public:
@@ -55,7 +55,7 @@ public:
     virtual ~DeltaObjective() = default;
 
     virtual std::vector<delta_t> operator()(
-            const solution_t&, const std::vector<transformation_t>&) = 0;
+            const solution_t&, const std::vector<transition_t>&) = 0;
 protected:
 
     const data_t * const _data;
@@ -82,15 +82,16 @@ public:
 
 };
 
-template< typename solution_t, typename transformation_t>
+template< typename solution_t, typename transition_t>
 class Transform : public NonCopyable
 {
 public:
 
     Transform() = default;
     virtual ~Transform() = default;
-    virtual void operator()(solution_t&, const transformation_t&) = 0;
+    virtual void operator()(solution_t&, const transition_t&) = 0;
 };
+
 
 }
 

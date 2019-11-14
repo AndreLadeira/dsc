@@ -15,14 +15,7 @@ struct __Trigger
 template <typename T = size_t>
 struct Trigger : public __Trigger
 {
-    using compare = bool (*)(T,T);
-
-    //static T abs(T x){ if (x<0) return -x; else return x; }
-    static bool less(const T a, const T b){return a<b;}
-    static bool greater(const T a, const T b){return a>b;}
-    static bool equal_to(const T a, const T b){return a==b;}
-
-    Trigger(const std::shared_ptr<const Value<T>> valueptr, T limit , compare c = greater):
+    Trigger(const std::shared_ptr<const Value<T>> valueptr, T limit , Compare<T> c = Compare<T>::greater ):
         _valueptr(valueptr),_limit(limit), _compare(c){}
 
     virtual operator bool() const
@@ -34,7 +27,7 @@ private:
 
     std::shared_ptr<const Value<T>> _valueptr;
     const T _limit;
-    compare _compare;
+    Compare<T> _compare;
 };
 
 class ExecutionController
