@@ -2,6 +2,7 @@
 #include <string>
 #include <ostream>
 #include <random>
+#include <algorithm>
 #include <chrono>
 
 #ifdef __DEBUG__
@@ -128,7 +129,7 @@ Neighborhood::trvec_t Neighborhood::operator()(const solution_t &s)
     return trvec_t(trvec);
     //return trvec;
 }
-
+#ifdef __DEBUG__
 namespace
 {
 
@@ -149,6 +150,7 @@ namespace
     }
 
 }
+#endif
 
 size_t atsp_decision::Objective::operator()(const solution_t & s)
 {
