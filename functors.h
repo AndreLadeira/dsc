@@ -82,6 +82,25 @@ public:
 
 };
 
+template< typename solution_t, typename data_t, typename result_t = size_t >
+class Update : public NonCopyable
+{
+public:
+
+    using objective_ptr_t = std::shared_ptr<Objective<solution_t,data_t,result_t>>;
+
+    Update( objective_ptr_t optr):_cost(optr){}
+    Update() = delete;
+    virtual ~Update() = default;
+    virtual bool operator()(solution_t& s){
+        //if
+    }
+
+private:
+    result_t best_cost;
+    objective_ptr_t _cost;
+};
+
 template< typename solution_t, typename transition_t>
 class Transform : public NonCopyable
 {
