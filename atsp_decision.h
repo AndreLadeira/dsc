@@ -21,6 +21,7 @@ struct node_t
 
     friend std::ostream& operator<<(std::ostream&, const node_t&);
 };
+std::ostream& operator<<(std::ostream&, const node_t&);
 
 using path_t = std::vector<size_t>;
 using solution_t = std::vector< node_t >;
