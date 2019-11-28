@@ -20,7 +20,15 @@ using namespace core;
 int main(int, char * argv[])
 {
     problem_data_t tspdata;
-    problems::atsp::loadTSPLIB(std::ifstream(argv[1]),tspdata);
+    std::ifstream datafile(argv[1]);
+    if (datafile.is_open())
+        problems::atsp::loadTSPLIB(datafile,tspdata);
+    else
+    {
+        std::cout<<"Data file not found.\n";
+        return 0;
+    }
+    datafile.close();
 
     // CREATE FUNCTION AND ACCESSORIES
 
