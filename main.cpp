@@ -85,7 +85,7 @@ int main(int, char * argv[])
             core::DeltaObjectiveCallAccumulator< solution_t, transformation_t, problem_data_t > >(deltacost);
     deltacost = delta_call_counter;
 
-//    deltacost = make_shared< BetATSP_Check >(deltacost,house);
+    //    deltacost = make_shared< BetATSP_Check >(deltacost,house);
 
     // ACCEPT FUNCTION AND ACCESSORIES
     shared_ptr< core::DeltaAccept<> > accept;

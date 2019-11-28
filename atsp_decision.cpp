@@ -12,7 +12,7 @@
 using namespace problems::atsp;
 using namespace atsp_decision;
 
-void atsp_decision::to_path(const solution_t &s, path_t &path)
+void atsp_decision::to_path(const solution_t& s, path_t &path)
 {
     path.clear();
     path.reserve( s.size() + 1);

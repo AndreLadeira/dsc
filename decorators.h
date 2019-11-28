@@ -175,6 +175,7 @@ public:
     }
 };
 
+
 //template< typename _delta_t = int >
 //class ProgressLogger:
 //        public DeltaAccept< _delta_t >,
