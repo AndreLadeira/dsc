@@ -102,12 +102,16 @@ int main(int, char * argv[])
     core::ExecutionController exec;
     auto restarts = strtoul(argv[2],nullptr,0);
 
+    // EXECUTION TIMER
+    auto timer = make_shared<Timer>();
+
     exec.addStopTrigger( make_shared< core::Trigger<> >(create_counter,restarts) );
     //exec.addStopTrigger( make_shared< core::Trigger<>>(neighbor_counter,30e06) );
     //exec.addStopTrigger( make_shared< core::Trigger<double>>(progress_monitor,0.73) );
     //exec.addStopTrigger( make_shared< core::Trigger<>>(cost_call_counter,100000) );
+    exec.addStopTrigger( make_shared< core::Trigger<double> >(timer,5.0) );
 
-    clock_t begin = clock();
+    timer->start();
 
     while(!exec.stop())
     {
@@ -153,7 +157,7 @@ int main(int, char * argv[])
 
     std::cout<< best_cost << "\t" << progress_monitor->getValue() << "\t" <<
                 cost_call_counter->getValue() << "\t" << neighbor_counter->getValue() << "\t" <<
-                (clock() - begin) / static_cast<double>(CLOCKS_PER_SEC) << endl;
+                timer->getValue() << endl;
 
     return 0;
 }

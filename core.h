@@ -3,20 +3,40 @@
 
 #include <memory>
 #include <cmath>
+#include <ctime>
 
 namespace core{
+
+struct Ostreamable
+{
+    virtual void output(std::ostream& to) = 0;
+    virtual~Ostreamable() = default;
+};
 
 template<typename T>
 struct Value
 {
     Value():_v(T(0)){}
     Value(T v):_v(v){}
-    T getValue(void) const {return _v;}
+    virtual ~Value() = default;
+    virtual T getValue(void) const {return _v;}
 
 protected:
 
     T _v;
 };
+template<typename T>
+struct OstreamableValue :
+        public Value<T>,
+        public Ostreamable
+{
+  public:
+    virtual void output(std::ostream &to) override
+    {
+        to << Value<T>::_v;
+    }
+};
+
 
 template<typename T = size_t>
 struct Accumulator : public Value<T>
@@ -49,6 +69,21 @@ private:
 
     compare_fcn_t _compare;
 
+};
+
+struct Timer : public Value<double>
+{
+    void start()
+    {
+        begin = clock();
+    }
+    virtual double getValue(void) const
+    {
+        return (clock() - begin) / static_cast<double>(CLOCKS_PER_SEC);
+    }
+
+private:
+    clock_t begin;
 };
 
 template<typename T = size_t>
