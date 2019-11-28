@@ -20,7 +20,15 @@ using namespace core;
 int main(int, char * argv[])
 {
     problem_data_t tspdata;
-    problems::atsp::loadTSPLIB(std::ifstream(argv[1]),tspdata);
+    std::ifstream datafile(argv[1]);
+    if (datafile.is_open())
+        problems::atsp::loadTSPLIB(datafile,tspdata);
+    else
+    {
+        std::cout<<"Data file not found.\n";
+        return 0;
+    }
+    datafile.close();
 
     // CREATE FUNCTION AND ACCESSORIES
 
@@ -77,7 +85,7 @@ int main(int, char * argv[])
             core::DeltaObjectiveCallAccumulator< solution_t, transformation_t, problem_data_t > >(deltacost);
     deltacost = delta_call_counter;
 
-//    deltacost = make_shared< BetATSP_Check >(deltacost,house);
+    //    deltacost = make_shared< BetATSP_Check >(deltacost,house);
 
     // ACCEPT FUNCTION AND ACCESSORIES
     shared_ptr< core::DeltaAccept<> > accept;
@@ -101,7 +109,7 @@ int main(int, char * argv[])
     //exec.addStopTrigger( make_shared< core::Trigger<>>(neighbor_counter,30e06) );
     //exec.addStopTrigger( make_shared< core::Trigger<double>>(progress_monitor,0.73) );
     //exec.addStopTrigger( make_shared< core::Trigger<>>(cost_call_counter,100000) );
-    exec.addStopTrigger( make_shared< core::Trigger<double> >(timer,5.0) );
+    //exec.addStopTrigger( make_shared< core::Trigger<double> >(timer,5.0) );
 
     timer->start();
 

@@ -9,7 +9,7 @@ namespace atsp{
 
 using matrix = std::vector< std::vector<size_t> >;
 
-void loadTSPLIB(std::ifstream file, matrix & data);
+void loadTSPLIB(std::ifstream& file, matrix & data);
 
 }}
 #endif // ATSP_H

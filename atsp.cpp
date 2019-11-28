@@ -5,7 +5,7 @@
 
 using namespace std;
 
-void problems::atsp::loadTSPLIB(std::ifstream file, matrix& data)
+void problems::atsp::loadTSPLIB(std::ifstream& file, matrix& data)
 {
     string line;
     getline(file,line); // problem name
