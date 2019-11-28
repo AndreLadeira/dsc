@@ -155,6 +155,7 @@ public:
     }
 };
 
+
 template< typename solution_t, typename transformation_t, typename data_t, typename delta_t = int>
 class DeltaObjectiveCallAccumulator:
         public DeltaObjective< solution_t, transformation_t, data_t, delta_t>,
@@ -174,6 +175,34 @@ public:
     }
 };
 
-}
+//template< typename _delta_t = int >
+//class ProgressLogger:
+//        public DeltaAccept< _delta_t >,
+//        public Decorator< DeltaAccept< _delta_t > >,
+//        public NonCopyable
+//{
+//public:
+//    using DecoratorBase = Decorator< DeltaAccept< _delta_t > >;
+//    using Result = typename DecoratorBase::Result;
+//    using delta_vector_t = typename DecoratorBase::delta_vector_t;
 
+//    ProgressLogger(std::ostream& os):_os(os){}
+//    virtual Result operator()(const delta_vector_t& dvec){
+//        Result r = DecoratorBase::_ptr->operator()(dvec);
+//        if ( r.accepted ){
+
+//        }
+//    }
+
+//    void addValue( std::shared_ptr< core::Ostreamable > v ){
+//        _values.push_back(v);
+//    }
+
+//private:
+
+//    std::ostream& _os;
+//    std::vector< std::shared_ptr< core::Ostreamable > > _values;
+//};
+
+}
 #endif // STD_DECORATORS_H

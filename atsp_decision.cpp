@@ -129,7 +129,6 @@ Neighborhood::trvec_t Neighborhood::operator()(const solution_t &s)
     return trvec_t(trvec);
     //return trvec;
 }
-
 #ifdef __DEBUG__
 namespace
 {
