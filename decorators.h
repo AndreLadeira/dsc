@@ -155,7 +155,6 @@ public:
     }
 };
 
-
 template< typename solution_t, typename transformation_t, typename data_t, typename delta_t = int>
 class DeltaObjectiveCallAccumulator:
         public DeltaObjective< solution_t, transformation_t, data_t, delta_t>,
