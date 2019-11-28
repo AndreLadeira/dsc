@@ -109,7 +109,7 @@ int main(int, char * argv[])
     //exec.addStopTrigger( make_shared< core::Trigger<>>(neighbor_counter,30e06) );
     //exec.addStopTrigger( make_shared< core::Trigger<double>>(progress_monitor,0.73) );
     //exec.addStopTrigger( make_shared< core::Trigger<>>(cost_call_counter,100000) );
-    exec.addStopTrigger( make_shared< core::Trigger<double> >(timer,5.0) );
+    //exec.addStopTrigger( make_shared< core::Trigger<double> >(timer,5.0) );
 
     timer->start();
 
