@@ -128,13 +128,14 @@ private:
     clock_t begin;
 };
 
-template<typename T = size_t>
+template<typename T = size_t,
+         typename Compare<T>::compare_fcn_t cf_t = Compare<T>::less >
 struct Progress : Value<double>
 {
-    Progress( Compare<T> c = Compare<T>::less )
-        :_v0(1),
-         _vi( c(0,1) ? std::numeric_limits<T>::max(): std::numeric_limits<T>::min()),
-         _compare(c){}
+    Progress()
+        :_compare(cf_t),
+          _v0(1),
+         _vi( _compare(0,1) ? std::numeric_limits<T>::max(): std::numeric_limits<T>::min()){}
 
     void setInitialValue(T v0){ if ( v0 != 0) _v0 = v0; }
     void setProgress(T v){
@@ -146,10 +147,9 @@ struct Progress : Value<double>
 
 protected:
 
+    Compare<T> _compare;
     T _v0;
     T _vi;
-    Compare<T> _compare;
-
 };
 
 template<typename T>
