@@ -129,11 +129,11 @@ private:
 };
 
 template<typename T = size_t,
-         typename Compare<T>::compare_fcn_t cf_t = Compare<T>::less >
+         typename Compare<T>::compare_fcn_t _compare_fcn = Compare<T>::less >
 struct Progress : Value<double>
 {
     Progress()
-        :_compare(cf_t),
+        :_compare(_compare_fcn),
           _v0(1),
          _vi( _compare(0,1) ? std::numeric_limits<T>::max(): std::numeric_limits<T>::min()){}
 
