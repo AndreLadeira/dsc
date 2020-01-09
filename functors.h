@@ -2,7 +2,7 @@
 #define FUNCTORS_H
 
 #include "noncopyable.h"
-#include <vector>
+#include "core.h"
 
 namespace core{
 
@@ -61,24 +61,20 @@ protected:
     const data_t * const _data;
 };
 
-template< typename _delta_t = int >
+template< typename _delta_t = int,
+          typename Compare<_delta_t>::compare_fcn_t _compare_fcn = Compare<_delta_t>::less >
 class DeltaAccept : public NonCopyable
 {
 public:
 
-    struct Result
-    {
-       bool accepted = false;
-       size_t index = 0;
-    };
-
     using delta_vector_t = std::vector<_delta_t>;
     using delta_t = _delta_t;
+
 
     DeltaAccept() = default;
     virtual ~DeltaAccept() = default;
 
-    virtual Result operator()(const delta_vector_t&) const = 0;
+    virtual int operator()(const delta_vector_t&) const = 0;
 
 };
 
