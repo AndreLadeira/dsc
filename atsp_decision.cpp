@@ -200,26 +200,6 @@ std::vector<int> atsp_decision::DeltaObjective::operator()
     return std::vector<int>(resvec);
 }
 
-DeltaAccept::Result DeltaAccept::operator()
-(const delta_vector_t & delta_vec) const
-{
-    Result res;
-    delta_t min = 0;
-    size_t index = 0;
-
-    for(const auto& d : delta_vec)
-    {
-        if (d < min)
-        {
-            min = d;
-            res.index = index;
-        }
-        index++;
-    }
-    if (min<0) res.accepted = true;
-    return res;
-}
-
 void Transform::operator()(solution_t & s, const transformation_t & t)
 {
     const auto& A = t.first;
@@ -240,41 +220,4 @@ void Transform::operator()(solution_t & s, const transformation_t & t)
     s.at(A).next = B;
 }
 
-DeltaAccept::Result DeltaAccept1stImprove::operator()
-(const DeltaAccept::delta_vector_t & delta_vec) const
-{
-    Result res;
-    size_t index = 0;
 
-    for(const auto& d : delta_vec)
-    {
-        if (d < 0)
-        {
-            res.accepted = true;
-            res.index = index;
-            return res;
-        }
-        index++;
-    }
-    return res;
-}
-
-Neighborhood1StImprove::trvec_t Neighborhood1StImprove::operator()(const solution_t &s)
-{
-    const auto max_sz = ( s.size() - 2 )*( s.size() - 2 );
-    static thread_local trvec_t trvec(max_sz);
-    static thread_local size_t index = max_sz;
-
-    if (index < max_sz)
-    {
-        index++;
-        return trvec_t(1,trvec.at(index-1));
-    }
-    else
-    {
-        index = 1;
-        atsp_decision::Neighborhood n;
-        trvec = n(s);
-        return trvec_t(1,trvec.at(0));
-    }
-}
