@@ -11,6 +11,7 @@
 #include "atsp_decision.h"
 #include "execution_controller.h"
 #include "betatsp_decorators.h"
+#include "stdfunctors.h"
 
 using namespace std;
 using namespace problems::atsp;
@@ -84,9 +85,9 @@ int main(int, char * argv[])
     shared_ptr< core::DeltaAccept<> > accept;
 
     if ( argv[3] == nullptr )
-        accept = make_shared<atsp_decision::DeltaAccept>();
+        accept = make_shared< core::DeltaAcceptBestImprove<> >();
     else
-        accept = make_shared<atsp_decision::DeltaAccept1stImprove>();
+        accept = make_shared< core::DeltaAccept1stImprove<> >();
 
     // TRANSFORM FUNCTION AND ACCESSORIES
 
@@ -99,10 +100,10 @@ int main(int, char * argv[])
     auto timer = make_shared<Timer>();
 
     exec.addStopTrigger( make_shared< core::Trigger<> >(create_counter,restarts) );
-    exec.addStopTrigger( make_shared< core::Trigger<>>(neighbors_counter,800e03) );
-//    exec.addStopTrigger( make_shared< core::Trigger<double>>(progress_monitor,0.65) );
+    //exec.addStopTrigger( make_shared< core::Trigger<>>(neighbors_counter,800e03) );
+    //exec.addStopTrigger( make_shared< core::Trigger<double>>(progress_monitor,0.65) );
 //    exec.addStopTrigger( make_shared< core::Trigger<>>(cost_call_counter,30) );
-    //exec.addStopTrigger( make_shared< core::Trigger<double> >(timer,0.5) );
+    exec.addStopTrigger( make_shared< core::Trigger<double> >(timer,1.0) );
 
     timer->start();
 
@@ -120,11 +121,11 @@ int main(int, char * argv[])
     {
         auto transitions = (*neighbor)(solution);
         auto deltas = (*deltacost)(solution,transitions);
-        auto acceptDelta = (*accept)(deltas);
+        auto index = (*accept)(deltas);
 
-        if ( acceptDelta.accepted )
+        if ( index > -1 )
         {
-            (*transform)(solution,transitions.at(acceptDelta.index));
+            (*transform)(solution,transitions.at( static_cast<size_t>(index)) );
 
             auto newcost = (*cost)(solution);
             if ( newcost < best_cost )
@@ -138,9 +139,6 @@ int main(int, char * argv[])
            solution = (*create_solution)();
         }
     }
-
-
-
 
 #ifdef __DEBUG__
     assert( best_cost == (*cost)(best));
@@ -156,12 +154,13 @@ int main(int, char * argv[])
     cout.imbue( std::locale(""));
     std::cout<< "Times objective function was called: " << cost_call_counter->getValue() << endl;
     std::cout<< "Times delta function was called: " << delta_call_counter->getValue() << endl;
-#else
     std::cout<< intsfRecorder->getRecord();
-    std::cout<< best_cost << "\t" << progress_monitor->getValue() << "\t" <<
-                cost_call_counter->getValue() << "\t" << neighbors_counter->getValue() << "\t" <<
-                timer->getValue() << endl;
-    std::cout<< intsfRecorder->getRecord() << endl;
+#else
+
+    std::cout<< std::setprecision(3) << best_cost << "\t" << progress_monitor->getValue() << "\t"
+             << cost_call_counter->getValue() << "\t" << neighbors_counter->getValue() << "\t"
+             << timer->getValue() << endl;
+    //std::cout<< intsfRecorder->getRecord() << endl;
 #endif
     return 0;
 }
