@@ -1,0 +1,4 @@
+#ifndef STDFUNCTORS_H
+#define STDFUNCTORS_H
+
+#endif // STDFUNCTORS_H
