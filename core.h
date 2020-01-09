@@ -131,7 +131,11 @@ private:
 template<typename T = size_t>
 struct Progress : Value<double>
 {
-    Progress( Compare<T> c = Compare<T>::less ):_v0(1),_vi(1),_compare(c){}
+    Progress( Compare<T> c = Compare<T>::less )
+        :_v0(1),
+         _vi( c(0,1) ? std::numeric_limits<T>::max(): std::numeric_limits<T>::min()),
+         _compare(c){}
+
     void setInitialValue(T v0){ if ( v0 != 0) _v0 = v0; }
     void setProgress(T v){
         if( _compare(v,_vi) ){
