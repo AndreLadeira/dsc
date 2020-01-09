@@ -50,13 +50,13 @@ int main(int, char * argv[])
     auto neighbors_counter = make_shared< core::NeighborsExploredCounter< solution_t, transformation_t > >(neighbor);
     neighbor = neighbors_counter;
 
-    auto neighbors_calls_resettable = make_shared< core::NeighborCallsResettable<solution_t,transformation_t > >(neighbor);
-    neighbor = neighbors_calls_resettable;
+//    auto neighbors_calls_resettable = make_shared< core::NeighborCallsResettable<solution_t,transformation_t > >(neighbor);
+//    neighbor = neighbors_calls_resettable;
 
-    // Record intensification history between each create call
-    auto intsfRecorder = make_shared< core::IntesificationRecorder< solution_t > > (create_solution,
-                                                                                    *neighbors_calls_resettable);
-    create_solution = intsfRecorder;
+//    // Record intensification history between each create call
+//    auto intsfRecorder = make_shared< core::IntesificationRecorder< solution_t > > (create_solution,
+//                                                                                    *neighbors_calls_resettable);
+//    create_solution = intsfRecorder;
 
     // OBJECTIVE FUNCTION AND ACCESSORIES
 
@@ -140,9 +140,10 @@ int main(int, char * argv[])
 #ifdef __DEBUG__
     assert( best_cost == (*cost)(best));
 
+#else
 
     cout<< "Elapsed time: " << fixed << std::setprecision(2) << timer->getValue() << endl;
-    std::cout<< "Initial result: " << start_cost << endl;
+    //std::cout<< "Initial result: " << start_cost << endl;
     std::cout<< "Final result: " << best_cost << endl;
     std::cout<< "Improvement: " << progress_monitor->getValue() * 100.0 << "%\n";
     std::cout<< "Times create solution called: " << create_counter->getValue() << endl;
@@ -153,14 +154,11 @@ int main(int, char * argv[])
     std::cout<< "Times objective function was called: " << cost_call_counter->getValue() << endl;
     std::cout<< "Times delta function was called: " << delta_call_counter->getValue() << endl;
 
-    std::cout<< intsfRecorder->getRecord();
-
-#else
-
-    std::cout<< best_cost << "\t" << progress_monitor->getValue() << "\t" <<
-                cost_call_counter->getValue() << "\t" << neighbors_counter->getValue() << "\t" <<
-                timer->getValue() << endl;
-    std::cout<< intsfRecorder->getRecord() << endl;
+//    std::cout<< intsfRecorder->getRecord();
+//    std::cout<< best_cost << "\t" << progress_monitor->getValue() << "\t" <<
+//                cost_call_counter->getValue() << "\t" << neighbors_counter->getValue() << "\t" <<
+//                timer->getValue() << endl;
+//    std::cout<< intsfRecorder->getRecord() << endl;
 #endif
     return 0;
 }
