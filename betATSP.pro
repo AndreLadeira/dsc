@@ -21,7 +21,8 @@ HEADERS += \
     repository.h \
     noncopyable.h \
     betatsp_decorators.h \
-    betatsp_core.h
+    betatsp_core.h \
+    stdfunctors.h
 
 CONFIG(debug, debug|release) {
     DEFINES += "__DEBUG__"

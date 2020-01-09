@@ -99,7 +99,7 @@ int main(int, char * argv[])
     auto timer = make_shared<Timer>();
 
     exec.addStopTrigger( make_shared< core::Trigger<> >(create_counter,restarts) );
-    //exec.addStopTrigger( make_shared< core::Trigger<>>(neighbors_counter,800e03) );
+    exec.addStopTrigger( make_shared< core::Trigger<>>(neighbors_counter,800e03) );
 //    exec.addStopTrigger( make_shared< core::Trigger<double>>(progress_monitor,0.65) );
 //    exec.addStopTrigger( make_shared< core::Trigger<>>(cost_call_counter,30) );
     //exec.addStopTrigger( make_shared< core::Trigger<double> >(timer,0.5) );
