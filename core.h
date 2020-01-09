@@ -4,14 +4,11 @@
 #include <memory>
 #include <cmath>
 #include <ctime>
+#include <list>
+#include <vector>
 
 namespace core{
 
-struct Ostreamable
-{
-    virtual void output(std::ostream& to) = 0;
-    virtual~Ostreamable() = default;
-};
 
 template<typename T>
 struct Value
@@ -25,33 +22,78 @@ protected:
 
     T _v;
 };
-template<typename T>
-struct OstreamableValue :
-        public Value<T>,
-        public Ostreamable
-{
-  public:
-    virtual void output(std::ostream &to) override
-    {
-        to << Value<T>::_v;
-    }
-};
 
-
-template<typename T = size_t>
-struct Accumulator : public Value<T>
+template<typename T = size_t, bool resettable = false>
+struct Counter : public Value<T>
 {
-    Accumulator() = default;
+    Counter() = default;
 protected:
     void increment(T amount){ Value<T>::_v += amount;}
 };
 
 template<typename T = size_t>
-struct Counter : public Accumulator<T>
+struct Resettable : public Counter<T>
 {
-    Counter() = default;
-protected:
+    Resettable() = default;
     void reset(){ Value<T>::_v = T(0);}
+};
+
+template<typename Tx = size_t, typename Ty = size_t>
+struct Record
+{
+    using data_t = std::pair<Tx,Ty>;
+
+    Record():_sz(0){}
+
+    void add(Tx x, Ty y) { add( data_t(x,y) ); }
+    void add(data_t r) { _data.push_back(r); _sz++;}
+    void clear() { _data.clear(); _sz = 0; }
+    size_t size() const { return _sz; }
+
+    std::vector<Tx> getX() const {
+        std::vector<Tx> v(_sz);
+        for(const auto &p : _data) v.push_back(p.first);
+        return std::vector<Tx>(v);
+    }
+
+    std::vector<Ty> getY() const {
+        std::vector<Ty> v(_sz);
+        for(const auto &p : _data) v.push_back(p.second);
+        return std::vector<Ty>(v);
+    }
+
+    template <typename tx, typename ty>
+    friend std::ostream& operator<<(std::ostream& os, const Record<tx,ty>& r);
+
+private:
+
+    std::list<data_t> _data;
+    size_t _sz;
+};
+
+template <typename tx, typename ty>
+std::ostream& operator<<(std::ostream& os, const Record<tx,ty>& record){
+    for(const auto& p: record._data) os << p.first << "\t" << p.second << "\n";
+    return os;
+}
+
+template< typename Tx = size_t, typename Ty = size_t >
+struct Recorder
+{
+    Recorder() = default;
+    void start()   { _started = true; }
+    void stop()    { _started = false; }
+    void restart()  { _record.clear(); _started = true;}
+    bool recording() const { return _started; }
+    void record(Tx x, Ty y){ if ( recording() ) _record.add(x,y);}
+
+    const Record<Tx,Ty>& getRecord() const {return _record; }
+
+private:
+
+  bool _started;
+  Record<Tx,Ty> _record;
+
 };
 
 template<typename T>
@@ -89,7 +131,8 @@ private:
 template<typename T = size_t>
 struct Progress : Value<double>
 {
-    Progress(T v, Compare<T> c = Compare<T>::less ):_v0(v),_vi(v),_compare(c){}
+    Progress( Compare<T> c = Compare<T>::less ):_v0(1),_vi(1),_compare(c){}
+    void setInitialValue(T v0){ if ( v0 != 0) _v0 = v0; }
     void setProgress(T v){
         if( _compare(v,_vi) ){
             _vi = v;
@@ -99,7 +142,7 @@ struct Progress : Value<double>
 
 protected:
 
-    const T _v0;
+    T _v0;
     T _vi;
     Compare<T> _compare;
 

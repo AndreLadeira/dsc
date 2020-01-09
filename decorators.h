@@ -8,7 +8,7 @@
 namespace core{
 
 template< typename solution_t >
-class CreateCallsAccumulator:
+class CreateCallsCounter:
         public Create< solution_t >,
         public Decorator< Create< solution_t > >,
         public Counter<>{
@@ -16,12 +16,45 @@ public:
 
     using DecoratorBase = Decorator< Create< solution_t > >;
 
-    CreateCallsAccumulator( typename DecoratorBase::ptr_t ptr ):DecoratorBase(ptr){}
+    CreateCallsCounter( typename DecoratorBase::ptr_t ptr ):DecoratorBase(ptr){}
 
     virtual solution_t operator()(void){
         Counter::increment(1);
         return DecoratorBase::_ptr->operator()();
     }
+
+};
+
+template< typename solution_t >
+class IntesificationRecorder:
+        public Create< solution_t >,
+        public Decorator< Create< solution_t > >,
+        public Recorder<>{
+
+public:
+
+    using DecoratorBase = Decorator< Create< solution_t > >;
+
+    IntesificationRecorder() = delete;
+    IntesificationRecorder( typename DecoratorBase::ptr_t ptr, core::Resettable<>& ncc ):
+        DecoratorBase(ptr),_neighbors_resettable(ncc){}
+
+    virtual solution_t operator()(void){
+
+        static size_t callsCounter = 0;
+
+        if ( callsCounter ){
+            record(callsCounter,_neighbors_resettable.getValue());
+            _neighbors_resettable.reset();
+        }
+
+        callsCounter++;
+        return DecoratorBase::_ptr->operator()();
+    }
+
+private:
+
+    core::Resettable<>& _neighbors_resettable;
 
 };
 
@@ -56,46 +89,7 @@ private:
 };
 
 template< typename solution_t , typename transformation_t >
-class NeighborCallAccumulator:
-        public Neighborhood< solution_t, transformation_t >,
-        public Decorator< Neighborhood< solution_t, transformation_t > >,
-        public Accumulator<>
-{
-public:
-
-    using DecoratorBase = Decorator< Neighborhood< solution_t, transformation_t > >;
-
-    NeighborCallAccumulator(typename DecoratorBase::ptr_t ptr):DecoratorBase(ptr){}
-
-    virtual ~NeighborCallAccumulator() = default;
-    virtual std::vector<transformation_t> operator()( const solution_t& s ){
-        Accumulator::increment(1);
-        return DecoratorBase::_ptr->operator()(s);
-    }
-};
-
-template< typename solution_t , typename transformation_t >
-class NeighborAccumulator:
-        public Neighborhood< solution_t, transformation_t >,
-        public Decorator< Neighborhood< solution_t, transformation_t > >,
-        public Accumulator<>
-{
-public:
-
-    using DecoratorBase = Decorator< Neighborhood< solution_t, transformation_t > >;
-
-    NeighborAccumulator(typename DecoratorBase::ptr_t ptr):DecoratorBase(ptr){}
-
-    virtual ~NeighborAccumulator() = default;
-    virtual std::vector<transformation_t> operator()( const solution_t& s ){
-        auto n = DecoratorBase::_ptr->operator()(s);
-        Accumulator::increment(n.size());
-        return n;
-    }
-};
-
-template< typename solution_t , typename transformation_t >
-class NeighborCounter:
+class NeighborCallsCounter:
         public Neighborhood< solution_t, transformation_t >,
         public Decorator< Neighborhood< solution_t, transformation_t > >,
         public Counter<>
@@ -104,28 +98,90 @@ public:
 
     using DecoratorBase = Decorator< Neighborhood< solution_t, transformation_t > >;
 
-    NeighborCounter(typename DecoratorBase::ptr_t ptr):DecoratorBase(ptr){}
+    NeighborCallsCounter(typename DecoratorBase::ptr_t ptr):DecoratorBase(ptr){}
 
-    virtual ~NeighborCounter() = default;
+    virtual ~NeighborCallsCounter() = default;
+    virtual std::vector<transformation_t> operator()( const solution_t& s ){
+        Counter::increment(1);
+        return DecoratorBase::_ptr->operator()(s);
+    }
+};
+
+template< typename solution_t , typename transformation_t >
+class NeighborCallsResettable:
+        public Neighborhood< solution_t, transformation_t >,
+        public Decorator< Neighborhood< solution_t, transformation_t > >,
+        public Resettable<>
+{
+public:
+
+    using DecoratorBase = Decorator< Neighborhood< solution_t, transformation_t > >;
+
+    NeighborCallsResettable(typename DecoratorBase::ptr_t ptr):DecoratorBase(ptr){}
+
+    virtual ~NeighborCallsResettable() = default;
+    virtual std::vector<transformation_t> operator()( const solution_t& s ){
+        auto n = DecoratorBase::_ptr->operator()(s);
+        Counter::increment(1);
+        return n;
+    }
+
+};
+
+template< typename solution_t , typename transformation_t >
+class NeighborsExploredCounter:
+        public Neighborhood< solution_t, transformation_t >,
+        public Decorator< Neighborhood< solution_t, transformation_t > >,
+        public Counter<>
+{
+public:
+
+    using DecoratorBase = Decorator< Neighborhood< solution_t, transformation_t > >;
+
+    NeighborsExploredCounter(typename DecoratorBase::ptr_t ptr):DecoratorBase(ptr){}
+
+    virtual ~NeighborsExploredCounter() = default;
     virtual std::vector<transformation_t> operator()( const solution_t& s ){
         auto n = DecoratorBase::_ptr->operator()(s);
         Counter::increment(n.size());
         return n;
     }
+
+};
+
+template< typename solution_t , typename transformation_t >
+class NeighborsExploredResettable:
+        public Neighborhood< solution_t, transformation_t >,
+        public Decorator< Neighborhood< solution_t, transformation_t > >,
+        public Resettable<>
+{
+public:
+
+    using DecoratorBase = Decorator< Neighborhood< solution_t, transformation_t > >;
+
+    NeighborsExploredResettable(typename DecoratorBase::ptr_t ptr):DecoratorBase(ptr){}
+
+    virtual ~NeighborsExploredResettable() = default;
+    virtual std::vector<transformation_t> operator()( const solution_t& s ){
+        auto n = DecoratorBase::_ptr->operator()(s);
+        Counter::increment(n.size());
+        return n;
+    }
+
 };
 
 template< typename solution_t, typename data_t, typename result_t = size_t >
-class ObjectiveCallAccumulator:
+class ObjectiveCallsCounter:
         public Objective< solution_t, data_t, result_t >,
         public Decorator< Objective< solution_t, data_t, result_t > >,
-        public Accumulator<>{
+        public Counter<>{
 
 public:
 
     using DecoratorBase = Decorator< Objective< solution_t, data_t, result_t > >;
 
-    ObjectiveCallAccumulator() = delete;
-    ObjectiveCallAccumulator( typename DecoratorBase::ptr_t ptr ):DecoratorBase(ptr){}
+    ObjectiveCallsCounter() = delete;
+    ObjectiveCallsCounter( typename DecoratorBase::ptr_t ptr ):DecoratorBase(ptr){}
 
     virtual size_t operator()(const solution_t& s){
         increment(1);
@@ -145,29 +201,34 @@ public:
     using DecoratorBase = Decorator< Objective< solution_t, data_t, result_t > >;
 
     ObjectiveProgress() = delete;
-    ObjectiveProgress( typename DecoratorBase::ptr_t ptr, size_t c0 ):
-        DecoratorBase(ptr),Progress<>(c0){}
+    ObjectiveProgress( typename DecoratorBase::ptr_t ptr):
+        DecoratorBase(ptr){}
 
     virtual size_t operator()(const solution_t& s){
+
+        static bool first = true;
         auto c = DecoratorBase::_ptr->operator()(s);
-        setProgress(c);
+
+        if (first) { setInitialValue(c); first = false; }
+        else setProgress(c);
+
         return c;
     }
 };
 
 
 template< typename solution_t, typename transformation_t, typename data_t, typename delta_t = int>
-class DeltaObjectiveCallAccumulator:
+class DeltaObjectiveCallsCounter:
         public DeltaObjective< solution_t, transformation_t, data_t, delta_t>,
         public Decorator<DeltaObjective< solution_t, transformation_t, data_t, delta_t>>,
-        public Accumulator<>{
+        public Counter<>{
 
 public:
 
     using DecoratorBase = Decorator<DeltaObjective< solution_t, transformation_t, data_t, delta_t>>;
 
-    DeltaObjectiveCallAccumulator() = delete;
-    DeltaObjectiveCallAccumulator( typename DecoratorBase::ptr_t ptr ):DecoratorBase(ptr){}
+    DeltaObjectiveCallsCounter() = delete;
+    DeltaObjectiveCallsCounter( typename DecoratorBase::ptr_t ptr ):DecoratorBase(ptr){}
 
     virtual std::vector<delta_t> operator()(const solution_t& s,const std::vector<transformation_t>& trvec){
         increment(1);

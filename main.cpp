@@ -35,59 +35,52 @@ int main(int, char * argv[])
     shared_ptr< core::Create< solution_t > > create_solution =
             make_shared< CreateRandom >(tspdata.size());
 
-    auto create_counter = make_shared< core::CreateCallsAccumulator< solution_t >>(create_solution);
+    auto create_counter = make_shared< core::CreateCallsCounter< solution_t >>(create_solution);
     create_solution = create_counter;
-    //create_solution = make_shared< create::PrintSolution<solution_t>>(create_counter);
 
-    // BET stuff
-//    Gambler::setProblemSize(tspdata.size());
-//    auto trsz = (tspdata.size() - 2)*(tspdata.size() - 2);
-//    std::vector<Gambler> gamblers(20);
-//    House house(gamblers,1000.0,1.0, trsz);
 
     // NEIGHBOR FUNCTION AND ACCESSORIES
 
     shared_ptr< core::Neighborhood<solution_t,transformation_t> >
             neighbor = make_shared< atsp_decision::Neighborhood >();
 
-    auto neighbor_totalcalls = make_shared< core::NeighborCallAccumulator<solution_t,transformation_t > >(neighbor);
-    neighbor = neighbor_totalcalls;
+    auto neighbor_calls_counter = make_shared< core::NeighborCallsCounter<solution_t,transformation_t > >(neighbor);
+    neighbor = neighbor_calls_counter;
 
-    auto neighbor_counter = make_shared< core::NeighborAccumulator<solution_t,transformation_t > >(neighbor);
-    neighbor = neighbor_counter;
+    auto neighbors_counter = make_shared< core::NeighborsExploredCounter< solution_t, transformation_t > >(neighbor);
+    neighbor = neighbors_counter;
 
-    auto neighbor_callcounter = make_shared< core::NeighborAccumulator<solution_t,transformation_t > >(neighbor);
-    neighbor = neighbor_callcounter;
+    auto neighbors_calls_resettable = make_shared< core::NeighborCallsResettable<solution_t,transformation_t > >(neighbor);
+    neighbor = neighbors_calls_resettable;
 
-    //neighbor = make_shared< BetATSP_Bet >(neighbor,house);
+    // Record intensification history between each create call
+    auto intsfRecorder = make_shared< core::IntesificationRecorder< solution_t > > (create_solution,
+                                                                                    *neighbors_calls_resettable);
+    create_solution = intsfRecorder;
 
     // OBJECTIVE FUNCTION AND ACCESSORIES
 
     shared_ptr< core::Objective<solution_t, problem_data_t> > cost =
             make_shared<atsp_decision::Objective>(tspdata);
 
-    auto cost_call_counter = make_shared< core::ObjectiveCallAccumulator<solution_t, problem_data_t> >(cost);
+    auto cost_call_counter = make_shared< core::ObjectiveCallsCounter<solution_t, problem_data_t> >(cost);
     cost = cost_call_counter;
 
-    auto solution = (*create_solution)();
-    auto best = solution;
-    auto best_cost = (*cost)(best);
-    const auto start_cost = best_cost;
-
-    auto progress_monitor = make_shared< core::ObjectiveProgress<solution_t, problem_data_t> >(cost, start_cost);
+    auto progress_monitor = make_shared< core::ObjectiveProgress<solution_t, problem_data_t> >(cost);
     cost = progress_monitor;
 
     // DELTA OBJECTIVE FUNCTION AND ACCESSORIES
 
     shared_ptr< core::DeltaObjective<solution_t,transformation_t,problem_data_t> >
             deltacost = make_shared< atsp_decision::DeltaObjective >(tspdata);
+
     auto delta_call_counter = make_shared<
-            core::DeltaObjectiveCallAccumulator< solution_t, transformation_t, problem_data_t > >(deltacost);
+            core::DeltaObjectiveCallsCounter< solution_t, transformation_t, problem_data_t > >(deltacost);
+
     deltacost = delta_call_counter;
 
-    //    deltacost = make_shared< BetATSP_Check >(deltacost,house);
-
     // ACCEPT FUNCTION AND ACCESSORIES
+
     shared_ptr< core::DeltaAccept<> > accept;
 
     if ( argv[3] == nullptr )
@@ -106,12 +99,20 @@ int main(int, char * argv[])
     auto timer = make_shared<Timer>();
 
     exec.addStopTrigger( make_shared< core::Trigger<> >(create_counter,restarts) );
-    //exec.addStopTrigger( make_shared< core::Trigger<>>(neighbor_counter,30e06) );
-    //exec.addStopTrigger( make_shared< core::Trigger<double>>(progress_monitor,0.73) );
-    //exec.addStopTrigger( make_shared< core::Trigger<>>(cost_call_counter,100000) );
-    //exec.addStopTrigger( make_shared< core::Trigger<double> >(timer,5.0) );
+//    exec.addStopTrigger( make_shared< core::Trigger<>>(neighbor_counter,600e03) );
+//    exec.addStopTrigger( make_shared< core::Trigger<double>>(progress_monitor,0.65) );
+//    exec.addStopTrigger( make_shared< core::Trigger<>>(cost_call_counter,30) );
+    //exec.addStopTrigger( make_shared< core::Trigger<double> >(timer,0.5) );
 
     timer->start();
+
+    auto solution = (*create_solution)();
+    auto best = solution;
+    auto best_cost = (*cost)(best);
+
+#ifdef __DEBUG__
+    const auto start_cost = best_cost;
+#endif
 
     while(!exec.stop())
     {
@@ -138,26 +139,28 @@ int main(int, char * argv[])
 
 #ifdef __DEBUG__
     assert( best_cost == (*cost)(best));
-#endif
 
 
-//    cout<< "Elapsed time: " << fixed << std::setprecision(2) <<
-//           (clock() - begin) / static_cast<double>(CLOCKS_PER_SEC) << endl;
-//    std::cout<< "Initial result: " << start_cost << endl;
-//    std::cout<< "Final result: " << best_cost << endl;
-//    std::cout<< "Improvement: " << ( start_cost - best_cost ) << " / " << 100.0 * ( start_cost - best_cost ) / start_cost << "%\n";
-//    std::cout<< "Improvement: " << progress_monitor->getValue() * 100.0 << "%\n";
-//    std::cout<< "Times create solution called: " << create_counter->getValue() << endl;
-//    std::cout<< "Times neighbor called: " << neighbor_totalcalls->getValue() << endl;
-//    cout.imbue( std::locale("en_US"));
-//    std::cout<< "Total Number of transitions listed: " << neighbor_counter->getValue() << endl;
-//    cout.imbue( std::locale(""));
-//    std::cout<< "Times objective function was called: " << cost_call_counter->getValue() << endl;
-//    std::cout<< "Times delta function was called: " << delta_call_counter->getValue() << endl;
+    cout<< "Elapsed time: " << fixed << std::setprecision(2) << timer->getValue() << endl;
+    std::cout<< "Initial result: " << start_cost << endl;
+    std::cout<< "Final result: " << best_cost << endl;
+    std::cout<< "Improvement: " << progress_monitor->getValue() * 100.0 << "%\n";
+    std::cout<< "Times create solution called: " << create_counter->getValue() << endl;
+    std::cout<< "Times neighbor called: " << neighbor_calls_counter->getValue() << endl;
+    cout.imbue( std::locale("en_US"));
+    std::cout<< "Total Number of transitions listed: " << neighbors_counter->getValue() << endl;
+    cout.imbue( std::locale(""));
+    std::cout<< "Times objective function was called: " << cost_call_counter->getValue() << endl;
+    std::cout<< "Times delta function was called: " << delta_call_counter->getValue() << endl;
+
+    std::cout<< intsfRecorder->getRecord();
+
+#else
 
     std::cout<< best_cost << "\t" << progress_monitor->getValue() << "\t" <<
-                cost_call_counter->getValue() << "\t" << neighbor_counter->getValue() << "\t" <<
+                cost_call_counter->getValue() << "\t" << neighbors_counter->getValue() << "\t" <<
                 timer->getValue() << endl;
-
+    std::cout<< intsfRecorder->getRecord() << endl;
+#endif
     return 0;
 }

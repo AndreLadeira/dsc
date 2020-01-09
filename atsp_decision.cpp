@@ -72,6 +72,9 @@ std::ostream& atsp_decision::operator<<(std::ostream &os, const node_t &n)
 Neighborhood::trvec_t Neighborhood::operator()(const solution_t &s)
 {
     const auto sz = s.size();
+    // declaring this variable static helps the compiler optimize it
+    // it doesnt have to manage it in any way after the declaration
+    // and thread local make this thread safe
     static thread_local trvec_t trvec((sz-2)*(sz-2));
     //trvec_t trvec((sz-2)*(sz-2));
 
@@ -86,13 +89,13 @@ Neighborhood::trvec_t Neighborhood::operator()(const solution_t &s)
     //
     // the general rule is: a city at position P on the path, P=[1...N-1], can
     // only go back 1-P, forward N-P-1, cannot stay at the same place (0)
-    // and go back one position (-1)
+    // and cant go back one position (-1)
     // obs: starting at 1 and not at zero because, by definition, we consider
     // paths always starting and ending at city 0, with no loss of generality.
     //
     // Example
     //          0123456 (N = 7)
-    // the D in abcDefg can go
+    // the D in abcDefg is at position P = 3, therefore it can go
     // 1-P = 1-3 = -2 postions backward (aDbcefg) to
     // N-P-1 = 7-3-1 = 3 positions forward (abcefgD)
     // cant stay at the same place (0)
@@ -126,7 +129,7 @@ Neighborhood::trvec_t Neighborhood::operator()(const solution_t &s)
         assert( pos == (sz-2)*(sz-2));
 #endif
 
-    return trvec_t(trvec);
+    return trvec_t(trvec); // enabling return value compiler optimization
     //return trvec;
 }
 #ifdef __DEBUG__
