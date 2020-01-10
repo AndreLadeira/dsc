@@ -139,9 +139,9 @@ namespace
     using matrix = std::vector<std::vector<size_t>>;
     using path = std::vector<size_t>;
 
-    size_t getCost(const matrix& data, const path& p)
+    int getCost(const matrix& data, const path& p)
     {
-        uint cost = 0;
+        int cost = 0;
         auto sz = p.size();
         //path costs;
         for (uint i = 0; i < sz-1; ++i)
@@ -155,9 +155,9 @@ namespace
 }
 #endif
 
-size_t atsp_decision::Objective::operator()(const solution_t & s)
+int atsp_decision::Objective::operator()(const solution_t & s)
 {
-   size_t cost = 0;
+   int cost = 0;
    size_t curr_city = 0;
    for(const auto& city : s)
    {

@@ -7,6 +7,7 @@
 #include <ostream>
 
 #include "functors.h"
+#include "stdfunctors.h"
 
 namespace problems{
 namespace atsp {
@@ -49,14 +50,14 @@ public:
     virtual trvec_t operator()(const solution_t & s);
 };
 
-class Objective : public core::Objective<solution_t,problem_data_t,size_t>
+class Objective : public core::Objective<solution_t,problem_data_t>
 {
 public:
 
     explicit Objective(const problem_data_t& data):
-        core::Objective<solution_t,problem_data_t,size_t>(data){}
+        core::Objective<solution_t,problem_data_t>(data){}
 
-    virtual size_t operator()(const solution_t&);
+    virtual int operator()(const solution_t&);
 
 };
 
@@ -80,6 +81,7 @@ public:
     virtual ~Transform() = default;
     virtual void operator()(solution_t&, const transformation_t&);
 };
+
 
 } // problems
 } // atsp
