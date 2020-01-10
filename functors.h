@@ -28,7 +28,7 @@ public:
 };
 
 
-template< typename solution_t, typename data_t, typename result_t = size_t >
+template< typename solution_t, typename data_t, typename objective_t = int >
 class Objective : public NonCopyable
 {
 public:
@@ -37,7 +37,7 @@ public:
     explicit Objective(const data_t& d):_data(&d){}
     virtual ~Objective() = default;
 
-    virtual result_t operator()(const solution_t&) = 0;
+    virtual objective_t operator()(const solution_t&) = 0;
 
 protected:
 
@@ -61,41 +61,32 @@ protected:
     const data_t * const _data;
 };
 
-template< typename _delta_t = int,
-          typename Compare<_delta_t>::compare_fcn_t _compare_fcn = Compare<_delta_t>::less >
+template< typename delta_t = int,
+          typename Compare<delta_t>::compare_fcn_t = core::Compare<delta_t>::less >
 class DeltaAccept : public NonCopyable
 {
 public:
 
-    using delta_vector_t = std::vector<_delta_t>;
-    using delta_t = _delta_t;
-
-
     DeltaAccept() = default;
     virtual ~DeltaAccept() = default;
 
-    virtual int operator()(const delta_vector_t&) const = 0;
+    virtual int operator()(const std::vector<delta_t>&) const = 0;
 
 };
 
-//template< typename solution_t, typename data_t, typename result_t = size_t >
-//class Update : public NonCopyable
-//{
-//public:
+template< typename solution_t,
+          typename objective_t,
+          typename Compare<objective_t>::compare_fcn_t >
+class Update : public NonCopyable
+{
+public:
 
-//    using objective_ptr_t = std::shared_ptr<Objective<solution_t,data_t,result_t>>;
+    Update() = default;
+    virtual ~Update() = default;
+    virtual bool operator()(solution_t& bestSoFar, objective_t& bsfCost,
+                            const solution_t& candidate, const objective_t candidateCost ) = 0;
 
-//    Update( objective_ptr_t optr):_cost(optr){}
-//    Update() = delete;
-//    virtual ~Update() = default;
-//    virtual bool operator()(solution_t& s){
-//        //if
-//    }
-
-//private:
-//    result_t best_cost;
-//    objective_ptr_t _cost;
-//};
+};
 
 template< typename solution_t, typename transition_t>
 class Transform : public NonCopyable
