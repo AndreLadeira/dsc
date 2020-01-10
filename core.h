@@ -6,9 +6,10 @@
 #include <ctime>
 #include <list>
 #include <vector>
+#include <numeric>
+#include <iostream>
 
 namespace core{
-
 
 template<typename T>
 struct Value
@@ -38,49 +39,90 @@ struct Resettable : public Counter<T>
     void reset(){ Value<T>::_v = T(0);}
 };
 
-template<typename Tx = size_t, typename Ty = size_t>
+template<typename T = size_t, typename U = size_t>
+struct Statistics;
+
+template<typename T = size_t, typename U = size_t>
 struct Record
 {
-    using data_t = std::pair<Tx,Ty>;
-
     Record():_sz(0){}
 
-    void add(Tx x, Ty y) { add( data_t(x,y) ); }
-    void add(data_t r) { _data.push_back(r); _sz++;}
-    void clear() { _data.clear(); _sz = 0; }
+    void add(T x, U y){
+        _x.push_back(x);
+        _y.push_back(y);
+        _sz++;
+    }
+
+    void clear(){
+        _x.clear();
+        _y.clear();
+        _sz = 0;
+    }
+
     size_t size() const { return _sz; }
+    std::vector<T> getX() const { return get<T>(_x); }
+    std::vector<U> getY() const { return get<U>(_y); }
 
-    std::vector<Tx> getX() const {
-        std::vector<Tx> v(_sz);
-        for(const auto &p : _data) v.push_back(p.first);
-        return std::vector<Tx>(v);
-    }
-
-    std::vector<Ty> getY() const {
-        std::vector<Ty> v(_sz);
-        for(const auto &p : _data) v.push_back(p.second);
-        return std::vector<Ty>(v);
-    }
-
-    template <typename tx, typename ty>
-    friend std::ostream& operator<<(std::ostream& os, const Record<tx,ty>& r);
+    template <T,U>
+    friend std::ostream& operator<<(std::ostream& os, const Record<T,U>& r);
+    friend struct Statistics<T,U>;
 
 private:
 
-    std::list<data_t> _data;
+    template<typename V> std::vector<V> get(const std::list<V>& list) const{
+        return std::vector<V>(list.cbegin(), list.cend());
+    }
+    std::list<T> _x;
+    std::list<U> _y;
     size_t _sz;
 };
 
+template<typename T, typename U>
+struct Statistics
+{
+    Statistics(const Record<T,U>& r):_r(r){}
+
+    double getAverage() const {
+        U sum = std::accumulate(_r._y.cbegin(), _r._y.cend(), U(0) );
+        return static_cast<double>(sum) / _r.size();
+    }
+    U getMin() const {
+      return *std::min_element(_r._y.cbegin(), _r._y.cend());
+    }
+    U getMax() const {
+      return *std::max_element(_r._y.cbegin(), _r._y.cend());
+    }
+    double getStdDev() const{
+        double avg = getAverage();
+        double accum = 0.0;
+        for(const auto&x : _r._y)
+            accum += (x - avg) * (x - avg);
+#ifdef __DEBUG__
+        double stddev = std::sqrt( accum / _r.size() );
+        auto max = getMax();
+        assert( ( avg + 3*stddev < max ) );
+#endif
+        return std::sqrt( accum / _r.size() );
+    }
+
+private:
+
+    const Record<T,U>&  _r;
+};
+
+
 template <typename tx, typename ty>
 std::ostream& operator<<(std::ostream& os, const Record<tx,ty>& record){
-    for(const auto& p: record._data) os << p.first << "\t" << p.second << "\n";
+    auto vx = record.getX();
+    auto vy = record.getY();
+    for(size_t i = 0; i < record.size(); ++i) os << vx.at(i) << "\t" << vy.at(i) << "\n";
     return os;
 }
 
 template< typename Tx = size_t, typename Ty = size_t >
 struct Recorder
 {
-    Recorder() = default;
+    Recorder():_started(true){}
     void start()   { _started = true; }
     void stop()    { _started = false; }
     void restart()  { _record.clear(); _started = true;}
