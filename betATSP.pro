@@ -18,7 +18,6 @@ HEADERS += \
     decorators.h \
     execution_controller.h \
     functors.h \
-    repository.h \
     noncopyable.h \
     betatsp_decorators.h \
     betatsp_core.h \
