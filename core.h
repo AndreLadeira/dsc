@@ -83,8 +83,10 @@ struct Statistics
     Statistics(const Record<T,U>& r):_r(r){}
 
     double getAverage() const {
-        U sum = std::accumulate(_r._y.cbegin(), _r._y.cend(), U(0) );
-        return static_cast<double>(sum) / _r.size();
+        if ( _r.size() ){
+            U sum = std::accumulate(_r._y.cbegin(), _r._y.cend(), U(0) );
+            return static_cast<double>(sum) / _r.size();
+        }else return 0;
     }
     U getMin() const {
       return *std::min_element(_r._y.cbegin(), _r._y.cend());
@@ -92,17 +94,14 @@ struct Statistics
     U getMax() const {
       return *std::max_element(_r._y.cbegin(), _r._y.cend());
     }
-    double getStdDev() const{
-        double avg = getAverage();
-        double accum = 0.0;
-        for(const auto&x : _r._y)
-            accum += (x - avg) * (x - avg);
-#ifdef __DEBUG__
-        double stddev = std::sqrt( accum / _r.size() );
-        auto max = getMax();
-        assert( ( avg + 3*stddev < max ) );
-#endif
-        return std::sqrt( accum / _r.size() );
+    double getStdDev() const {
+        if ( _r.size() ){
+            double avg = getAverage();
+            double accum = 0.0;
+            for(const auto&x : _r._y)
+                accum += (x - avg) * (x - avg);
+            return std::sqrt( accum / _r.size() );
+        }else return 0;
     }
 
 private:
@@ -203,6 +202,14 @@ struct Decorator
 protected:
 
     ptr_t _ptr;
+};
+template<typename id_t>
+struct Identified
+{
+    explicit Identified(id_t id):_id(id){}
+    id_t getId(){return _id;}
+private:
+    id_t _id;
 };
 
 }
