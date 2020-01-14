@@ -102,23 +102,21 @@ int main(int, char * argv[])
 
     update = neighCallsRecorder;
 
-    // add a stagnation counter. One stagnation count means intensifying to the end and not improving.
+    // add a stagnation counter. One stagnation means intensifying to the end and not improving.
     auto stagnation_counter = make_shared<
         core::StagnationCounter<solution_t,int,core::Compare<int>::less > > (update);
 
     update = stagnation_counter;
 
-
-
     // EXECUTION TIMER
     auto timer = make_shared<Timer>();
 
-    //exec.addStopTrigger( make_shared< core::Trigger<> >(create_counter,restarts) );
-    //exec.addStopTrigger( make_shared< core::Trigger<>>(neighbors_counter,800e03) );
-    //exec.addStopTrigger( make_shared< core::Trigger<double>>(progress_monitor,0.65) );
-//    exec.addStopTrigger( make_shared< core::Trigger<>>(cost_call_counter,30) );
-    //exec.addStopTrigger( make_shared< core::Trigger<double> >(timer,1.0) );
-    exec.addStopTrigger( make_shared< core::Trigger<> >(stagnation_counter,300) );
+//    exec.addStopTrigger( make_shared< core::Trigger<> >("Create function counter", create_counter,restarts));
+//    exec.addStopTrigger( make_shared< core::Trigger<>>("Total explored transitions counter", neighbors_counter,800e03) );
+//    exec.addStopTrigger( make_shared< core::Trigger<double>>("Progress monitor", progress_monitor,0.66) );
+//    exec.addStopTrigger( make_shared< core::Trigger<>>("Cost function counter", cost_call_counter,30) );
+//    exec.addStopTrigger( make_shared< core::Trigger<double> >("Timer", timer,0.03) );
+//    exec.addStopTrigger( make_shared< core::Trigger<> >("Stagnated intensifications counter", stagnation_counter,3) );
 
     timer->start();
 
@@ -129,7 +127,6 @@ int main(int, char * argv[])
 #ifndef __RESULTGEN__
     auto start_cost = current_cost;
 #endif
-
     while(!exec.stop())
     {
         auto transitions = (*neighbor)(current);
@@ -160,22 +157,24 @@ int main(int, char * argv[])
              << timer->getValue() << endl;
     //std::cout<< neighCallsRecorder->getRecord() << endl;
 #else
-    cout<< "Elapsed time: " << fixed << std::setprecision(2) << timer->getValue() << endl;
-    std::cout<< "Initial result: " << start_cost << endl;
-    std::cout<< "Final result: " << best_cost << endl;
-    std::cout<< "Improvement: " << progress_monitor->getValue() * 100.0 << "%\n";
-    std::cout<< "Times create solution called: " << create_counter->getValue() << endl;
-    std::cout<< "Times neighbor called: " << neighbor_calls_counter->getValue() << endl;
-    cout.imbue( std::locale("en_US"));
-    std::cout<< "Total Number of transitions listed: " << neighbors_counter->getValue() << endl;
-    cout.imbue( std::locale(""));
-    std::cout<< "Times objective function was called: " << cost_call_counter->getValue() << endl;
-    std::cout<< "Times delta function was called: " << delta_call_counter->getValue() << endl;
-    core::Statistics<> stats( neighCallsRecorder->getRecord() );
-    std::cout<< "Intensification until local maxima (min/max/avg/stddev):" << stats.getMin()
-             << "/" << stats.getMax() <<"/" << stats.getAverage() <<"/" << stats.getStdDev() << endl;
-    std::cout<< "Final stagnation count:" << stagnation_counter->getValue() << endl;
     //std::cout<< neighCallsRecorder->getRecord() << endl;
+    cout<< "Execution stop triggered by         : " << exec.getStoppingTrigger() << endl;
+    cout<< "Execution time                      : " << fixed << std::setprecision(2) << timer->getValue() << endl;
+    cout<< "Initial result                      : " << start_cost << endl;
+    cout<< "Final result                        : " << best_cost << endl;
+    cout<< "Improvement                         : " << progress_monitor->getValue() * 100.0 << "%\n";
+    cout<< "Times create solution called        : " << create_counter->getValue() << endl;
+    cout<< "Times neighbor called               : " << neighbor_calls_counter->getValue() << endl;
+    cout.imbue( std::locale("en_US"));
+    cout<< "Total Number of transitions listed  : " << neighbors_counter->getValue() << endl;
+    cout.imbue( std::locale(""));
+    cout<< "Times objective function was called : " << cost_call_counter->getValue() << endl;
+    cout<< "Times delta function was called     : " << delta_call_counter->getValue() << endl;
+    core::Statistics<> stats( neighCallsRecorder->getRecord() );
+    cout<< "Intensification until local maxima (min/max/avg/stddev):" << stats.getMin()
+             << "/" << stats.getMax() <<"/" << stats.getAverage() <<"/" << stats.getStdDev() << endl;
+    cout<< "Final stagnation count              : " << stagnation_counter->getValue() << endl;
+
 #endif
     return 0;
 }
