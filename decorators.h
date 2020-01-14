@@ -198,9 +198,9 @@ public:
 
         static bool first = true;
 
-        if (first)
-            { setInitialValue(bsfCost); first = false; }
-        else if ( candidateCost < bsfCost )  setProgress(candidateCost);
+        if (first){ setInitialValue(bsfCost); first = false; }
+
+        if ( candidateCost < bsfCost ) setProgress(candidateCost);
 
         return DecoratorBase::_ptr->operator()(bestSoFar,bsfCost,candidate,candidateCost);
     }
