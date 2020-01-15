@@ -11,6 +11,15 @@
 
 namespace core{
 
+class NonCopyable
+{
+protected:
+    NonCopyable() = default;
+    ~NonCopyable() = default;
+    NonCopyable( const NonCopyable& ) = delete;
+    NonCopyable& operator=( const NonCopyable& ) = delete;
+};
+
 template<typename T>
 struct Value
 {
@@ -20,6 +29,8 @@ struct Value
     virtual T getValue(void) const {return _v;}
 
 protected:
+
+    void setValue(T v){_v = v;}
 
     T _v;
 };
@@ -142,7 +153,9 @@ struct Compare
 {
     using compare_fcn_t = bool (*)(T,T);
     static bool less(const T a, const T b){return a<b;}
+    static bool less_or_equal(const T a, const T b){return a<=b;}
     static bool greater(const T a, const T b){return a>b;}
+    static bool greater_or_equal(const T a, const T b){return a>=b;}
     static bool equal_to(const T a, const T b){return a==b;}
 
     Compare(compare_fcn_t c = less):_compare(c){}
