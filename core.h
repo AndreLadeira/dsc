@@ -25,6 +25,8 @@ struct Value
 {
     Value():_v(T(0)){}
     Value(T v):_v(v){}
+    Value(bool minimize):_v( minimize ? std::numeric_limits<T>::max() :
+                                        std::numeric_limits<T>::min() ){}
     virtual ~Value() = default;
     virtual T getValue(void) const {return _v;}
 
@@ -157,6 +159,7 @@ struct Compare
     static bool greater(const T a, const T b){return a>b;}
     static bool greater_or_equal(const T a, const T b){return a>=b;}
     static bool equal_to(const T a, const T b){return a==b;}
+    static bool _true(const T, const T){return true;}
 
     Compare(compare_fcn_t c = less):_compare(c){}
     bool operator()(const T a, const T b) const { return _compare(a,b); }

@@ -1,7 +1,6 @@
 #ifndef STD_DECORATORS_H
 #define STD_DECORATORS_H
 
-#include "core.h"
 #include "functors.h"
 #include <iosfwd>
 #include <iostream>
@@ -88,10 +87,9 @@ public:
     NeighborCallsResettable(typename DecoratorBase::ptr_t ptr):DecoratorBase(ptr){}
 
     virtual ~NeighborCallsResettable() = default;
-    virtual std::vector<transformation_t> operator()( const solution_t& s ){
-        auto n = DecoratorBase::_ptr->operator()(s);
+    virtual std::vector<transformation_t> operator()( const solution_t& s ){   
         Counter::increment(1);
-        return n;
+        return DecoratorBase::_ptr->operator()(s);;
     }
 
 };
@@ -178,16 +176,15 @@ public:
 };
 
 template< typename solution_t,
-          typename objective_t,
-          typename Compare<objective_t>::compare_fcn_t compare>
+          typename objective_t>
 class ObjectiveProgress:
-        public Update< solution_t, objective_t, compare >,
-        public Decorator< Update< solution_t, objective_t, compare > >,
+        public Update< solution_t, objective_t>,
+        public Decorator< Update< solution_t, objective_t> >,
         public Progress<>{
 
 public:
 
-    using DecoratorBase = Decorator< Update< solution_t, objective_t, compare > >;
+    using DecoratorBase = Decorator< Update< solution_t, objective_t> >;
 
     ObjectiveProgress() = delete;
     ObjectiveProgress( typename DecoratorBase::ptr_t ptr):
@@ -206,19 +203,17 @@ public:
     }
 };
 
-
-
 template< typename solution_t,
           typename objective_t,
           typename Compare<objective_t>::compare_fcn_t compare>
 class NeighborsCallsRecorder:
-        public Update< solution_t, objective_t, compare >,
-        public Decorator< Update< solution_t, objective_t, compare > >,
+        public Update< solution_t, objective_t>,
+        public Decorator< Update< solution_t, objective_t> >,
         public Recorder<>{
 
 public:
 
-    using DecoratorBase = Decorator< Update< solution_t, objective_t, compare > >;
+    using DecoratorBase = Decorator< Update< solution_t, objective_t > >;
 
     NeighborsCallsRecorder() = delete;
     NeighborsCallsRecorder( typename DecoratorBase::ptr_t ptr, core::Resettable<>& ncc ):
@@ -242,13 +237,13 @@ template< typename solution_t,
           typename objective_t,
           typename Compare<objective_t>::compare_fcn_t compare>
 class StagnationCounter:
-        public Update< solution_t, objective_t, compare >,
-        public Decorator< Update< solution_t, objective_t, compare > >,
+        public Update< solution_t, objective_t>,
+        public Decorator< Update< solution_t, objective_t > >,
         public Resettable<>{
 
 public:
 
-    using DecoratorBase = Decorator< Update< solution_t, objective_t, compare > >;
+    using DecoratorBase = Decorator< Update< solution_t, objective_t> >;
 
     StagnationCounter() = delete;
     StagnationCounter( typename DecoratorBase::ptr_t ptr):
@@ -261,6 +256,31 @@ public:
             reset();
         else
             increment(1);
+        return updated;
+    }
+};
+
+template< typename solution_t,
+          typename objective_t,
+          typename Compare<objective_t>::compare_fcn_t compare>
+class ObjectiveValue:
+        public Update< solution_t, objective_t >,
+        public Decorator< Update< solution_t, objective_t > >,
+        public Value<size_t>{
+
+public:
+
+    using DecoratorBase = Decorator< Update< solution_t, objective_t > >;
+
+    ObjectiveValue() = delete;
+    ObjectiveValue( typename DecoratorBase::ptr_t ptr, bool minimize = true):
+        DecoratorBase(ptr), Value<size_t>( minimize ){}
+
+    virtual bool operator()(solution_t& bestSoFar, objective_t& bsfCost,
+                            const solution_t& candidate, const objective_t candidateCost ){
+        bool updated = DecoratorBase::_ptr->operator()(bestSoFar,bsfCost,candidate,candidateCost);
+        if ( updated )
+            setValue(candidateCost);
         return updated;
     }
 };

@@ -18,10 +18,13 @@ HEADERS += \
     decorators.h \
     execution_controller.h \
     functors.h \
-    noncopyable.h \
     betatsp_decorators.h \
     betatsp_core.h \
-    stdfunctors.h
+    stdfunctors.h \
+    simulated_annealing.h \
+    greedy.h
+
+#DEFINES += "__RESULTGEN__"
 
 CONFIG(debug, debug|release) {
     DEFINES += "__DEBUG__"

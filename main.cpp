@@ -1,9 +1,11 @@
-#include <iostream>
-#include <vector>
 #include <algorithm>
 #include <iomanip>
 #include <ctime>
 #include <cassert>
+#include <iostream>
+#include <vector>
+#include <typeinfo>
+#include <cxxabi.h>
 
 #include "functors.h"
 #include "decorators.h"
@@ -12,12 +14,16 @@
 #include "execution_controller.h"
 #include "betatsp_decorators.h"
 #include "stdfunctors.h"
+#include "greedy.h"
+#include "simulated_annealing.h"
 
 using namespace std;
 using namespace problems::atsp;
 using namespace atsp_decision;
 using namespace core;
 
+using algorithms::simmulated_annealing::CooldownCos;
+using algorithms::simmulated_annealing::TemperatureFunction;
 int main(int, char * argv[])
 {
     problem_data_t tspdata;
@@ -31,6 +37,9 @@ int main(int, char * argv[])
     }
     datafile.close();
 
+    core::ExecutionController exec;
+    auto restarts = strtoul(argv[2],nullptr,0);
+
     // CREATE FUNCTION AND ACCESSORIES
 
     shared_ptr< core::Create< solution_t > > create_solution =
@@ -39,6 +48,11 @@ int main(int, char * argv[])
     auto create_counter = make_shared< core::CreateCallsCounter< solution_t >>(create_solution);
     create_solution = create_counter;
 
+    algorithms::simmulated_annealing::CooldownFunction
+            coolCos(10,1,restarts,std::bind(CooldownCos,std::placeholders::_1,5.0) );
+
+    auto update_temp = make_shared< TemperatureFunction< solution_t > >(create_solution,coolCos);
+    create_solution = update_temp;
 
     // NEIGHBOR FUNCTION AND ACCESSORIES
 
@@ -76,24 +90,23 @@ int main(int, char * argv[])
 
     shared_ptr< core::DeltaAccept<> > accept;
 
-    if ( argv[3] == nullptr )
-        accept = make_shared< core::DeltaAcceptBestDecrease<> >();
-    else
-        accept = make_shared< core::DeltaAccept1stDecrease<> >();
+    accept = make_shared< algorithms::simmulated_annealing::DeltaAcceptDecrease<> >(*update_temp);
+
+//    if ( argv[3] == nullptr )
+//        accept = make_shared< algorithms::greedy::DeltaAcceptBestDecrease<> >();
+//    else
+//        accept = make_shared< algorithms::greedy::DeltaAccept1stDecrease<> >();
 
     // TRANSFORM FUNCTION AND ACCESSORIES
 
     auto transform = make_shared<atsp_decision::Transform>();
 
-    core::ExecutionController exec;
-    auto restarts = strtoul(argv[2],nullptr,0);
-
     // UPDATE FUNCTION AND DECORATORS
 
-    shared_ptr< core::Update<solution_t,int,core::Compare<int>::less> > update;
-    update = make_shared< core::UpdateIfsmaller<solution_t,int> >();
+    shared_ptr< core::Update<solution_t,int> > update =
+            make_shared< core::UpdateAlways<solution_t,int> >();
 
-    auto progress_monitor = make_shared< core::ObjectiveProgress<solution_t,int,core::Compare<int>::less> >(update);
+    auto progress_monitor = make_shared< core::ObjectiveProgress<solution_t,int> >(update);
     update = progress_monitor;
 
     // Record intensification history between each create call
@@ -108,15 +121,22 @@ int main(int, char * argv[])
 
     update = stagnation_counter;
 
+    auto objective_value = make_shared<
+        core::ObjectiveValue<solution_t,int,core::Compare<int>::less > > (update);
+
+    update = objective_value;
+
     // EXECUTION TIMER
     auto timer = make_shared<Timer>();
 
-//    exec.addStopTrigger( make_shared< core::Trigger<> >("Create function counter", create_counter,restarts));
-//    exec.addStopTrigger( make_shared< core::Trigger<>>("Total explored transitions counter", neighbors_counter,800e03) );
-//    exec.addStopTrigger( make_shared< core::Trigger<double>>("Progress monitor", progress_monitor,0.66) );
-//    exec.addStopTrigger( make_shared< core::Trigger<>>("Cost function counter", cost_call_counter,30) );
-//    exec.addStopTrigger( make_shared< core::Trigger<double> >("Timer", timer,0.03) );
-//    exec.addStopTrigger( make_shared< core::Trigger<> >("Stagnated intensifications counter", stagnation_counter,3) );
+    exec.addStopTrigger( make_shared< core::Trigger<> >("Create function counter", create_counter,500));
+    exec.addRestartTrigger( make_shared< core::Trigger<> >("Neighbor calls", neighbors_calls_resettable, 3));
+//    exec.addStopTrigger( make_shared< core::Trigger<>>("Total explored transitions counter", neighbors_counter,20e06) );
+//    exec.addStopTrigger( make_shared< core::Trigger<double>>("Progress monitor", progress_monitor,0.73) );
+//    exec.addStopTrigger( make_shared< core::Trigger<>>("Cost function counter", cost_call_counter,100) );
+//    exec.addStopTrigger( make_shared< core::Trigger<double> >("Timer", timer,0.5) );
+//    exec.addStopTrigger( make_shared< core::Trigger<> >("Stagnated intensifications counter", stagnation_counter,100) );
+      //exec.addStopTrigger( make_shared< core::Trigger<> >("Objective value", objective_value,6910,Compare<size_t>::less_or_equal) );
 
     timer->start();
 
@@ -129,21 +149,23 @@ int main(int, char * argv[])
 #endif
     while(!exec.stop())
     {
-        auto transitions = (*neighbor)(current);
-        auto deltas = (*deltacost)(current,transitions);
-        auto index = (*accept)(deltas);
+        int index = 0;
+        while( index > -1 && !exec.restart())
+        {
+            auto transitions = (*neighbor)(current);
+            auto deltas = (*deltacost)(current,transitions);
+            index = (*accept)(deltas);
 
-        if ( index > -1 )
-        {
-            (*transform)(current,transitions.at( static_cast<size_t>(index)) );
-            current_cost = current_cost + deltas.at( static_cast<size_t>(index) );
+            if ( index > -1 )
+            {
+                (*transform)(current,transitions.at( static_cast<size_t>(index)) );
+                current_cost = current_cost + deltas.at( static_cast<size_t>(index) );
+            }
         }
-        else
-        {
-           (*update)(best,best_cost,current,current_cost);
-           current = (*create_solution)();
-           current_cost = (*cost)(current);
-        }
+
+        (*update)(best,best_cost,current,current_cost);
+        current = (*create_solution)();
+        current_cost = (*cost)(current);
     }
 
 #ifdef __DEBUG__
@@ -159,7 +181,7 @@ int main(int, char * argv[])
 #else
     //std::cout<< neighCallsRecorder->getRecord() << endl;
     cout<< "Execution stop triggered by         : " << exec.getStoppingTrigger() << endl;
-    cout<< "Execution time                      : " << fixed << std::setprecision(2) << timer->getValue() << endl;
+    cout<< "Execution time                      : " << fixed << std::setprecision(2) << timer->getValue() << "s\n";
     cout<< "Initial result                      : " << start_cost << endl;
     cout<< "Final result                        : " << best_cost << endl;
     cout<< "Improvement                         : " << progress_monitor->getValue() * 100.0 << "%\n";
@@ -171,8 +193,8 @@ int main(int, char * argv[])
     cout<< "Times objective function was called : " << cost_call_counter->getValue() << endl;
     cout<< "Times delta function was called     : " << delta_call_counter->getValue() << endl;
     core::Statistics<> stats( neighCallsRecorder->getRecord() );
-    cout<< "Intensification until local maxima (min/max/avg/stddev):" << stats.getMin()
-             << "/" << stats.getMax() <<"/" << stats.getAverage() <<"/" << stats.getStdDev() << endl;
+    cout<< "Intensification until local maxima  : " << stats.getMin() << "/" << stats.getMax()
+        <<"/" << stats.getAverage() <<"/" << stats.getStdDev() << " (min/max/avg/stddev)\n";
     cout<< "Final stagnation count              : " << stagnation_counter->getValue() << endl;
 
 #endif

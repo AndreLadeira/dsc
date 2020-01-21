@@ -22,7 +22,7 @@ struct Trigger : public __Trigger
 
     virtual operator bool() const
     {
-        return _compare(_valueptr->getValue(),_limit);
+        return _compare( _valueptr->getValue(), _limit );
     }
 
 private:
@@ -32,13 +32,14 @@ private:
     Compare<T> _compare;
 };
 
-class ExecutionController
+class ExecutionController : public NonCopyable
 {
 public:
 
     using trigger_ptr_t = std::shared_ptr<__Trigger>;
 
     ExecutionController();
+
     bool restart();
     bool stop();
     void addRestartTrigger( trigger_ptr_t );

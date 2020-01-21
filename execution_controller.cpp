@@ -5,12 +5,12 @@ using namespace core;
 __Trigger::__Trigger(std::string id):Identified<std::string>(id){}
 
 
-ExecutionController::ExecutionController():_stoppingTrigger("Error: no stop trigger set.")
-{
-
-}
+ExecutionController::ExecutionController():_stoppingTrigger("Error: no stop trigger set."){}
 
 bool ExecutionController::restart(){
+
+    if ( restartTriggers.empty() ) return false;
+
     for( auto trigger : restartTriggers )
         if (*trigger) return true;
     return false;

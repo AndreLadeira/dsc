@@ -1,7 +1,6 @@
 #ifndef FUNCTORS_H
 #define FUNCTORS_H
 
-#include "noncopyable.h"
 #include "core.h"
 
 namespace core{
@@ -75,17 +74,25 @@ public:
 };
 
 template< typename solution_t,
-          typename objective_t,
-          typename Compare<objective_t>::compare_fcn_t >
+          typename objective_t>
 class Update : public NonCopyable
 {
 public:
 
-    Update() = default;
+    Update(typename Compare<objective_t>::compare_fcn_t c = Compare<objective_t>::_true ):_compare(c){}
     virtual ~Update() = default;
     virtual bool operator()(solution_t& bestSoFar, objective_t& bsfCost,
-                            const solution_t& candidate, const objective_t candidateCost ) = 0;
+                            const solution_t& candidate, const objective_t candidateCost ){
+        if ( _compare(candidateCost, bsfCost) ){
+            bsfCost = candidateCost;
+            bestSoFar = candidate;
+            return true;
+        }
+        return false;
+    }
+private:
 
+    typename Compare<objective_t>::compare_fcn_t _compare;
 };
 
 template< typename solution_t, typename transition_t>
